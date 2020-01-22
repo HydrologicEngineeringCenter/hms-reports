@@ -12,7 +12,7 @@ class JsonBasinInputParserTest {
     @Test
     void getElementInput() {
         BasinInputParser parser = BasinInputParser.builder()
-                .pathToBasinInputFile("C:/Temp/")
+                .pathToBasinInputFile("src/resources/MiddleColumbia_WY2017.basin.json")
                 .build();
 
         List<ElementInput> inputs = parser.getElementInput();

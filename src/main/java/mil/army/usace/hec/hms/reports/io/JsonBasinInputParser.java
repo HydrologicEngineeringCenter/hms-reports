@@ -1,6 +1,7 @@
 package mil.army.usace.hec.hms.reports.io;
 
 import mil.army.usace.hec.hms.reports.ElementInput;
+import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,12 +62,10 @@ public class JsonBasinInputParser extends BasinInputParser {
         /* Loop through objectArray to populate 'processes' */
         List<Process> processes = new ArrayList<>();
         for(String key : object.keySet()) {
-            // Skipping non-array objects and unncessary contents
-            if(object.optJSONObject(key) == null) { continue; }
+            // Skipping unnecessary contents
             List<String> unusedVariables = unnecessaryContent();
             if(unusedVariables.contains(key)) { continue; }
-
-            Process objectProcess = populateProcess(object.getJSONObject(key));
+            Process objectProcess = populateProcess(object, key);
             processes.add(objectProcess);
         } // Loop through all keys in object's keySet
 
@@ -83,13 +82,56 @@ public class JsonBasinInputParser extends BasinInputParser {
     private List<String> unnecessaryContent() {
         List<String> stringList = new ArrayList<>();
         stringList.add("schematicProperties");
+        stringList.add("lastModifiedTime");
         /* Add more if necessary */
         return stringList;
     } // unnecessaryContent()
 
-    private Process populateProcess(JSONObject object) {
+    private Process populateProcess(JSONObject elementObject, String keyName) {
+        String name = keyName;
+        String value = "";
+        List<Parameter> parameters = new ArrayList<>();
+        /* Check for Processes that does not have table-like parameters */
+        if(elementObject.optJSONObject(keyName) == null) {
+            value = elementObject.opt(keyName).toString();
+        } // If: 'Process' is not type JSONObject -> Doesn't hold table-like parameters
+        else { /* Populating Process with parameters */
+            JSONObject processObject = elementObject.getJSONObject(keyName);
+            for(String paramKey : processObject.keySet()) {
+                Parameter param = populateParameter(processObject, paramKey);
+                parameters.add(param);
+            } // Loop: Populate Process with its parameters
+        } // Else: 'Process' is type JSONObject
 
-        return null;
-    } // populateProcess
+        /* Building 'Process" object */
+        Process process = Process.builder()
+                .name(name)
+                .value(value)
+                .parameters(parameters)
+                .build();
+
+        return process;
+    } // populateProcess()
+
+    private Parameter populateParameter(JSONObject processObject, String keyName) {
+        String name = "";
+        String value = "";
+        /* Check for parameters that does not contain a table */
+        if(processObject.optJSONObject(keyName) == null) {
+            name = keyName;
+            value = processObject.opt(keyName).toString();
+        } // If: 'Parameter' is not type JSONObject
+        else { /* Special: Parameters that contain table-structure */
+            // TODO: Flattening tables inside those parameters for now
+
+        } // Else: 'Parameter' is type JSONObject
+
+        Parameter parameter = Parameter.builder()
+                .name(name)
+                .value(value)
+                .build();
+
+        return parameter;
+    } // populateParameter()
 
 } // JsonBasinInputParser class
