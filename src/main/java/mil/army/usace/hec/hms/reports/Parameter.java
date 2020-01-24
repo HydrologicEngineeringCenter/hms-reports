@@ -1,19 +1,24 @@
 package mil.army.usace.hec.hms.reports;
 
+import java.util.List;
+
 public class Parameter {
     /* Class Variables */
     private final String name;
     private final String value;
+    private final List<SubParameter> subParameters;
 
     /* Constructors */
     private Parameter(Builder builder){
         this.name = builder.name;
         this.value = builder.value;
+        this.subParameters = builder.subParameters;
     } // Parameter Constructor
 
     public static class Builder{
         String name;
         String value;
+        List<SubParameter> subParameters;
 
         public Builder name(String name){
             this.name = name;
@@ -24,6 +29,11 @@ public class Parameter {
             this.value = value;
             return this;
         } // 'value' constructor
+
+        public Builder subParameters(List<SubParameter> subParameters){
+            this.subParameters = subParameters;
+            return this;
+        } // 'subParameters' constructor
 
         public Parameter build(){
             return new Parameter(this);
@@ -41,5 +51,6 @@ public class Parameter {
     public String getValue(){
         return this.value;
     }
+    public List<SubParameter> getSubProcesses() { return this.subParameters; }
 
 } // Parameter Class

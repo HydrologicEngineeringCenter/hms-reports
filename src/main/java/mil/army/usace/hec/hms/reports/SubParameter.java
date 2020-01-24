@@ -1,24 +1,19 @@
 package mil.army.usace.hec.hms.reports;
 
-import java.util.List;
-
-public class Process {
+public class SubParameter {
     /* Class Variables */
     private final String name;
     private final String value;
-    private final List<Parameter> parameters;
 
     /* Constructors */
-    private Process(Builder builder) {
+    private SubParameter(Builder builder) {
         this.name = builder.name;
         this.value = builder.value;
-        this.parameters = builder.parameters;
-    } // Process Constructor
+    } // SubParameter Constructor
 
     public static class Builder{
         String name;
         String value;
-        List<Parameter> parameters;
 
         public Builder name(String name) {
             this.name = name;
@@ -30,15 +25,10 @@ public class Process {
             return this;
         } // 'value' constructor
 
-        public Builder parameters(List<Parameter> parameters){
-            this.parameters = parameters;
-            return this;
-        } // 'parameters' constructor
-
-        public Process build(){
-            return new Process(this);
+        public SubParameter build(){
+            return new SubParameter(this);
         }
-    } // Builder class: as Process's Constructor
+    } // Builder class: as SubParameter's Constructor
 
     public static Builder builder(){
         return new Builder();
@@ -47,6 +37,5 @@ public class Process {
     /* Methods */
     public String getName() { return this.name; }
     public String getValue() { return this.value; }
-    public List<Parameter> getParameters() { return this.parameters; }
 
-} // Process Class
+} // SubParameter Class

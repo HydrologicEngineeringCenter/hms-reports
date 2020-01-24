@@ -3,19 +3,15 @@ package mil.army.usace.hec.hms.reports.io;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
+import mil.army.usace.hec.hms.reports.SubParameter;
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.io.FileReader;
-import org.apache.commons.io.FileUtils;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JsonBasinInputParser extends BasinInputParser {
 
@@ -94,14 +90,14 @@ public class JsonBasinInputParser extends BasinInputParser {
         /* Check for Processes that does not have table-like parameters */
         if(elementObject.optJSONObject(keyName) == null) {
             value = elementObject.opt(keyName).toString();
-        } // If: 'Process' is not type JSONObject -> Doesn't hold table-like parameters
+        } // If: 'Process' is not type JSONObject. Ex: Reach's Name
         else { /* Populating Process with parameters */
             JSONObject processObject = elementObject.getJSONObject(keyName);
             for(String paramKey : processObject.keySet()) {
                 Parameter param = populateParameter(processObject, paramKey);
                 parameters.add(param);
             } // Loop: Populate Process with its parameters
-        } // Else: 'Process' is type JSONObject
+        } // Else: 'Process' is type JSONObject. Ex: Reach's Route
 
         /* Building 'Process" object */
         Process process = Process.builder()
@@ -116,22 +112,76 @@ public class JsonBasinInputParser extends BasinInputParser {
     private Parameter populateParameter(JSONObject processObject, String keyName) {
         String name = "";
         String value = "";
-        /* Check for parameters that does not contain a table */
+        List<SubParameter> subParameters = new ArrayList<>();
+
         if(processObject.optJSONObject(keyName) == null) {
             name = keyName;
             value = processObject.opt(keyName).toString();
-        } // If: 'Parameter' is not type JSONObject
-        else { /* Special: Parameters that contain table-structure */
-            // TODO: Flattening tables inside those parameters for now
+        } // If: 'Parameter' is not type JSONObject. Ex. Route's Method
+        else {
+            JSONObject paramObject = processObject.getJSONObject(keyName);
 
-        } // Else: 'Parameter' is type JSONObject
+            if(specialParameters().contains(keyName)) {
+                subParameters = populateSpecialParameter(processObject, keyName);
+            } // If: is a special SubParameter. Ex: baseflowLayerList 0 & 1
+            else {
+                for(String subKey : paramObject.keySet()) {
+                    SubParameter subParam = populateSubParameter(paramObject, subKey);
+                    subParameters.add(subParam);
+                } // Loop: Populate Parameter with its SubParameters
+            } // Else: Not a special parameter. Ex: Channel
+        } // Else: 'Parameter' is type JSONObject. Ex: Route's Channel
 
         Parameter parameter = Parameter.builder()
                 .name(name)
                 .value(value)
+                .subParameters(subParameters)
                 .build();
 
         return parameter;
     } // populateParameter()
+
+    private SubParameter populateSubParameter(JSONObject paramObject, String keyName) {
+        String name = keyName;
+        String value = paramObject.opt(keyName).toString();
+
+        SubParameter subParameter = SubParameter.builder()
+                .name(name)
+                .value(value)
+                .build();
+
+        return subParameter;
+    } // populateSubParameter()
+
+    private List<String> specialParameters() {
+        List<String> stringList = new ArrayList<>();
+        stringList.add("baseflowLayerList");
+        /* Add more if necessary */
+        return stringList;
+    } // unnecessaryContent()
+
+    private List<SubParameter> populateSpecialParameter(JSONObject processObject, String keyName) {
+        List<SubParameter> subParameters = new ArrayList<>();
+
+        if(keyName.equals("baseflowLayerList")) {
+            // JSONArray: baseflowLayerList
+            JSONArray baseflowLayerList = processObject.getJSONArray(keyName);
+            for(int i = 0; i < baseflowLayerList.length(); i++) {
+                int layerNum = i + 1; // Starting with Layer 1 instead of 0
+                JSONObject layer = baseflowLayerList.getJSONObject(i);
+                for(String key : layer.keySet()) {
+                    String name = key + layerNum;
+                    String value = layer.getString(key);
+                    SubParameter subParameter = SubParameter.builder()
+                            .name(name)
+                            .value(value)
+                            .build();
+                    subParameters.add(subParameter);
+                } // Loop: through each layer
+            } // Loop: through baseflowLayerList
+        } // Case: baseflowLayerList
+
+        return subParameters;
+    } // populateSpecialParameter()
 
 } // JsonBasinInputParser class
