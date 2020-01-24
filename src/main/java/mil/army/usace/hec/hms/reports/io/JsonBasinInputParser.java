@@ -110,12 +110,11 @@ public class JsonBasinInputParser extends BasinInputParser {
     } // populateProcess()
 
     private Parameter populateParameter(JSONObject processObject, String keyName) {
-        String name = "";
+        String name = keyName;
         String value = "";
         List<SubParameter> subParameters = new ArrayList<>();
 
         if(processObject.optJSONObject(keyName) == null) {
-            name = keyName;
             value = processObject.opt(keyName).toString();
         } // If: 'Parameter' is not type JSONObject. Ex. Route's Method
         else {
@@ -123,10 +122,10 @@ public class JsonBasinInputParser extends BasinInputParser {
 
             if(specialParameters().contains(keyName)) {
                 subParameters = populateSpecialParameter(processObject, keyName);
-            } // If: is a special SubParameter. Ex: baseflowLayerList 0 & 1
+            } // If: is a special Parameter. Ex: baseflowLayerList 0 & 1
             else {
                 for(String subKey : paramObject.keySet()) {
-                    SubParameter subParam = populateSubParameter(paramObject, subKey);
+                    SubParameter subParam = populateSubParameter(paramObject, subKey, subKey);
                     subParameters.add(subParam);
                 } // Loop: Populate Parameter with its SubParameters
             } // Else: Not a special parameter. Ex: Channel
@@ -141,8 +140,8 @@ public class JsonBasinInputParser extends BasinInputParser {
         return parameter;
     } // populateParameter()
 
-    private SubParameter populateSubParameter(JSONObject paramObject, String keyName) {
-        String name = keyName;
+    private SubParameter populateSubParameter(JSONObject paramObject, String keyName, String subParamName) {
+        String name = subParamName;
         String value = paramObject.opt(keyName).toString();
 
         SubParameter subParameter = SubParameter.builder()
@@ -167,16 +166,10 @@ public class JsonBasinInputParser extends BasinInputParser {
             // JSONArray: baseflowLayerList
             JSONArray baseflowLayerList = processObject.getJSONArray(keyName);
             for(int i = 0; i < baseflowLayerList.length(); i++) {
-                int layerNum = i + 1; // Starting with Layer 1 instead of 0
+                String layerNum = Integer.toString(i + 1); // Starting with Layer 1 instead of 0
                 JSONObject layer = baseflowLayerList.getJSONObject(i);
                 for(String key : layer.keySet()) {
-                    String name = key + layerNum;
-                    String value = layer.getString(key);
-                    SubParameter subParameter = SubParameter.builder()
-                            .name(name)
-                            .value(value)
-                            .build();
-                    subParameters.add(subParameter);
+                    SubParameter subParameter = populateSubParameter(layer, key, key + layerNum);
                 } // Loop: through each layer
             } // Loop: through baseflowLayerList
         } // Case: baseflowLayerList
