@@ -32,7 +32,6 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return elementInputList;
     } // getElementInput()
-
     private JSONObject getJsonObject(String pathToJson) {
         /* Read in Json File */
         File file = new File(pathToJson);
@@ -49,7 +48,6 @@ public class JsonBasinInputParser extends BasinInputParser {
         return new JSONObject(content);
 
     } // getJsonObject()
-
     private ElementInput populateElement(JSONObject object) {
         /* Parsing each ElementInput for its: name, elementType, and Processes */
         String name = object.getString("name");
@@ -74,7 +72,6 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return elementInput;
     } // populateElement()
-
     private List<String> unnecessaryContent() {
         List<String> stringList = new ArrayList<>();
         stringList.add("schematicProperties");
@@ -82,7 +79,6 @@ public class JsonBasinInputParser extends BasinInputParser {
         /* Add more if necessary */
         return stringList;
     } // unnecessaryContent()
-
     private Process populateProcess(JSONObject elementObject, String keyName) {
         String name = keyName;
         String value = "";
@@ -108,7 +104,6 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return process;
     } // populateProcess()
-
     private Parameter populateParameter(JSONObject processObject, String keyName) {
         String name = keyName;
         String value = "";
@@ -138,7 +133,6 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return parameter;
     } // populateParameter()
-
     private SubParameter populateSubParameter(JSONObject paramObject, String keyName, String subParamName) {
         String name = subParamName;
         String value = paramObject.opt(keyName).toString();
@@ -150,14 +144,12 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return subParameter;
     } // populateSubParameter()
-
     private List<String> specialParameters() {
         List<String> stringList = new ArrayList<>();
         stringList.add("baseflowLayerList");
         /* Add more if necessary */
         return stringList;
     } // unnecessaryContent()
-
     private List<SubParameter> populateSpecialParameter(JSONObject processObject, String keyName) {
         List<SubParameter> subParameters = new ArrayList<>();
 
@@ -176,7 +168,6 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return subParameters;
     } // populateSpecialParameter()
-
     private String beautifyString (String name) {
         String result = "";
 
@@ -196,13 +187,11 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return result;
     } // beautifyString
-
     private String beautifyCamelCase (String name) {
         // Capitalizing the first letter. Turn into PascalCase
         name = name.substring(0,1).toUpperCase() + name.substring(1);
         return beautifyPascalCase(name);
     } // beautifyCamelCase()
-
     private String beautifyPascalCase (String name) {
         StringBuilder result = new StringBuilder();
         char[] charArray = name.toCharArray();
@@ -226,7 +215,6 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return result.toString();
     } // beautifyPascalCase()
-
     private String beautifyUpperUnderscore(String name) {
         StringBuilder result = new StringBuilder();
         name = name.toLowerCase();

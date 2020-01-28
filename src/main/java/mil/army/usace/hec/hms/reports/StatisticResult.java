@@ -3,7 +3,7 @@ package mil.army.usace.hec.hms.reports;
 public class StatisticResult {
     /* Class Variables */
     private final String name;
-    private final double value;
+    private final String value;
     private final String units;
 
     /* Constructors */
@@ -15,7 +15,7 @@ public class StatisticResult {
 
     public static class Builder{
         String name;
-        double value;
+        String value;
         String units;
 
         public Builder name(String name){
@@ -23,7 +23,7 @@ public class StatisticResult {
             return this;
         } // 'name' constructor
 
-        public Builder value(double value){
+        public Builder value(String value){
             this.value = value;
             return this;
         } // 'value' constructor
@@ -46,7 +46,7 @@ public class StatisticResult {
     String getName(){
         return this.name;
     }
-    double getValue(){
+    String getValue(){
         return this.value;
     }
     String getUnits(){

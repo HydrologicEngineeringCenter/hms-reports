@@ -10,12 +10,12 @@ class StatisticResultTest {
     void CreateStatisticResult(){
         StatisticResult result = StatisticResult.builder()
                 .name("Outflow Minimum")
-                .value(10.9546337)
+                .value("10.9546337")
                 .units("CFS")
                 .build();
 
         assertEquals("Outflow Minimum", result.getName());
-        assertEquals(10.9546337, result.getValue());
+        assertEquals("10.9546337", result.getValue());
         assertEquals("CFS", result.getUnits());
     }
 
