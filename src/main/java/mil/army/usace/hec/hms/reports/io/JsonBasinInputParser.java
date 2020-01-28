@@ -114,16 +114,15 @@ public class JsonBasinInputParser extends BasinInputParser {
         String value = "";
         List<SubParameter> subParameters = new ArrayList<>();
 
-        if(processObject.optJSONObject(keyName) == null) {
+        if(processObject.optJSONObject(keyName) == null && processObject.optJSONArray(keyName) == null) {
             value = processObject.opt(keyName).toString();
         } // If: 'Parameter' is not type JSONObject. Ex. Route's Method
         else {
-            JSONObject paramObject = processObject.getJSONObject(keyName);
-
             if(specialParameters().contains(keyName)) {
                 subParameters = populateSpecialParameter(processObject, keyName);
             } // If: is a special Parameter. Ex: baseflowLayerList 0 & 1
             else {
+                JSONObject paramObject = processObject.getJSONObject(keyName);
                 for(String subKey : paramObject.keySet()) {
                     SubParameter subParam = populateSubParameter(paramObject, subKey, subKey);
                     subParameters.add(subParam);
@@ -170,6 +169,7 @@ public class JsonBasinInputParser extends BasinInputParser {
                 JSONObject layer = baseflowLayerList.getJSONObject(i);
                 for(String key : layer.keySet()) {
                     SubParameter subParameter = populateSubParameter(layer, key, key + layerNum);
+                    subParameters.add(subParameter);
                 } // Loop: through each layer
             } // Loop: through baseflowLayerList
         } // Case: baseflowLayerList
