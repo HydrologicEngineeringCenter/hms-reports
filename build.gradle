@@ -15,8 +15,19 @@ repositories {
 dependencies {
     implementation 'org.json:json:20190722'
     implementation 'commons-io:commons-io:2.6'
+
+    implementation 'com.rmanet:rma:6.0.0.51'
+    implementation 'com.rmanet:rmadev:6.0.0.51'
+    implementation 'com.vividsolutions:jts:1.13'
     implementation 'mil.army.usace.hec:hec:6.0.0.51'
+    implementation 'mil.army.usace.hec:hecData:6.0.0.51'
     implementation 'mil.army.usace.hec:heclib:6.0.0.51'
+    implementation 'mil.army.usace.hec:hecnf:6.0.0.51'
+    implementation 'mil.army.usace.hec:environment:6.0.0.51'
+    implementation 'mil.army.usace.hec:S00hfp:6.0.0.51'
+    implementation 'mil.army.usace.hec:hec-dssvue-dev:6.0.0.51'
+    implementation 'mil.army.usace.hec:hecnfPluginAPI:6.0.0.51'
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.4.0'
     testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.4.0"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"

@@ -1,10 +1,11 @@
 package mil.army.usace.hec.hms.reports;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 public class TimeSeriesResult {
     /* Class Variables */
-    private final ZonedDateTime[] times;
+    private final List<ZonedDateTime> times;
     private final double[] values;
 
     /* Constructors */
@@ -14,10 +15,10 @@ public class TimeSeriesResult {
     } // TimesSeriesResult Constructor
 
     public static class Builder {
-        ZonedDateTime[] times;
+        List<ZonedDateTime> times;
         double[] values;
 
-        public Builder times(ZonedDateTime[] times) {
+        public Builder times(List<ZonedDateTime> times) {
             this.times = times;
             return this;
         } // 'times' constructor
@@ -33,7 +34,7 @@ public class TimeSeriesResult {
     public static Builder builder() {return new Builder();}
 
     /* Methods */
-    public ZonedDateTime[] getTimes() { return times; }
+    public List<ZonedDateTime> getTimes() { return times; }
     public double[] getValues() { return values; }
 
 } // TimeSeriesResult Class
