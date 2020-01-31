@@ -1,6 +1,5 @@
 package mil.army.usace.hec.hms.reports.io;
 
-import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import org.junit.jupiter.api.Test;
 

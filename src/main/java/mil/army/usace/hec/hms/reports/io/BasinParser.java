@@ -10,10 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BasinParser {
-    final Path pathToBasinInputFile;
-    final Path pathToBasinResultsFile;
+    private final Path pathToBasinInputFile;
+    private final Path pathToBasinResultsFile;
 
-    BasinParser(Builder builder){
+    private BasinParser(Builder builder){
         this.pathToBasinInputFile = builder.pathToBasinInputFile;
         this.pathToBasinResultsFile = builder.pathToBasinResultsFile;
     }

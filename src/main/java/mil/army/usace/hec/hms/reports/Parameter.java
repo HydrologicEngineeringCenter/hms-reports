@@ -6,7 +6,7 @@ public class Parameter {
     /* Class Variables */
     private final String name;
     private final String value;
-    private final List<SubParameter> subParameters;
+    private final List<Parameter> subParameters;
 
     /* Constructors */
     private Parameter(Builder builder){
@@ -18,7 +18,7 @@ public class Parameter {
     public static class Builder{
         String name;
         String value;
-        List<SubParameter> subParameters;
+        List<Parameter> subParameters;
 
         public Builder name(String name){
             this.name = name;
@@ -30,7 +30,7 @@ public class Parameter {
             return this;
         } // 'value' constructor
 
-        public Builder subParameters(List<SubParameter> subParameters){
+        public Builder subParameters(List<Parameter> subParameters){
             this.subParameters = subParameters;
             return this;
         } // 'subParameters' constructor
@@ -51,6 +51,6 @@ public class Parameter {
     public String getValue(){
         return this.value;
     }
-    public List<SubParameter> getSubProcesses() { return this.subParameters; }
+    public List<Parameter> getSubParameters() { return this.subParameters; }
 
 } // Parameter Class

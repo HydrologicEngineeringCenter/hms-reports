@@ -3,7 +3,6 @@ package mil.army.usace.hec.hms.reports.io;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
-import mil.army.usace.hec.hms.reports.SubParameter;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -90,7 +89,7 @@ public class JsonBasinInputParser extends BasinInputParser {
         else { /* Populating Process with parameters */
             JSONObject processObject = elementObject.getJSONObject(keyName);
             for(String paramKey : processObject.keySet()) {
-                Parameter param = populateParameter(processObject, paramKey);
+                Parameter param = populateParameter(processObject, paramKey, paramKey);
                 parameters.add(param);
             } // Loop: Populate Process with its parameters
         } // Else: 'Process' is type JSONObject. Ex: Reach's Route
@@ -104,26 +103,24 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return process;
     } // populateProcess()
-    private Parameter populateParameter(JSONObject processObject, String keyName) {
-        String name = keyName;
+    private Parameter populateParameter(JSONObject processObject, String keyName, String paramName) {
+        String name = paramName;
         String value = "";
-        List<SubParameter> subParameters = new ArrayList<>();
+        List<Parameter> subParameters = new ArrayList<>();
 
-        if(processObject.optJSONObject(keyName) == null && processObject.optJSONArray(keyName) == null) {
-            value = processObject.opt(keyName).toString();
-        } // If: 'Parameter' is not type JSONObject. Ex. Route's Method
+        if(specialParameters().contains(keyName)) {
+            subParameters = populateSpecialParameter(processObject, keyName);
+        } // If: Special cases that need to be flattened (Ex: Base flow)
+        else if(processObject.optJSONObject(keyName) != null) {
+            JSONObject paramObject = processObject.getJSONObject(keyName);
+            for(String subParamKey : paramObject.keySet()) {
+                Parameter subParam = populateParameter(paramObject, subParamKey, subParamKey);
+                subParameters.add(subParam);
+            } // Loop: through all SubParameters inside Parameter
+        } // If: 'Parameter' is a JSONObject. Ex: Route
         else {
-            if(specialParameters().contains(keyName)) {
-                subParameters = populateSpecialParameter(processObject, keyName);
-            } // If: is a special Parameter. Ex: baseflowLayerList 0 & 1
-            else {
-                JSONObject paramObject = processObject.getJSONObject(keyName);
-                for(String subKey : paramObject.keySet()) {
-                    SubParameter subParam = populateSubParameter(paramObject, subKey, subKey);
-                    subParameters.add(subParam);
-                } // Loop: Populate Parameter with its SubParameters
-            } // Else: Not a special parameter. Ex: Channel
-        } // Else: 'Parameter' is type JSONObject. Ex: Route's Channel
+            value = processObject.opt(keyName).toString();
+        } // Else: 'Parameter' is not a JSONObject. Ex: Method
 
         Parameter parameter = Parameter.builder()
                 .name(name)
@@ -133,34 +130,22 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return parameter;
     } // populateParameter()
-    private SubParameter populateSubParameter(JSONObject paramObject, String keyName, String subParamName) {
-        String name = subParamName;
-        String value = paramObject.opt(keyName).toString();
-
-        SubParameter subParameter = SubParameter.builder()
-                .name(name)
-                .value(value)
-                .build();
-
-        return subParameter;
-    } // populateSubParameter()
     private List<String> specialParameters() {
         List<String> stringList = new ArrayList<>();
         stringList.add("baseflowLayerList");
         /* Add more if necessary */
         return stringList;
-    } // unnecessaryContent()
-    private List<SubParameter> populateSpecialParameter(JSONObject processObject, String keyName) {
-        List<SubParameter> subParameters = new ArrayList<>();
+    } // specialParameters()
+    private List<Parameter> populateSpecialParameter(JSONObject processObject, String keyName) {
+        List<Parameter> subParameters = new ArrayList<>();
 
         if(keyName.equals("baseflowLayerList")) {
-            // JSONArray: baseflowLayerList
             JSONArray baseflowLayerList = processObject.getJSONArray(keyName);
             for(int i = 0; i < baseflowLayerList.length(); i++) {
                 String layerNum = Integer.toString(i + 1); // Starting with Layer 1 instead of 0
                 JSONObject layer = baseflowLayerList.getJSONObject(i);
                 for(String key : layer.keySet()) {
-                    SubParameter subParameter = populateSubParameter(layer, key, key + layerNum);
+                    Parameter subParameter = populateParameter(layer, key, key + layerNum);
                     subParameters.add(subParameter);
                 } // Loop: through each layer
             } // Loop: through baseflowLayerList
@@ -168,66 +153,5 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return subParameters;
     } // populateSpecialParameter()
-    private String beautifyString (String name) {
-        String result = "";
-
-        String camelCasePattern = "[a-z]+[A-Z]+[a-zA-Z]+"; // Ex: camelCase, camelCaseATest
-        String pascalCasePattern = "[A-Z]+[a-zA-Z]+"; // Ex: PascalCase, PascalCaseATest
-        String upperUnderscorePattern = "([A-Z]+[_])+[A-Z]+"; // Ex: UNDER_SCORE, UNDER_SCORE_TEST
-
-        if(name.matches(camelCasePattern) || name.toLowerCase().equals(name)) {
-            result = beautifyCamelCase(name);
-        } // If: camelCase or lowerall
-        else if(name.matches(upperUnderscorePattern) || name.toUpperCase().equals(name)) {
-            result = beautifyUpperUnderscore(name);
-        } // Else if: UPPER_UNDERSCORE or UPPERALL
-        else if(name.matches(pascalCasePattern)) {
-            result = beautifyPascalCase(name);
-        } // Else if: PascalCase
-
-        return result;
-    } // beautifyString
-    private String beautifyCamelCase (String name) {
-        // Capitalizing the first letter. Turn into PascalCase
-        name = name.substring(0,1).toUpperCase() + name.substring(1);
-        return beautifyPascalCase(name);
-    } // beautifyCamelCase()
-    private String beautifyPascalCase (String name) {
-        StringBuilder result = new StringBuilder();
-        char[] charArray = name.toCharArray();
-        List<Integer> capitalIndices = new ArrayList<>();
-
-        for(int i = 0; i < charArray.length; i++) {
-            if(Character.isUpperCase(charArray[i]))
-                capitalIndices.add(i);
-        }  // Getting indices of capital characters
-
-        for(int i = 0; i < capitalIndices.size() - 1; i++){
-            String subString = name.substring(capitalIndices.get(i), capitalIndices.get(i + 1));
-            result.append(subString);
-            result.append(" ");
-        } // Appending substrings to result
-
-        String lastSubString = name.substring(capitalIndices.get(capitalIndices.size() - 1));
-        result.append(lastSubString);
-
-        System.out.println(result.toString());
-
-        return result.toString();
-    } // beautifyPascalCase()
-    private String beautifyUpperUnderscore(String name) {
-        StringBuilder result = new StringBuilder();
-        name = name.toLowerCase();
-
-        String[] splitString = name.split("_");
-        for(String token : splitString) {
-            token = token.substring(0, 1).toUpperCase() + token.substring(1) + " ";
-            result.append(token);
-        } // Capitalizing first characters
-
-        System.out.println(result.toString());
-
-        return result.toString();
-    } // beautifyUpperUnderscore()
 
 } // JsonBasinInputParser class

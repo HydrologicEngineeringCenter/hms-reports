@@ -1,26 +1,24 @@
 package mil.army.usace.hec.hms.reports.io;
 
+import hec.heclib.dss.HecDataManager;
+import hec.heclib.dss.HecTimeSeries;
 import hec.heclib.util.HecTime;
 import hec.heclib.util.HecTimeArray;
-import mil.army.usace.hec.hms.reports.ElementResults;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-
-import mil.army.usace.hec.hms.reports.StatisticResult;
-import mil.army.usace.hec.hms.reports.TimeSeriesResult;
-import hec.heclib.dss.*;
 import hec.io.TimeSeriesContainer;
+import mil.army.usace.hec.hms.reports.ElementResults;
+import mil.army.usace.hec.hms.reports.StatisticResult;
+import mil.army.usace.hec.hms.reports.util.TimeConverter;
+import mil.army.usace.hec.hms.reports.TimeSeriesResult;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
-import wcds.hfp.shared.Zone;
+
+import java.io.File;
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class XmlBasinResultsParser extends BasinResultsParser {
 
@@ -68,7 +66,6 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return elementResults;
     } // populateElement()
-
     private List<TimeSeriesResult> populateTimeSeriesResult(JSONObject hydrologyObject) {
         List<TimeSeriesResult> timeSeriesResultList = new ArrayList<>();
         String keyName = "TimeSeries";
@@ -94,7 +91,6 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return timeSeriesResultList;
     } // populateTimeSeriesResult()
-
     private TimeSeriesResult populateSingleTimeSeriesResult (JSONObject timeObject) {
         String DssFileName = timeObject.getString("DssFileName");
         String pathToDss = "src/resources/" + DssFileName;
@@ -109,7 +105,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         if(operationStatus != 0) { System.out.println("Time Read not Successful"); }
 
         double[] values = container.getValues();
-        List<ZonedDateTime> times  = convertToZoneDateTime(container.getTimes());
+        List<ZonedDateTime> times  = getZonedDateTimeArray(container.getTimes());
 
         TimeSeriesResult timeSeriesResult = TimeSeriesResult.builder()
                 .times(times)
@@ -118,32 +114,16 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return timeSeriesResult;
     } // populateSingleTimeSeriesResult()
-
-    private List<ZonedDateTime> convertToZoneDateTime (HecTimeArray timeArray) {
+    private List<ZonedDateTime> getZonedDateTimeArray (HecTimeArray timeArray) {
         List<ZonedDateTime> zonedDateTimeArray = new ArrayList<>();
         for(int i = 0; i < timeArray.numberElements(); i++) {
             HecTime singleTime = timeArray.element(i);
-            int year = singleTime.year();
-            int month = singleTime.month();
-            int day = singleTime.day();
-            int hour = singleTime.hour();
-            int minute = singleTime.minute();
-            int second = singleTime.second();
-            int nanosecond = 0;
-            ZoneId zoneId = ZoneId.of("UTC");
-
-            if(hour == 24 && minute == 0) {
-                hour = 23;
-                minute = 59;
-            } // Make 'hour' acceptable to ZonedDateTime's hour (capped at 23)
-
-            ZonedDateTime zonedTime = ZonedDateTime.of(year, month, day, hour, minute, second, nanosecond, zoneId);
+            ZonedDateTime zonedTime = TimeConverter.toZonedDateTime(singleTime);
             zonedDateTimeArray.add(zonedTime);
         } // Loop: through HecTimeArray
 
         return zonedDateTimeArray;
-    } // convertToZoneDateTime()
-
+    } // getZonedDateTimeArray()
     private List<StatisticResult> populateStatisticsResult(JSONObject statisticsObject) {
         List<StatisticResult> statisticResultList = new ArrayList<>();
         String keyName = "StatisticMeasure";
