@@ -95,6 +95,9 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         String DssFileName = timeObject.getString("DssFileName");
         String pathToDss = "src/resources/" + DssFileName;
 
+        /* Read in TimeSeriesType */
+        String type = timeObject.getJSONObject("TimeSeriesType").getString("displayString");
+
         /* Using HEC DSS to read in Time Series Container */
         TimeSeriesContainer container = new TimeSeriesContainer();
         container.fullName = (timeObject.getString("DssPathname"));
@@ -108,6 +111,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         List<ZonedDateTime> times  = getZonedDateTimeArray(container.getTimes());
 
         TimeSeriesResult timeSeriesResult = TimeSeriesResult.builder()
+                .type(type)
                 .times(times)
                 .values(values)
                 .build();
