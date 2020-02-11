@@ -41,8 +41,8 @@ public class Element {
     public static Builder builder() { return new Builder(); }
 
     /* Methods */
-    String getName() { return this.name; }
-    ElementInput getElementInput() { return this.elementInput; }
-    ElementResults getElementResults() { return this.elementResults; }
+    public String getName() { return this.name; }
+    public ElementInput getElementInput() { return this.elementInput; }
+    public ElementResults getElementResults() { return this.elementResults; }
 
 } // Element Class
