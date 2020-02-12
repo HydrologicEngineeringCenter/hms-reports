@@ -6,6 +6,7 @@ import mil.army.usace.hec.hms.reports.ElementResults;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+  import java.util.Map;
 
 public abstract class BasinResultsParser {
     Path pathToBasinResultsFile;
@@ -36,7 +37,7 @@ public abstract class BasinResultsParser {
         return new BasinResultsParser.Builder();
     }
 
-    public abstract List<ElementResults> getElementResults();
+    public abstract Map<String, ElementResults> getElementResults();
 }
 
 

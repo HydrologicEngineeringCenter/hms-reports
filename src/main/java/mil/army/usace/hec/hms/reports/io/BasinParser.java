@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class BasinParser {
     private final Path pathToBasinInputFile;
@@ -52,18 +53,19 @@ public class BasinParser {
                 .build();
 
         List<ElementInput> inputs = inputParser.getElementInput();
-        List<ElementResults> results = resultsParser.getElementResults();
+        Map<String, ElementResults> results = resultsParser.getElementResults();
 
         if(inputs.size() != results.size()) {
             System.out.println("Error: Number of inputs and results do not match!");
             return null;
         } // Check if # of inputs and results matches
 
-        for(int i = 0; i < inputs.size(); i++) {
+        for(ElementInput input : inputs) {
+            String elementName = input.getName();
             Element element = Element.builder()
-                    .name(inputs.get(i).getName())
-                    .elementInput(inputs.get(i))
-                    .elementResults(results.get(i))
+                    .name(elementName)
+                    .elementInput(input)
+                    .elementResults(results.get(elementName))
                     .build();
             elementList.add(element);
         } // Loop: to get a List of Elements

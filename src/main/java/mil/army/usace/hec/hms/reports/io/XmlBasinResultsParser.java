@@ -18,7 +18,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class XmlBasinResultsParser extends BasinResultsParser {
 
@@ -27,15 +29,15 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     }
 
     @Override
-    public List<ElementResults> getElementResults() {
-        List<ElementResults> elementResultsList = new ArrayList<>();
+    public Map<String,ElementResults> getElementResults() {
+        Map<String, ElementResults> elementResultsList = new HashMap<>();
         JSONObject resultFile = getJsonObject(this.pathToBasinResultsFile.toString());
         JSONArray elemenentArray = resultFile.getJSONObject("RunResults").getJSONArray("BasinElement");
 
         for(int i = 0; i < elemenentArray.length(); i++) {
             System.out.println("Element Index: " + i);
             ElementResults elementResults = populateElement(elemenentArray.getJSONObject(i));
-            elementResultsList.add(elementResults);
+            elementResultsList.put(elementResults.getName(), elementResults);
         } // Loop through all element's results, and populate
 
         return elementResultsList;
@@ -54,12 +56,16 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         return object;
     } // getJsonObject()
     private ElementResults populateElement(JSONObject elementObject) {
+        String name = elementObject.getString("name");
         JSONObject hydrologyObject = elementObject.getJSONObject("Hydrology");
-        List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
+        // FIXME: Uncomment code below to populate TimeSeriesResults
+//        List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
+        List<TimeSeriesResult> timeSeriesResult = new ArrayList<>();
         JSONObject statisticsArray = elementObject.getJSONObject("Statistics");
         List<StatisticResult> statisticResults = populateStatisticsResult(statisticsArray);
 
         ElementResults elementResults = ElementResults.builder()
+                .name(name)
                 .timeSeriesResults(timeSeriesResult)
                 .statisticResults(statisticResults)
                 .build();
