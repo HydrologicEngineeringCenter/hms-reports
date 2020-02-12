@@ -22,6 +22,9 @@ public class StringBeautifier {
         else if(name.matches(pascalCasePattern)) {
             result = beautifyPascalCase(name);
         } // Else if: PascalCase
+        else {
+            result = name;
+        } // Else: Doesn't match any special
 
         return result;
     } // beautifyString
