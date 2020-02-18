@@ -1,8 +1,93 @@
-body {
-  background-color: lightblue;
+@import url('https://fonts.googleapis.com/css?family=Vollkorn:400,700&display=swap');
+
+body{
+	background-color: white;
+	font-family: 'Vollkorn', serif;
+    width: 8.5in;
+    height: 11in;
 }
 
-h1 {
-  color: navy;
-  margin-left: 20px;
+div.element{
+	/* Page break after each element */
+    page-break-after: always;
+}
+
+div.table-process{
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(4in, 1fr));
+	/*grid-template-columns: auto auto;*/
+}
+
+div.max-plot{
+	page-break-before: always;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(4in, 1fr));
+}
+
+div.non-max-plot{
+	page-break-before: auto;
+}
+
+caption{
+	caption-side: top;
+	font-weight: bold;
+}
+
+/* Style for all Data Columns */
+td{
+	text-align: center;
+	padding-left: 0.2in;
+	padding-right: 0.2in;
+}
+
+/* Style for all Header Columns */
+th{
+	text-align: center;
+	border-bottom: 1px solid black;
+}
+
+
+/* Style for first Data Column */
+td:nth-child(1){
+	text-align: left;
+	padding-left: 0.1in;
+	padding-right: 0.1in;
+}
+
+/* Style for odd Table Rows */
+tr:nth-child(odd){
+  background: #eee;
+  -webkit-print-color-adjust: exact;
+}
+
+table.table-parameter{
+	width: 100%;
+	padding-bottom: 0.3in;
+}
+
+table.statistic-result{
+	page-break-before: avoid;
+	page-break-after: auto;
+	width: 100%;
+	padding-bottom: 0.3in;
+}
+
+table.nested-parameter{
+	margin: auto;
+	page-break-inside: avoid;
+	width: 8in;
+
+}
+
+p.single-process{
+	padding-bottom: 0.3in;
+}
+
+td.nested-table{
+	background-color: white;
+	padding-top: 0.2in;
+}
+
+div.element-input{
+	padding-bottom: 0.4in;
 }
