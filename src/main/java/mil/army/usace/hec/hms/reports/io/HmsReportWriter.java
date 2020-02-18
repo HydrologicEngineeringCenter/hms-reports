@@ -4,20 +4,33 @@ import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.*;
 
 import mil.army.usace.hec.hms.reports.Process;
+import mil.army.usace.hec.hms.reports.util.FigureCreator;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.TimeConverter;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import tech.tablesaw.api.Table;
+import tech.tablesaw.plotly.components.Figure;
+import tech.tablesaw.plotly.components.Page;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static j2html.TagCreator.*;
 
-public class HmsReportWriter extends ReportWriter {
 
+
+public class HmsReportWriter extends ReportWriter {
     HmsReportWriter(Builder builder) {
         super(builder);
     }
@@ -26,7 +39,9 @@ public class HmsReportWriter extends ReportWriter {
     public void write() {
         /* HTML Layout */
         String htmlOutput = html(
-                head(title("Elements of Water and Fire"), link().withRel("stylesheet").withHref("style.css")),
+                head(   title("Elements of Water and Fire"),
+                        link().withRel("stylesheet").withHref("style.css"),
+                        script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
                 body(printElementList(this.elements))
         ).renderFormatted();
         /* Writing to HTML output file */
@@ -127,7 +142,7 @@ public class HmsReportWriter extends ReportWriter {
             String reformatName = StringBeautifier.beautifyString(nestedParameter.getName());
             DomContent tableName = td(reformatName);
             List<Parameter> subParameters = nestedParameter.getSubParameters();
-            DomContent subParameterTable = td(printParameterTable(subParameters,""));
+            DomContent subParameterTable = td(attrs(".nested-table"), printParameterTable(subParameters,""));
             nestedParameterDom.add(tableName);
             nestedParameterDom.add(subParameterTable);
             parameterDom.add(tr(nestedParameterDom.toArray(new DomContent[]{})));
@@ -166,7 +181,8 @@ public class HmsReportWriter extends ReportWriter {
         DomContent statisticResults = printStatisticResult(elementResults.getStatisticResults());
         elementResultsDomList.add(statisticResults);
         /* Get TimeSeries Results Dom */
-        DomContent timeSeriesResults = printTimeSeriesResult(elementResults.getTimeSeriesResults());
+        String elementName = elementResults.getName();
+        DomContent timeSeriesResults = printTimeSeriesResult(elementResults.getTimeSeriesResults(), elementName);
         elementResultsDomList.add(timeSeriesResults);
 
         return div(attrs(".element-results"), elementResultsDomList.toArray(new DomContent[]{}));
@@ -194,6 +210,7 @@ public class HmsReportWriter extends ReportWriter {
         if(!statisticResultDomList.isEmpty()) {
             DomContent head = printTableHeadRow(Arrays.asList("Name", "Value", "Unit"));
             statisticResultDomList.add(0, head); // Add to front
+            statisticResultDomList.add(0, caption("Statistics"));
         } // If: There is a table
 
         return table(attrs(".statistic-result"), statisticResultDomList.toArray(new DomContent[]{}));
@@ -216,9 +233,92 @@ public class HmsReportWriter extends ReportWriter {
 
         return stringList;
     } // validStatisticResult()
-    private DomContent printTimeSeriesResult(List<TimeSeriesResult> timeSeriesResult) {
-        return null;
+    private DomContent printTimeSeriesResult(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
+        List<DomContent> timeSeriesPlotDomList = new ArrayList<>();
+        List<DomContent> maxPlotDom = new ArrayList<>();
+        int maxPlotsPerPage = 6;
+
+        for(TimeSeriesResult data : timeSeriesResultList) {
+            DomContent timeSeriesPlotDom = printTimeSeriesPlot(data, elementName);
+
+            if(maxPlotDom.size() < maxPlotsPerPage) {
+                maxPlotDom.add(timeSeriesPlotDom);
+           } // If: we haven't reached 6 plots per page
+            else {
+                timeSeriesPlotDomList.add(div(attrs(".max-plot"), maxPlotDom.toArray(new DomContent[]{})));
+                maxPlotDom.clear();
+                maxPlotDom.add(timeSeriesPlotDom);
+            } // Else: we have reached 6 plots per page
+        } // Loop: to print each TimeSeriesResult's plot
+
+        if(!maxPlotDom.isEmpty()) {
+            timeSeriesPlotDomList.add(div(attrs(".non-max-plot"), maxPlotDom.toArray(new DomContent[]{})));
+        }
+
+        return div(attrs(".group-plot"), timeSeriesPlotDomList.toArray(new DomContent[]{}));
     } // printTimeSeriesResult
+    private DomContent printTimeSeriesPlot(TimeSeriesResult timeSeriesResult, String elementName) {
+        Table timeSeriesTable = getTimeSeriesTable(timeSeriesResult);
+        String plotName = timeSeriesResult.getType();
+        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, timeSeriesTable, "Time", "Value");
+        String plotDivName = StringBeautifier.getPlotDivName(elementName, plotName);
+
+        Page page = Page.pageBuilder(timeSeriesFigure, plotDivName).build();
+        String plotHtml = page.asJavascript();
+
+        Document doc = Jsoup.parse(plotHtml);
+        Elements elements = doc.select("body").first().children();
+        String content = elements.outerHtml();
+        DomContent domContent = join(content);
+
+        return div(attrs(".single-plot"), domContent);
+    } // printTimeSeriesPlot()
+
+    private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult) {
+        Table timeSeriesPlot = null;
+
+        /* Get readable date format */
+        List<ZonedDateTime> zonedDateTimeList = timeSeriesResult.getTimes();
+        List<String> reformattedTimeList = new ArrayList<>();
+        String dateFormat = "yyyy-MM-dd kk:mm:ss";
+        for(ZonedDateTime zonedDateTime : zonedDateTimeList) {
+            String reformattedDate = TimeConverter.toString(zonedDateTime, dateFormat);
+            reformattedTimeList.add(reformattedDate);
+        } // Loop: to convert ZonedDateTime to acceptable format
+
+        /* Get readable value */
+        double[] valueArray = timeSeriesResult.getValues();
+        List<String> reformattedValueList = new ArrayList<>();
+        for(double value : valueArray) {
+            String reformattedValue = Double.toString(value);
+            reformattedValueList.add(reformattedValue);
+        } // Loop: to convert valueArray to String
+
+        /* Writing time and value out to a csv file */
+        try {
+            File outputFile = new File("src/resources/timeSeriesResult.csv");
+            FileWriter writer = new FileWriter(outputFile);
+            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("Time", "Value"));
+
+            for(int i = 0; i < reformattedTimeList.size(); i++) {
+                String time = reformattedTimeList.get(i);
+                String value = reformattedValueList.get(i);
+                printer.printRecord(time, value);
+            } // Loop: to print out every time & value pair
+
+            // Flush Printer, and Close Writer
+            printer.flush();
+            writer.close();
+
+            // Read in CSV file to get a Table
+            timeSeriesPlot = Table.read().csv(outputFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return timeSeriesPlot;
+    } // timeSeriesToCsv
+
     private void writeToFile(String pathToOutput, String content) {
         try { FileUtils.writeStringToFile(new File(pathToOutput), content, StandardCharsets.UTF_8); }
         catch (IOException e) { e.printStackTrace(); }
