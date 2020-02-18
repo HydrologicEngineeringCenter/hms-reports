@@ -9,7 +9,7 @@ public class StringBeautifier {
     public static String beautifyString (String name) {
         String result = "";
 
-        String camelCasePattern = "[a-z]+[A-Z]+[a-zA-Z]+"; // Ex: camelCase, camelCaseATest
+        String camelCasePattern = "[a-z]+[A-Z]+[a-zA-Z]+."; // Ex: camelCase, camelCaseATest3
         String pascalCasePattern = "[A-Z]+[a-zA-Z]+"; // Ex: PascalCase, PascalCaseATest
         String upperUnderscorePattern = "([A-Z]+[_])+[A-Z]+"; // Ex: UNDER_SCORE, UNDER_SCORE_TEST
 
@@ -59,8 +59,6 @@ public class StringBeautifier {
         String lastSubString = name.substring(capitalIndices.get(capitalIndices.size() - 1));
         result.append(lastSubString);
 
-        System.out.println(result.toString());
-
         return result.toString();
     } // beautifyPascalCase()
     private static String beautifyUpperUnderscore(String name) {
@@ -73,9 +71,14 @@ public class StringBeautifier {
             result.append(token);
         } // Capitalizing first characters
 
-        System.out.println(result.toString());
-
         return result.toString();
     } // beautifyUpperUnderscore()
+
+    public static String getPlotDivName(String elementName, String plotName) {
+        String plotDivName = elementName.toLowerCase() + "_";
+        String reformatName = plotName.toLowerCase().replace(' ', '_');
+
+        return plotDivName + reformatName;
+    } // getPlotDivName
 
 } // StringBeautifier class
