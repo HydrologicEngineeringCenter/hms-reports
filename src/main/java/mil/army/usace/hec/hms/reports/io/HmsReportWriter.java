@@ -28,8 +28,6 @@ import java.util.List;
 
 import static j2html.TagCreator.*;
 
-
-
 public class HmsReportWriter extends ReportWriter {
     HmsReportWriter(Builder builder) {
         super(builder);
@@ -71,7 +69,7 @@ public class HmsReportWriter extends ReportWriter {
         /* For each elementInput, print: Name, ElementType, and Processes */
         String elementName = elementInput.getName();
         String elementType = StringBeautifier.beautifyString(elementInput.getElementType());
-        DomContent elementNameAndType = h2(elementName + ": " + elementType);
+        DomContent elementNameAndType = h2(elementType + ": " + elementName);
         elementInputDomList.add(elementNameAndType);
 
         List<Process> processList = elementInput.getProcesses();
@@ -260,7 +258,8 @@ public class HmsReportWriter extends ReportWriter {
     private DomContent printTimeSeriesPlot(TimeSeriesResult timeSeriesResult, String elementName) {
         Table timeSeriesTable = getTimeSeriesTable(timeSeriesResult);
         String plotName = timeSeriesResult.getType();
-        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, timeSeriesTable, "Time", "Value");
+        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, timeSeriesTable,
+                "Time", "Value", timeSeriesResult.getUnitType(), timeSeriesResult.getUnit());
         String plotDivName = StringBeautifier.getPlotDivName(elementName, plotName);
 
         Page page = Page.pageBuilder(timeSeriesFigure, plotDivName).build();

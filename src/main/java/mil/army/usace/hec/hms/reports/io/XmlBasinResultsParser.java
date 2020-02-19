@@ -59,8 +59,8 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         String name = elementObject.getString("name");
         JSONObject hydrologyObject = elementObject.getJSONObject("Hydrology");
         // FIXME: Uncomment code below to populate TimeSeriesResults
-//        List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
-        List<TimeSeriesResult> timeSeriesResult = new ArrayList<>();
+        List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
+//        List<TimeSeriesResult> timeSeriesResult = new ArrayList<>();
         JSONObject statisticsArray = elementObject.getJSONObject("Statistics");
         List<StatisticResult> statisticResults = populateStatisticsResult(statisticsArray);
 
@@ -115,9 +115,14 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         double[] values = container.getValues();
         List<ZonedDateTime> times  = getZonedDateTimeArray(container.getTimes());
+        String unit = container.getUnits();
+        String fullName = container.getFullName();
+        String unitType = fullName.split("/")[3];
 
         TimeSeriesResult timeSeriesResult = TimeSeriesResult.builder()
                 .type(type)
+                .unitType(unitType)
+                .unit(unit)
                 .times(times)
                 .values(values)
                 .build();
