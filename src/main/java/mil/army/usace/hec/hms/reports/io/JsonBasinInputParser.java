@@ -59,6 +59,12 @@ public class JsonBasinInputParser extends BasinInputParser {
             List<String> unusedVariables = unnecessaryContent();
             if(unusedVariables.contains(key)) { continue; }
             Process objectProcess = populateProcess(object, key);
+
+            if(objectProcess.getParameters().isEmpty() && objectProcess.getValue().equals("")) {
+                System.out.println("Eliminating Process: " + objectProcess.getName());
+                continue;
+            } // If: Process doesn't contain any content
+
             processes.add(objectProcess);
         } // Loop through all keys in object's keySet
 
@@ -90,6 +96,11 @@ public class JsonBasinInputParser extends BasinInputParser {
             JSONObject processObject = elementObject.getJSONObject(keyName);
             for(String paramKey : processObject.keySet()) {
                 Parameter param = populateParameter(processObject, paramKey, paramKey);
+                if(param.getSubParameters().isEmpty() && param.getValue().equals("")) {
+                    System.out.println("Eliminating: " + param.getName());
+                    continue; // Move on to next Parameter
+                } // If: paramater has no value, nor sub-parameters
+
                 parameters.add(param);
             } // Loop: Populate Process with its parameters
         } // Else: 'Process' is type JSONObject. Ex: Reach's Route
@@ -119,7 +130,10 @@ public class JsonBasinInputParser extends BasinInputParser {
             } // Loop: through all SubParameters inside Parameter
         } // If: 'Parameter' is a JSONObject. Ex: Route
         else {
-            value = processObject.opt(keyName).toString();
+            String paramValue = processObject.opt(keyName).toString();
+            if(!paramValue.equals("NONE")) {
+                value = paramValue;
+            } // If: processValue is not None -> saves value
         } // Else: 'Parameter' is not a JSONObject. Ex: Method
 
         Parameter parameter = Parameter.builder()
