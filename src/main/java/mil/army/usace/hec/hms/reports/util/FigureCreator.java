@@ -17,8 +17,8 @@ public class FigureCreator {
 
         Layout plotLayout = Layout.builder()
                 .title(plotTitle)
-                .height(400)
-                .width(530)
+                .height(600)
+                .width(800)
                 .xAxis(Axis.builder().title(xColumnName).build())
                 .yAxis(Axis.builder().title(yAxisTitle).build())
                 .build();
