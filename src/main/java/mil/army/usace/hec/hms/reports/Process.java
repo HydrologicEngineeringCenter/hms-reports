@@ -1,8 +1,9 @@
 package mil.army.usace.hec.hms.reports;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Process {
+public class Process implements Comparable {
     /* Class Variables */
     private final String name;
     private final String value;
@@ -14,6 +15,30 @@ public class Process {
         this.value = builder.value;
         this.parameters = builder.parameters;
     } // Process Constructor
+
+    @Override
+    public int compareTo(Object o) {
+        Process compareProcess = (Process) o;
+
+        List<String> orderedProcess = new ArrayList<>();
+        orderedProcess.add("area");
+        orderedProcess.add("latitude");
+        orderedProcess.add("longitude");
+        orderedProcess.add("downstream");
+
+        int thisProcessIndex = 0, compareProcessIndex = 0;
+
+        if(orderedProcess.contains(this.getName())) {
+            thisProcessIndex = orderedProcess.indexOf(this.getName());
+        } // If: this process is in the orderedProcess List
+
+        if(orderedProcess.contains(compareProcess.getName())) {
+            compareProcessIndex = orderedProcess.indexOf(compareProcess.getName());
+        } // If: compare process is in the orderedProcess List
+
+        // Ascending Order
+        return thisProcessIndex - compareProcessIndex;
+    } // compareTo()
 
     public static class Builder{
         String name;

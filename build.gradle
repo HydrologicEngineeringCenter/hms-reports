@@ -19,6 +19,9 @@ dependencies {
     implementation 'tech.tablesaw:tablesaw-core:0.37.3'
     implementation 'tech.tablesaw:tablesaw-jsplot:0.37.3'
     implementation 'org.jsoup:jsoup:1.12.2'
+    implementation 'org.seleniumhq.selenium:selenium-java:3.8.1'
+    implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.1'
+    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.1'
     implementation 'org.apache.commons:commons-csv:1.8'
 
     implementation 'com.rmanet:rma:6.0.0.51'

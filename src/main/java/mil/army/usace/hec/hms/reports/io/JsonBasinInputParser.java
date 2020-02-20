@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class JsonBasinInputParser extends BasinInputParser {
@@ -67,6 +68,9 @@ public class JsonBasinInputParser extends BasinInputParser {
 
             processes.add(objectProcess);
         } // Loop through all keys in object's keySet
+
+        // Sorting processes in order
+        Collections.sort(processes);
 
         /* Building ElementInput object */
         ElementInput elementInput = ElementInput.builder()
