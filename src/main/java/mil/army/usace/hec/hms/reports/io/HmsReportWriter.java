@@ -1,5 +1,6 @@
 package mil.army.usace.hec.hms.reports.io;
 
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.*;
 
@@ -13,18 +14,21 @@ import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.plotly.components.Figure;
 import tech.tablesaw.plotly.components.Page;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import javax.script.*;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static j2html.TagCreator.*;
 
@@ -94,6 +98,10 @@ public class HmsReportWriter extends ReportWriter {
         List<DomContent> singleProcessesDomList = new ArrayList<>();
 
         for(Process process : singleProcesses) {
+            if(unnecessarySingleProcesses().contains(process.getName())) {
+                continue;
+            } // Skipping unnecessary processes
+
             String processName = StringBeautifier.beautifyString(process.getName());
             String processValue = StringBeautifier.beautifyString(process.getValue());
             DomContent singleDom = join(b(processName), ":", processValue, br());
@@ -102,6 +110,12 @@ public class HmsReportWriter extends ReportWriter {
 
         return p(attrs(".single-process"), singleProcessesDomList.toArray(new DomContent[]{})); // Return in the format of a 'paragraph'
     } // printSingleProcesses()
+    private List<String> unnecessarySingleProcesses() {
+        List<String> stringList = new ArrayList<>();
+        stringList.add("name");
+        stringList.add("elementType");
+        return stringList;
+    } // unnecessarySingleProcesses()
     private DomContent printTableProcesses(List<Process> tableProcesses) {
         List<DomContent> tableProcessesDomList = new ArrayList<>();
 
@@ -237,6 +251,10 @@ public class HmsReportWriter extends ReportWriter {
         int maxPlotsPerPage = 6;
 
         for(TimeSeriesResult data : timeSeriesResultList) {
+            if(!validTimeSeriesPlot(data.getType())) {
+                System.out.println("Unnecessary plot: " + data.getType());
+                continue;
+            } // If: is an unnecessary plot
             DomContent timeSeriesPlotDom = printTimeSeriesPlot(data, elementName);
 
             if(maxPlotDom.size() < maxPlotsPerPage) {
@@ -272,7 +290,17 @@ public class HmsReportWriter extends ReportWriter {
 
         return div(attrs(".single-plot"), domContent);
     } // printTimeSeriesPlot()
+    private Boolean validTimeSeriesPlot(String plotName) {
+        if(plotName.contains("Precipitation")) {
+            return true;
+        } // If: plotName contains Precipitation
 
+        if(plotName.contains("Outflow")) {
+            return true;
+        } // If: plotName contains Outflow
+
+        return false;
+    } // validTimeSeriesPlot()
     private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult) {
         Table timeSeriesPlot = null;
 
@@ -318,8 +346,26 @@ public class HmsReportWriter extends ReportWriter {
         return timeSeriesPlot;
     } // timeSeriesToCsv
 
-    private void writeToFile(String pathToOutput, String content) {
-        try { FileUtils.writeStringToFile(new File(pathToOutput), content, StandardCharsets.UTF_8); }
+    private void convertPlotlyToStatic(String pathToHtml) {
+        try {
+            String htmlContent = FileUtils.readFileToString(new File(pathToHtml), StandardCharsets.UTF_8);
+            htmlContent = htmlContent.replace("layout);", "layout, {staticPlot: true});");
+            String pathToStaticPlotHtml = pathToHtml.replace(".html", "-static.html");
+            File staticPlotHtml = new File(pathToStaticPlotHtml);
+            FileUtils.writeStringToFile(staticPlotHtml, htmlContent, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    } // convertPlotlyToStatic()
+
+    private void writeToFile(String pathToHtml, String content) {
+        /* Writing to HTML file */
+        String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
+        String fullPathToPdf = fullPathToHtml.replaceAll("html", "pdf");
+        try { FileUtils.writeStringToFile(new File(pathToHtml), content, StandardCharsets.UTF_8); }
         catch (IOException e) { e.printStackTrace(); }
+
+        convertPlotlyToStatic(fullPathToHtml);
+
     } // writeToFile()
 } // HmsReportWriter class
