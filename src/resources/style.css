@@ -19,13 +19,15 @@ div.table-process{
 }
 
 div.max-plot{
-	page-break-before: always;
+	page-break-after: always;
+	page-break-inside: avoid;
 	/* display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(4in, 1fr)); */
 }
 
 div.non-max-plot{
 	page-break-before: auto;
+	page-break-inside: avoid;
 }
 
 caption{
@@ -66,8 +68,7 @@ table.table-parameter{
 }
 
 table.statistic-result{
-	page-break-before: avoid;
-	page-break-after: auto;
+	page-break-inside: avoid;
 	width: 100%;
 	padding-bottom: 0.3in;
 }

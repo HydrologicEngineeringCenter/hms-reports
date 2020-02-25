@@ -148,6 +148,7 @@ public class HmsReportWriter extends ReportWriter {
         } // Loop: through Parameter List
 
         /* Tables within a table */
+        boolean nestedTable = false;
         for(Parameter nestedParameter : nestedParameterList) {
             /* Note: Nested Parameter's table should be in a row */
             List<DomContent> nestedParameterDom = new ArrayList<>();
@@ -159,8 +160,12 @@ public class HmsReportWriter extends ReportWriter {
             nestedParameterDom.add(subParameterTable);
             parameterDom.add(tr(nestedParameterDom.toArray(new DomContent[]{})));
             // Return table of class 'nested_process' if nested
-            return table(attrs(".nested-parameter"), parameterDom.toArray(new DomContent[]{}));
+            nestedTable = true;
         } // Loop: through nested parameter List
+
+        if(nestedTable) {
+            return table(attrs(".nested-parameter"), parameterDom.toArray(new DomContent[]{}));
+        } // If: Nested Table
 
         return table(attrs(".table-parameter"), parameterDom.toArray(new DomContent[]{})); // Table of Parameters
     } // printParameterTable()
@@ -248,7 +253,7 @@ public class HmsReportWriter extends ReportWriter {
     private DomContent printTimeSeriesResult(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
         List<DomContent> timeSeriesPlotDomList = new ArrayList<>();
         List<DomContent> maxPlotDom = new ArrayList<>();
-        int maxPlotsPerPage = 6;
+        int maxPlotsPerPage = 2;
 
         for(TimeSeriesResult data : timeSeriesResultList) {
             if(!validTimeSeriesPlot(data.getType())) {
@@ -358,6 +363,18 @@ public class HmsReportWriter extends ReportWriter {
         }
     } // convertPlotlyToStatic()
 
+    private void setPlotlyFont(String pathToHtml, String fontFamily, String fontSize) {
+        try {
+            String htmlContent = FileUtils.readFileToString(new File(pathToHtml), StandardCharsets.UTF_8);
+            htmlContent = htmlContent.replace("var layout = {",
+                    "var layout = { font: { family: '" + fontFamily + "', size: " + fontSize + "},");
+            File staticPlotHtml = new File(pathToHtml);
+            FileUtils.writeStringToFile(staticPlotHtml, htmlContent, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    } // setPlotlyFont()
+
     private void writeToFile(String pathToHtml, String content) {
         /* Writing to HTML file */
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
@@ -365,7 +382,9 @@ public class HmsReportWriter extends ReportWriter {
         try { FileUtils.writeStringToFile(new File(pathToHtml), content, StandardCharsets.UTF_8); }
         catch (IOException e) { e.printStackTrace(); }
 
+        setPlotlyFont(fullPathToHtml, "Times New Roman, serif", "12");
         convertPlotlyToStatic(fullPathToHtml);
+
 
     } // writeToFile()
 } // HmsReportWriter class

@@ -1,5 +1,6 @@
 package mil.army.usace.hec.hms.reports.util;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,11 +10,14 @@ public class StringBeautifier {
     public static String beautifyString (String name) {
         String result = "";
 
-        String camelCasePattern = "[a-z]+[A-Z]+[a-zA-Z]+."; // Ex: camelCase, camelCaseATest3
-        String pascalCasePattern = "[A-Z]+[a-zA-Z]+"; // Ex: PascalCase, PascalCaseATest
+        String camelCasePattern = "[a-z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*"; // Ex: camelCase, camelCaseATest3
+        String pascalCasePattern = "[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*"; // Ex: PascalCase, PascalCaseATest
         String upperUnderscorePattern = "([A-Z]+[_])+[A-Z]+"; // Ex: UNDER_SCORE, UNDER_SCORE_TEST
 
-        if(name.matches(camelCasePattern) || name.toLowerCase().equals(name)) {
+        if(isNumeric(name)) {
+            result =  beautifyNumber(name);
+        } // If: Numeric
+        else if(name.matches(camelCasePattern) || name.toLowerCase().equals(name)) {
             result = beautifyCamelCase(name);
         } // If: camelCase or lowerall
         else if(name.matches(upperUnderscorePattern) || name.toUpperCase().equals(name)) {
@@ -73,7 +77,17 @@ public class StringBeautifier {
 
         return result.toString();
     } // beautifyUpperUnderscore()
-
+    private static String beautifyNumber(String name) {
+        Double number = Double.parseDouble(name);
+        String roundedNumber = new DecimalFormat("#.##").format(number);
+        return roundedNumber;
+    } // beautifyNumber()
+    private static boolean isNumeric(String name) {
+        boolean isNumeric = true;
+        try { Double num = Double.parseDouble(name); }
+        catch (NumberFormatException e) { isNumeric = false; }
+        return isNumeric;
+    } // isDouble()
     public static String getPlotDivName(String elementName, String plotName) {
         String plotDivName = elementName.toLowerCase() + "_";
         String reformatName = plotName.toLowerCase().replace(' ', '_');
