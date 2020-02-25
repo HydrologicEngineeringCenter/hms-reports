@@ -257,7 +257,7 @@ public class HmsReportWriter extends ReportWriter {
 
         for(TimeSeriesResult data : timeSeriesResultList) {
             if(!validTimeSeriesPlot(data.getType())) {
-                System.out.println("Unnecessary plot: " + data.getType());
+//                System.out.println("Unnecessary plot: " + data.getType());
                 continue;
             } // If: is an unnecessary plot
             DomContent timeSeriesPlotDom = printTimeSeriesPlot(data, elementName);
