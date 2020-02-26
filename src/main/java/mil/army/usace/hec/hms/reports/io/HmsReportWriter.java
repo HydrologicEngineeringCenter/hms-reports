@@ -1,12 +1,11 @@
 package mil.army.usace.hec.hms.reports.io;
 
-import mil.army.usace.hec.hms.reports.*;
+import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Process;
+import mil.army.usace.hec.hms.reports.*;
 import mil.army.usace.hec.hms.reports.util.FigureCreator;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 import mil.army.usace.hec.hms.reports.util.TimeConverter;
-
-import j2html.tags.DomContent;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
@@ -17,7 +16,9 @@ import tech.tablesaw.api.Table;
 import tech.tablesaw.plotly.components.Figure;
 import tech.tablesaw.plotly.components.Page;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
@@ -247,47 +248,47 @@ public class HmsReportWriter extends ReportWriter {
     private DomContent printTimeSeriesResult(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
         List<DomContent> timeSeriesPlotDomList = new ArrayList<>();
         List<DomContent> maxPlotDom = new ArrayList<>();
-        List<String> plotAccessed = new ArrayList<>();
         int maxPlotsPerPage = 2;
 
         Map<String, TimeSeriesResult> timeSeriesResultMap = timeSeriesResultList.stream()
                 .filter(individual -> validTimeSeriesPlot(individual.getType()))
                 .collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getTimeSeriesResult));
 
-        for(TimeSeriesResult data : timeSeriesResultList) {
-            // Skip through unnecessary plots
-            if(!validTimeSeriesPlot(data.getType()) || plotAccessed.contains(data.getType())) {
-                continue;
-            } // If: is an unnecessary plot
+        Map<String, Map<String, TimeSeriesResult>> combinedPlotMap = getCombinedPlotName(timeSeriesResultMap);
 
-            // Get DomContent for the Plot
-            DomContent timeSeriesPlotDom;
-            if(combinedTimeSeriesPlot().containsKey(data.getType())) {
-                String pairPlot = combinedTimeSeriesPlot().get(data.getType());
-                TimeSeriesResult pairTimeSeries = timeSeriesResultMap.get(pairPlot);
-
-                if(pairTimeSeries != null) {
-                    timeSeriesPlotDom = printTimeSeriesPairPlot(data, pairTimeSeries, elementName);
-                    plotAccessed.add(pairPlot); // So we won't access the pair plot again
-                } // If: pairPlot is found
+        // Case: Combined Plot (Outflow and Precipitation, or others)
+        if(!combinedPlotMap.isEmpty()) {
+            for(String combinedPlotName : combinedPlotMap.keySet()) {
+                Map<String, TimeSeriesResult> combinedTsrMap = combinedPlotMap.get(combinedPlotName);
+                // Plot the corresponding Combined Plot
+                DomContent tsrDom = printTimeSeriesCombinedPlot(combinedTsrMap, combinedPlotName, elementName);
+                // Divide the plots by only having Max number of plots per page
+                if(maxPlotDom.size() < maxPlotsPerPage) {
+                    maxPlotDom.add(tsrDom);
+                } // If: we haven't reached 2 plots per page
                 else {
-                    timeSeriesPlotDom = printTimeSeriesPlot(data, elementName);
-                } // Else: pairPlot is not found
-            } // If: Pair Plots (Like Precipitation and Outflow)
-            else {
-                timeSeriesPlotDom = printTimeSeriesPlot(data, elementName);
-            } // Else: Single Plots
+                    timeSeriesPlotDomList.add(div(attrs(".max-plot"), maxPlotDom.toArray(new DomContent[]{})));
+                    maxPlotDom.clear();
+                    maxPlotDom.add(tsrDom);
+                } // Else: we have reached 2 plots per page
+                // Remove the used plots from the timeSeriesResultMap
+                for(String usedPlot : combinedTsrMap.keySet()) {
+                    timeSeriesResultMap.remove(usedPlot);
+                } // Loop: to remove used plots
+            } // Loop: To plot each Combined Plot
+        } // If: There is a combined plot
 
-            // Divide the plots by only having Max number of plots per page
+        for(String key : timeSeriesResultMap.keySet()) {
+            DomContent tsrDom = printTimeSeriesPlot(timeSeriesResultMap.get(key), elementName);
             if(maxPlotDom.size() < maxPlotsPerPage) {
-                maxPlotDom.add(timeSeriesPlotDom);
-            } // If: we haven't reached 6 plots per page
+                maxPlotDom.add(tsrDom);
+            } // If: we haven't reached 2 plots per page
             else {
                 timeSeriesPlotDomList.add(div(attrs(".max-plot"), maxPlotDom.toArray(new DomContent[]{})));
                 maxPlotDom.clear();
-                maxPlotDom.add(timeSeriesPlotDom);
-            } // Else: we have reached 6 plots per page
-        } // Loop: to print each TimeSeriesResult's plot
+                maxPlotDom.add(tsrDom);
+            } // Else: we have reached 2 plots per page
+        } // Loop: to print each single plot
 
         if(!maxPlotDom.isEmpty()) {
             timeSeriesPlotDomList.add(div(attrs(".non-max-plot"), maxPlotDom.toArray(new DomContent[]{})));
@@ -314,38 +315,65 @@ public class HmsReportWriter extends ReportWriter {
 
         return div(attrs(".single-plot"), domContent);
     } // printTimeSeriesPlot()
-    private DomContent printTimeSeriesPairPlot(TimeSeriesResult tsr1, TimeSeriesResult tsr2, String elementName) {
-        // Figuring out which Plot is on top, which is on bottom
-        TimeSeriesResult topPlot, bottomPlot;
+    private DomContent printTimeSeriesCombinedPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
+        DomContent combinedPlotDom = null;
 
-        if(pairTopPlots().contains(tsr1.getUnitType())) {
-            topPlot = tsr1;
-            bottomPlot = tsr2;
-        } // If: tsr1 is Top Plot
-        else {
-            topPlot = tsr1;
-            bottomPlot = tsr2;
-        } // Else: tsr2 is Top Plot
+        // Get the DomContent of the Plot
+        switch(plotName) {
+            case "Precipitation and Outflow":
+                combinedPlotDom = getPrecipOutflowPlot(tsrMap, plotName, elementName);
+        } // Switch case for each type of Combined Plots
 
-        Table topPlotTable = getTimeSeriesTable(topPlot, new String[]{"Time1", "Value1"});
-        Table bottomPlotTable = getTimeSeriesTable(bottomPlot, new String[]{"Time2", "Value2"});
+        return div(attrs(".single-plot"), combinedPlotDom);
+    } // printTimeSeriesCombinedPlot()
+    private DomContent getPrecipOutflowPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
+        List<TimeSeriesResult> topPlots = Arrays.asList(tsrMap.get("Precipitation"), tsrMap.get("Excess Precipitation"));
+        List<TimeSeriesResult> bottomPlots = Collections.singletonList(tsrMap.get("Outflow"));
 
-        String plotName = tsr1.getType() + " and " + tsr2.getType();
+        // Creating Tables for both Top Plots and Bottom Plots
+        List<Table> topPlotTables = new ArrayList<>(), bottomPlotTables = new ArrayList<>();
+        int count = 0;
+        for(TimeSeriesResult tsr : topPlots) {
+            Table plotTable = getTimeSeriesTable(tsr, new String[] {"Time" + count, "Value" + count});
+            topPlotTables.add(plotTable);
+            count++;
+        } // Loop: to create Tables for Top Plots
+        for(TimeSeriesResult tsr : bottomPlots) {
+            Table plotTable = getTimeSeriesTable(tsr, new String[] {"Time" + count, "Value" + count});
+            bottomPlotTables.add(plotTable);
+            count++;
+        } // Loop: to create Tables for Bottom Plots
+
+        // Setting Plot's configurations
         String xAxisTitle = "Time";
-        String y1AxisTitle = topPlot.getUnitType() + " (" + topPlot.getUnit() + ")";
-        String y2AxisTitle = bottomPlot.getUnitType() + " (" + bottomPlot.getUnit() + ")";
+        String y1AxisTitle = bottomPlots.get(0).getUnitType() + " (" + topPlots.get(0).getUnit() + ")";
+        String y2AxisTitle = topPlots.get(0).getUnitType() + " (" +  bottomPlots.get(0).getUnit() + ")";
         String divName = StringBeautifier.getPlotDivName(elementName, plotName);
 
         // Create Plot
-        Figure timeSeriesFigure = FigureCreator.createPairTimeSeriesPlot(plotName, topPlotTable, bottomPlotTable, xAxisTitle, y1AxisTitle, y2AxisTitle);
+        Figure timeSeriesFigure = FigureCreator.createCombinedTimeSeriesPlot(plotName, topPlotTables, bottomPlotTables, xAxisTitle, y1AxisTitle, y2AxisTitle);
         Page page = Page.pageBuilder(timeSeriesFigure, divName).build();
 
         // Extract Plot's Javascript
         String plotHtml = page.asJavascript();
         DomContent domContent = extractPlotlyJavascript(plotHtml);
 
-        return div(attrs(".single-plot"), domContent);
-    } // printTimeSeriesPairPlot()
+        return domContent;
+    } // printPrecipOutflowPlot()
+    private Map<String, Map<String, TimeSeriesResult>> getCombinedPlotName(Map<String, TimeSeriesResult> tsrMap) {
+        Map<String, Map<String, TimeSeriesResult>> combinedPlotMap = new HashMap<>();
+
+        if(tsrMap.containsKey("Precipitation") && tsrMap.containsKey("Outflow") && tsrMap.containsKey("Excess Precipitation")) {
+            Map<String, TimeSeriesResult> combinedMap = new HashMap<>();
+            combinedMap.put("Precipitation", tsrMap.get("Precipitation"));
+            combinedMap.put("Outflow", tsrMap.get("Outflow"));
+            combinedMap.put("Excess Precipitation", tsrMap.get("Excess Precipitation"));
+            String plotName = "Precipitation and Outflow";
+            combinedPlotMap.put(plotName, combinedMap);
+        } // If: CombinedPlot is a 'Precipitation and Outflow'
+
+        return combinedPlotMap;
+    } // getCombinedPlotName()
     private DomContent extractPlotlyJavascript(String plotHtml) {
         Document doc = Jsoup.parse(plotHtml);
         Elements elements = doc.select("body").first().children();
@@ -365,18 +393,6 @@ public class HmsReportWriter extends ReportWriter {
 
         return false;
     } // validTimeSeriesPlot()
-    private Map<String, String> combinedTimeSeriesPlot() {
-        Map<String, String> pairPlot = new HashMap<>();
-        pairPlot.put("Precipitation", "Outflow");
-        pairPlot.put("Outflow", "Precipitation");
-
-        return pairPlot;
-    } // combinedTimeSeriesPlot(). Ex: Precipitation and Outflow
-    private List<String> pairTopPlots() {
-        List<String> stringList = new ArrayList<>();
-        stringList.add("Precipitation");
-        return stringList;
-    } // pairTopPlots()
     private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult, String[] columnNames) {
         Table timeSeriesPlot = null;
 

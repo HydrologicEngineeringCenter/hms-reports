@@ -74,5 +74,50 @@ public class FigureCreator {
         return new Figure(plotLayout, traceList.toArray(new Trace[]{}));
     } // createPairTimeSeriesPlot()
 
+    public static Figure createCombinedTimeSeriesPlot(String plotTitle, List<Table> topPlots, List<Table> bottomPlots, String xAxisTitle, String y1AxisTitle, String y2AxisTitle) {
+
+        List<Trace> traceList = new ArrayList<>();
+
+        Grid grid = Grid.builder()
+                .rows(2) // Two Subplots: Top and Bottom
+                .columns(1)
+                .pattern(Grid.Pattern.INDEPENDENT)
+                .rowOrder(Grid.RowOrder.BOTTOM_TO_TOP)
+                .build();
+
+        Layout plotLayout = Layout.builder()
+                .title(plotTitle)
+                .height(500)
+                .width(850)
+                .xAxis(Axis.builder().title(xAxisTitle).build())
+                .yAxis(Axis.builder().title(y1AxisTitle).build())
+                .yAxis2(Axis.builder().title(y2AxisTitle).autoRange(Axis.AutoRange.REVERSED).build())
+                .grid(grid)
+                .build();
+
+        for(Table plot : topPlots) {
+            List<String> plotColumns = plot.columnNames();
+            ScatterTrace plotTrace = ScatterTrace.builder(plot.column(plotColumns.get(0)), plot.column(plotColumns.get(1)))
+                    .mode(ScatterTrace.Mode.LINE)
+                    .name(plot.name())
+                    .yAxis("y2")
+                    .xAxis("x2")
+                    .build();
+            traceList.add(plotTrace);
+        } // Loop: to get Traces for top plots
+
+        for(Table plot : bottomPlots) {
+            List<String> plotColumns = plot.columnNames();
+            ScatterTrace plotTrace = ScatterTrace.builder(plot.column(plotColumns.get(0)), plot.column(plotColumns.get(1)))
+                    .mode(ScatterTrace.Mode.LINE)
+                    .name(plot.name())
+                    .yAxis("y1")
+                    .xAxis("x1")
+                    .build();
+            traceList.add(plotTrace);
+        } // Loop: to get Traces for bottom plots
+
+        return new Figure(plotLayout, traceList.toArray(new Trace[]{}));
+    } // createCombinedTimeSeriesPlot()
 
 } // FigureCreator class
