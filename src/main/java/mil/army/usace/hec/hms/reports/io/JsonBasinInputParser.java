@@ -62,7 +62,6 @@ public class JsonBasinInputParser extends BasinInputParser {
             Process objectProcess = populateProcess(object, key);
 
             if(objectProcess.getParameters().isEmpty() && objectProcess.getValue().equals("")) {
-//                System.out.println("Eliminating Process: " + objectProcess.getName());
                 continue;
             } // If: Process doesn't contain any content
 
@@ -101,7 +100,6 @@ public class JsonBasinInputParser extends BasinInputParser {
             for(String paramKey : processObject.keySet()) {
                 Parameter param = populateParameter(processObject, paramKey, paramKey);
                 if(param.getSubParameters().isEmpty() && param.getValue().equals("")) {
-//                    System.out.println("Eliminating: " + param.getName());
                     continue; // Move on to next Parameter
                 } // If: paramater has no value, nor sub-parameters
 

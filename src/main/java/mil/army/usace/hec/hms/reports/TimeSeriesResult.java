@@ -63,5 +63,6 @@ public class TimeSeriesResult {
     public double[] getValues() { return values; }
     public String getUnitType() { return unitType; }
     public String getUnit() { return unit; }
+    public TimeSeriesResult getTimeSeriesResult() { return this; }
 
 } // TimeSeriesResult Class

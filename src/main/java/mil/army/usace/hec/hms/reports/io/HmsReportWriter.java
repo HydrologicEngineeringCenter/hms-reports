@@ -1,34 +1,28 @@
 package mil.army.usace.hec.hms.reports.io;
 
-import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
-import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.*;
-
 import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.util.FigureCreator;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 import mil.army.usace.hec.hms.reports.util.TimeConverter;
+
+import j2html.tags.DomContent;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.plotly.components.Figure;
 import tech.tablesaw.plotly.components.Page;
 
-import javax.script.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static j2html.TagCreator.*;
 
@@ -253,18 +247,41 @@ public class HmsReportWriter extends ReportWriter {
     private DomContent printTimeSeriesResult(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
         List<DomContent> timeSeriesPlotDomList = new ArrayList<>();
         List<DomContent> maxPlotDom = new ArrayList<>();
+        List<String> plotAccessed = new ArrayList<>();
         int maxPlotsPerPage = 2;
 
+        Map<String, TimeSeriesResult> timeSeriesResultMap = timeSeriesResultList.stream()
+                .filter(individual -> validTimeSeriesPlot(individual.getType()))
+                .collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getTimeSeriesResult));
+
         for(TimeSeriesResult data : timeSeriesResultList) {
-            if(!validTimeSeriesPlot(data.getType())) {
-//                System.out.println("Unnecessary plot: " + data.getType());
+            // Skip through unnecessary plots
+            if(!validTimeSeriesPlot(data.getType()) || plotAccessed.contains(data.getType())) {
                 continue;
             } // If: is an unnecessary plot
-            DomContent timeSeriesPlotDom = printTimeSeriesPlot(data, elementName);
 
+            // Get DomContent for the Plot
+            DomContent timeSeriesPlotDom;
+            if(combinedTimeSeriesPlot().containsKey(data.getType())) {
+                String pairPlot = combinedTimeSeriesPlot().get(data.getType());
+                TimeSeriesResult pairTimeSeries = timeSeriesResultMap.get(pairPlot);
+
+                if(pairTimeSeries != null) {
+                    timeSeriesPlotDom = printTimeSeriesPairPlot(data, pairTimeSeries, elementName);
+                    plotAccessed.add(pairPlot); // So we won't access the pair plot again
+                } // If: pairPlot is found
+                else {
+                    timeSeriesPlotDom = printTimeSeriesPlot(data, elementName);
+                } // Else: pairPlot is not found
+            } // If: Pair Plots (Like Precipitation and Outflow)
+            else {
+                timeSeriesPlotDom = printTimeSeriesPlot(data, elementName);
+            } // Else: Single Plots
+
+            // Divide the plots by only having Max number of plots per page
             if(maxPlotDom.size() < maxPlotsPerPage) {
                 maxPlotDom.add(timeSeriesPlotDom);
-           } // If: we haven't reached 6 plots per page
+            } // If: we haven't reached 6 plots per page
             else {
                 timeSeriesPlotDomList.add(div(attrs(".max-plot"), maxPlotDom.toArray(new DomContent[]{})));
                 maxPlotDom.clear();
@@ -274,30 +291,72 @@ public class HmsReportWriter extends ReportWriter {
 
         if(!maxPlotDom.isEmpty()) {
             timeSeriesPlotDomList.add(div(attrs(".non-max-plot"), maxPlotDom.toArray(new DomContent[]{})));
-        }
+        } // If: We haven't maxed out number of plots in a page yet
 
         return div(attrs(".group-plot"), timeSeriesPlotDomList.toArray(new DomContent[]{}));
     } // printTimeSeriesResult
     private DomContent printTimeSeriesPlot(TimeSeriesResult timeSeriesResult, String elementName) {
-        Table timeSeriesTable = getTimeSeriesTable(timeSeriesResult);
+        // Configure Plot settings
+        String[] columnNames = {"Time", "Value"};
+        Table timeSeriesTable = getTimeSeriesTable(timeSeriesResult, columnNames);
         String plotName = timeSeriesResult.getType();
-        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, timeSeriesTable,
-                "Time", "Value", timeSeriesResult.getUnitType(), timeSeriesResult.getUnit());
+        String xAxisTitle = "Time";
+        String yAxisTitle = timeSeriesResult.getUnitType() + " (" + timeSeriesResult.getUnit() + ")";
+
+        // Create Plot
+        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, timeSeriesTable, xAxisTitle, yAxisTitle);
         String plotDivName = StringBeautifier.getPlotDivName(elementName, plotName);
-
         Page page = Page.pageBuilder(timeSeriesFigure, plotDivName).build();
-        String plotHtml = page.asJavascript();
 
+        // Extract Plot's Javascript
+        String plotHtml = page.asJavascript();
+        DomContent domContent = extractPlotlyJavascript(plotHtml);
+
+        return div(attrs(".single-plot"), domContent);
+    } // printTimeSeriesPlot()
+    private DomContent printTimeSeriesPairPlot(TimeSeriesResult tsr1, TimeSeriesResult tsr2, String elementName) {
+        // Figuring out which Plot is on top, which is on bottom
+        TimeSeriesResult topPlot, bottomPlot;
+
+        if(pairTopPlots().contains(tsr1.getUnitType())) {
+            topPlot = tsr1;
+            bottomPlot = tsr2;
+        } // If: tsr1 is Top Plot
+        else {
+            topPlot = tsr1;
+            bottomPlot = tsr2;
+        } // Else: tsr2 is Top Plot
+
+        Table topPlotTable = getTimeSeriesTable(topPlot, new String[]{"Time1", "Value1"});
+        Table bottomPlotTable = getTimeSeriesTable(bottomPlot, new String[]{"Time2", "Value2"});
+
+        String plotName = tsr1.getType() + " and " + tsr2.getType();
+        String xAxisTitle = "Time";
+        String y1AxisTitle = topPlot.getUnitType() + " (" + topPlot.getUnit() + ")";
+        String y2AxisTitle = bottomPlot.getUnitType() + " (" + bottomPlot.getUnit() + ")";
+        String divName = StringBeautifier.getPlotDivName(elementName, plotName);
+
+        // Create Plot
+        Figure timeSeriesFigure = FigureCreator.createPairTimeSeriesPlot(plotName, topPlotTable, bottomPlotTable, xAxisTitle, y1AxisTitle, y2AxisTitle);
+        Page page = Page.pageBuilder(timeSeriesFigure, divName).build();
+
+        // Extract Plot's Javascript
+        String plotHtml = page.asJavascript();
+        DomContent domContent = extractPlotlyJavascript(plotHtml);
+
+        return div(attrs(".single-plot"), domContent);
+    } // printTimeSeriesPairPlot()
+    private DomContent extractPlotlyJavascript(String plotHtml) {
         Document doc = Jsoup.parse(plotHtml);
         Elements elements = doc.select("body").first().children();
         String content = elements.outerHtml();
         DomContent domContent = join(content);
-
-        return div(attrs(".single-plot"), domContent);
-    } // printTimeSeriesPlot()
+        return domContent;
+    } // extractPlotlyJavascript()
     private Boolean validTimeSeriesPlot(String plotName) {
         if(plotName.contains("Precipitation")) {
-            return true;
+            if(!plotName.contains("Cumulative"))
+                return true;
         } // If: plotName contains Precipitation
 
         if(plotName.contains("Outflow")) {
@@ -306,7 +365,19 @@ public class HmsReportWriter extends ReportWriter {
 
         return false;
     } // validTimeSeriesPlot()
-    private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult) {
+    private Map<String, String> combinedTimeSeriesPlot() {
+        Map<String, String> pairPlot = new HashMap<>();
+        pairPlot.put("Precipitation", "Outflow");
+        pairPlot.put("Outflow", "Precipitation");
+
+        return pairPlot;
+    } // combinedTimeSeriesPlot(). Ex: Precipitation and Outflow
+    private List<String> pairTopPlots() {
+        List<String> stringList = new ArrayList<>();
+        stringList.add("Precipitation");
+        return stringList;
+    } // pairTopPlots()
+    private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult, String[] columnNames) {
         Table timeSeriesPlot = null;
 
         /* Get readable date format */
@@ -330,7 +401,7 @@ public class HmsReportWriter extends ReportWriter {
         try {
             File outputFile = new File("src/resources/timeSeriesResult.csv");
             FileWriter writer = new FileWriter(outputFile);
-            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("Time", "Value"));
+            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(columnNames));
 
             for(int i = 0; i < reformattedTimeList.size(); i++) {
                 String time = reformattedTimeList.get(i);
@@ -344,13 +415,13 @@ public class HmsReportWriter extends ReportWriter {
 
             // Read in CSV file to get a Table
             timeSeriesPlot = Table.read().csv(outputFile);
+            timeSeriesPlot.setName(timeSeriesResult.getType());
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         return timeSeriesPlot;
     } // timeSeriesToCsv
-
     private void convertPlotlyToStatic(String pathToHtml) {
         try {
             String htmlContent = FileUtils.readFileToString(new File(pathToHtml), StandardCharsets.UTF_8);
@@ -362,7 +433,6 @@ public class HmsReportWriter extends ReportWriter {
             e.printStackTrace();
         }
     } // convertPlotlyToStatic()
-
     private void setPlotlyFont(String pathToHtml, String fontFamily, String fontSize) {
         try {
             String htmlContent = FileUtils.readFileToString(new File(pathToHtml), StandardCharsets.UTF_8);
@@ -374,7 +444,6 @@ public class HmsReportWriter extends ReportWriter {
             e.printStackTrace();
         }
     } // setPlotlyFont()
-
     private void writeToFile(String pathToHtml, String content) {
         /* Writing to HTML file */
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
