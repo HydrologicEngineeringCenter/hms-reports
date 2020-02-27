@@ -95,14 +95,20 @@ public class FigureCreator {
                 .grid(grid)
                 .build();
 
+        // Precipitation, Excess Precipitation, Outflow
+        List<String> colorWay = Arrays.asList("#5CB3FF", "#0492c2", "#1f77b4");
+        int count = 0;
+
         for(Table plot : topPlots) {
             List<String> plotColumns = plot.columnNames();
             ScatterTrace plotTrace = ScatterTrace.builder(plot.column(plotColumns.get(0)), plot.column(plotColumns.get(1)))
                     .mode(ScatterTrace.Mode.LINE)
                     .name(plot.name())
+                    .marker(Marker.builder().color(colorWay.get(count)).build())
                     .yAxis("y2")
                     .xAxis("x2")
                     .build();
+            count++;
             traceList.add(plotTrace);
         } // Loop: to get Traces for top plots
 
@@ -111,9 +117,11 @@ public class FigureCreator {
             ScatterTrace plotTrace = ScatterTrace.builder(plot.column(plotColumns.get(0)), plot.column(plotColumns.get(1)))
                     .mode(ScatterTrace.Mode.LINE)
                     .name(plot.name())
+                    .marker(Marker.builder().color(colorWay.get(count)).build())
                     .yAxis("y1")
                     .xAxis("x1")
                     .build();
+            count++;
             traceList.add(plotTrace);
         } // Loop: to get Traces for bottom plots
 

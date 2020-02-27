@@ -3,15 +3,9 @@ package mil.army.usace.hec.hms.reports.io;
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.*;
-import mil.army.usace.hec.hms.reports.util.FigureCreator;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
-import mil.army.usace.hec.hms.reports.util.TimeConverter;
+import mil.army.usace.hec.hms.reports.util.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.io.FileUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.plotly.components.Figure;
 import tech.tablesaw.plotly.components.Page;
@@ -19,8 +13,6 @@ import tech.tablesaw.plotly.components.Page;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -42,26 +34,30 @@ public class HmsReportWriter extends ReportWriter {
                 body(printElementList(this.elements))
         ).renderFormatted();
         /* Writing to HTML output file */
-        writeToFile(this.pathToDestination.toString(), htmlOutput);
+        HtmlModifier.writeToFile(this.pathToDestination.toString(), htmlOutput);
     } // write()
     private DomContent printElementList(List<Element> elementList) {
         List<DomContent> elementDomList = new ArrayList<>();
 
         /* For each element, print: ElementInput and ElementResults */
         for(Element element : elementList) {
+            List<DomContent> elementDom = new ArrayList<>(); // Holds elementInput and elementResult
             // Getting ElementInput DomContent
             ElementInput elementInput = element.getElementInput();
             DomContent elementInputDom = printElementInput(elementInput);
+            if(elementInputDom != null) { elementDom.add(elementInputDom); }
             // Getting ElementResults DomContent
             ElementResults elementResults = element.getElementResults();
             DomContent elementResultsDom = printElementResults(elementResults);
+            if(elementResultsDom != null) { elementDom.add(elementResultsDom); }
             // Creating a 'div', 'class: element'
-            List<DomContent> elementDom = Arrays.asList(elementInputDom, elementResultsDom);
             elementDomList.add(div(attrs(".element"), elementDom.toArray(new DomContent[]{})));
         } // Loop: through elementList to print each Element
 
         return main(elementDomList.toArray(new DomContent[]{}));
     } // printElementList()
+
+    /* Element Input */
     private DomContent printElementInput(ElementInput elementInput) {
         List<DomContent> elementInputDomList = new ArrayList<>();
 
@@ -83,9 +79,10 @@ public class HmsReportWriter extends ReportWriter {
         } // Loop: Separate processes between Single and Table
 
         DomContent processSingleDom = printSingleProcesses(processSingle);
-        elementInputDomList.add(processSingleDom);
+        if(processSingleDom != null) { elementInputDomList.add(processSingleDom); }
         DomContent processTableDom = printTableProcesses(processTable);
-        elementInputDomList.add(processTableDom);
+        if(processTableDom != null) { elementInputDomList.add(processTableDom); }
+        if(elementInputDomList.isEmpty()) { return null; } // If: There is no elementInput, return null
 
         return div(attrs(".element-input"), elementInputDomList.toArray(new DomContent[]{}));
     } // printElementInput()
@@ -93,7 +90,7 @@ public class HmsReportWriter extends ReportWriter {
         List<DomContent> singleProcessesDomList = new ArrayList<>();
 
         for(Process process : singleProcesses) {
-            if(unnecessarySingleProcesses().contains(process.getName())) {
+            if(ValidCheck.unnecessarySingleProcesses().contains(process.getName())) {
                 continue;
             } // Skipping unnecessary processes
 
@@ -103,14 +100,10 @@ public class HmsReportWriter extends ReportWriter {
             singleProcessesDomList.add(singleDom);
         } // Loop: through each single process
 
+        if(singleProcessesDomList.isEmpty()) { return null; } // Return null if there is no single processes
+
         return p(attrs(".single-process"), singleProcessesDomList.toArray(new DomContent[]{})); // Return in the format of a 'paragraph'
     } // printSingleProcesses()
-    private List<String> unnecessarySingleProcesses() {
-        List<String> stringList = new ArrayList<>();
-        stringList.add("name");
-        stringList.add("elementType");
-        return stringList;
-    } // unnecessarySingleProcesses()
     private DomContent printTableProcesses(List<Process> tableProcesses) {
         List<DomContent> tableProcessesDomList = new ArrayList<>();
 
@@ -121,15 +114,19 @@ public class HmsReportWriter extends ReportWriter {
             tableProcessesDomList.add(tableDom);
         } // Loop: through each table process
 
+        if(tableProcessesDomList.isEmpty()) { return null; } // Return null if there is no table processes
+
         return div(attrs(".table-process"), tableProcessesDomList.toArray(new DomContent[]{})); // Return a list of tables (for processes)
     } // printTableProcesses()
-    private DomContent printParameterTable(List<Parameter> parameterList, String processName) {
+    private DomContent printParameterTable(List<Parameter> parameterList, String tableCaption) {
         List<DomContent> parameterDom = new ArrayList<>();
         List<Parameter> nestedParameterList = new ArrayList<>();
+        String tdAttribute = ".element-nested";
 
-        if(!processName.equals("")) {
-            parameterDom.add(caption(processName));
-        } // If: has processName, add caption
+        if(!tableCaption.equals("")) {
+            parameterDom.add(caption(tableCaption));
+            tdAttribute = ".element-non-nested";
+        } // If: has tableCaption, add caption
 
         for(Parameter parameter : parameterList) {
             if(!parameter.getSubParameters().isEmpty()) {
@@ -137,7 +134,7 @@ public class HmsReportWriter extends ReportWriter {
             } // If: Parameter contains SubParameters
             else {
                 List<String> tableRow = Arrays.asList(parameter.getName(), parameter.getValue());
-                DomContent row = printTableDataRow(tableRow);
+                DomContent row = HtmlModifier.printTableDataRow(tableRow, tdAttribute, tdAttribute);
                 parameterDom.add(row);
             } // Else: Parameter does not contain SubParameters
         } // Loop: through Parameter List
@@ -159,33 +156,13 @@ public class HmsReportWriter extends ReportWriter {
         } // Loop: through nested parameter List
 
         if(nestedTable) {
-            return table(attrs(".nested-parameter"), parameterDom.toArray(new DomContent[]{}));
+            return table(attrs(".nested"), parameterDom.toArray(new DomContent[]{}));
         } // If: Nested Table
 
-        return table(attrs(".table-parameter"), parameterDom.toArray(new DomContent[]{})); // Table of Parameters
+        return table(attrs(".single"), parameterDom.toArray(new DomContent[]{})); // Table of Parameters
     } // printParameterTable()
-    private DomContent printTableHeadRow(List<String> headRow) {
-        List<DomContent> domList = new ArrayList<>();
 
-        for(String column : headRow) {
-            String reformatString = StringBeautifier.beautifyString(column);
-            DomContent headDom = th(reformatString);
-            domList.add(headDom);
-        } // Loop: through headRow list
-
-        return tr(domList.toArray(new DomContent[]{}));
-    } // printTableHeadRow()
-    private DomContent printTableDataRow(List<String> dataRow) {
-        List<DomContent> domList = new ArrayList<>();
-
-        for(String data : dataRow) {
-            String reformatString = StringBeautifier.beautifyString(data);
-            DomContent dataDom = td(reformatString); // Table Data type
-            domList.add(dataDom);
-        } // Convert 'data' to Dom
-
-        return tr(domList.toArray(new DomContent[]{})); // Table Row type
-    } // printTableDataRow()
+    /* Element Results */
     private DomContent printElementResults(ElementResults elementResults) {
         List<DomContent> elementResultsDomList = new ArrayList<>();
 
@@ -199,11 +176,6 @@ public class HmsReportWriter extends ReportWriter {
 
         return div(attrs(".element-results"), elementResultsDomList.toArray(new DomContent[]{}));
     } // printElementResults()
-    /**
-     * Takes a list of StatisticResults, and create a table for that list.
-     * @param statisticResultList A list of Statistic Results.
-     * @return A DomContent table of Statistic Results.
-     */
     private DomContent printStatisticResult(List<StatisticResult> statisticResultList) {
         List<DomContent> statisticResultDomList = new ArrayList<>();
 
@@ -211,47 +183,29 @@ public class HmsReportWriter extends ReportWriter {
         for(StatisticResult statisticResult : statisticResultList) {
             String statisticName = statisticResult.getName();
             /* Skip unnecessary StatisticResults */
-            if(!validStatisticResult().contains(statisticName)) { continue; }
+            if(!ValidCheck.validStatisticResult().contains(statisticName)) { continue; }
             /* Print out StatisticResult Table */
             List<String> rowContent = Arrays.asList(statisticName, statisticResult.getValue(), statisticResult.getUnits());
-            DomContent row = printTableDataRow(rowContent);
+            DomContent row = HtmlModifier.printTableDataRow(rowContent, ".statistic", ".statistic");
             statisticResultDomList.add(row);
         } // Loop: to get DomContent rows for table
 
         /* Addng Head of the Table if there is a table */
         if(!statisticResultDomList.isEmpty()) {
-            DomContent head = printTableHeadRow(Arrays.asList("Name", "Value", "Unit"));
+            DomContent head = HtmlModifier.printTableHeadRow(Arrays.asList("Name", "Value", "Unit"), ".statistic", ".statistic");
             statisticResultDomList.add(0, head); // Add to front
             statisticResultDomList.add(0, caption("Statistics"));
         } // If: There is a table
 
         return table(attrs(".statistic-result"), statisticResultDomList.toArray(new DomContent[]{}));
     } // printStatisticResults()
-    /**
-     * A List of valid Statistic Results
-     * @return a List of Strings (of valid Statistic Results)
-     */
-    private List<String> validStatisticResult() {
-        List<String> stringList = new ArrayList<>();
-
-        stringList.add("Peak Discharge");
-        stringList.add("Precipitation Volume");
-        stringList.add("Loss Volume");
-        stringList.add("Excess Volume");
-        stringList.add("Date/Time of Peak Discharge");
-        stringList.add("Direct Runoff Volume");
-        stringList.add("Baseflow Volume");
-        stringList.add("Discharge Volume");
-
-        return stringList;
-    } // validStatisticResult()
     private DomContent printTimeSeriesResult(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
         List<DomContent> timeSeriesPlotDomList = new ArrayList<>();
         List<DomContent> maxPlotDom = new ArrayList<>();
         int maxPlotsPerPage = 2;
 
         Map<String, TimeSeriesResult> timeSeriesResultMap = timeSeriesResultList.stream()
-                .filter(individual -> validTimeSeriesPlot(individual.getType()))
+                .filter(individual -> ValidCheck.validTimeSeriesPlot(individual.getType()))
                 .collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getTimeSeriesResult));
 
         Map<String, Map<String, TimeSeriesResult>> combinedPlotMap = getCombinedPlotName(timeSeriesResultMap);
@@ -311,7 +265,7 @@ public class HmsReportWriter extends ReportWriter {
 
         // Extract Plot's Javascript
         String plotHtml = page.asJavascript();
-        DomContent domContent = extractPlotlyJavascript(plotHtml);
+        DomContent domContent = HtmlModifier.extractPlotlyJavascript(plotHtml);
 
         return div(attrs(".single-plot"), domContent);
     } // printTimeSeriesPlot()
@@ -356,7 +310,7 @@ public class HmsReportWriter extends ReportWriter {
 
         // Extract Plot's Javascript
         String plotHtml = page.asJavascript();
-        DomContent domContent = extractPlotlyJavascript(plotHtml);
+        DomContent domContent = HtmlModifier.extractPlotlyJavascript(plotHtml);
 
         return domContent;
     } // printPrecipOutflowPlot()
@@ -374,25 +328,6 @@ public class HmsReportWriter extends ReportWriter {
 
         return combinedPlotMap;
     } // getCombinedPlotName()
-    private DomContent extractPlotlyJavascript(String plotHtml) {
-        Document doc = Jsoup.parse(plotHtml);
-        Elements elements = doc.select("body").first().children();
-        String content = elements.outerHtml();
-        DomContent domContent = join(content);
-        return domContent;
-    } // extractPlotlyJavascript()
-    private Boolean validTimeSeriesPlot(String plotName) {
-        if(plotName.contains("Precipitation")) {
-            if(!plotName.contains("Cumulative"))
-                return true;
-        } // If: plotName contains Precipitation
-
-        if(plotName.contains("Outflow")) {
-            return true;
-        } // If: plotName contains Outflow
-
-        return false;
-    } // validTimeSeriesPlot()
     private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult, String[] columnNames) {
         Table timeSeriesPlot = null;
 
@@ -438,38 +373,4 @@ public class HmsReportWriter extends ReportWriter {
 
         return timeSeriesPlot;
     } // timeSeriesToCsv
-    private void convertPlotlyToStatic(String pathToHtml) {
-        try {
-            String htmlContent = FileUtils.readFileToString(new File(pathToHtml), StandardCharsets.UTF_8);
-            htmlContent = htmlContent.replace("layout);", "layout, {staticPlot: true});");
-            String pathToStaticPlotHtml = pathToHtml.replace(".html", "-static.html");
-            File staticPlotHtml = new File(pathToStaticPlotHtml);
-            FileUtils.writeStringToFile(staticPlotHtml, htmlContent, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    } // convertPlotlyToStatic()
-    private void setPlotlyFont(String pathToHtml, String fontFamily, String fontSize) {
-        try {
-            String htmlContent = FileUtils.readFileToString(new File(pathToHtml), StandardCharsets.UTF_8);
-            htmlContent = htmlContent.replace("var layout = {",
-                    "var layout = { font: { family: '" + fontFamily + "', size: " + fontSize + "},");
-            File staticPlotHtml = new File(pathToHtml);
-            FileUtils.writeStringToFile(staticPlotHtml, htmlContent, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    } // setPlotlyFont()
-    private void writeToFile(String pathToHtml, String content) {
-        /* Writing to HTML file */
-        String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
-        String fullPathToPdf = fullPathToHtml.replaceAll("html", "pdf");
-        try { FileUtils.writeStringToFile(new File(pathToHtml), content, StandardCharsets.UTF_8); }
-        catch (IOException e) { e.printStackTrace(); }
-
-        setPlotlyFont(fullPathToHtml, "Times New Roman, serif", "12");
-        convertPlotlyToStatic(fullPathToHtml);
-
-
-    } // writeToFile()
 } // HmsReportWriter class
