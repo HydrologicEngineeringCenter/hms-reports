@@ -176,6 +176,7 @@ public class HmsReportWriter extends ReportWriter {
 
         return div(attrs(".element-results"), elementResultsDomList.toArray(new DomContent[]{}));
     } // printElementResults()
+    /*    Statistic Results     */
     private DomContent printStatisticResult(List<StatisticResult> statisticResultList) {
         List<DomContent> statisticResultDomList = new ArrayList<>();
 
@@ -199,6 +200,7 @@ public class HmsReportWriter extends ReportWriter {
 
         return table(attrs(".statistic-result"), statisticResultDomList.toArray(new DomContent[]{}));
     } // printStatisticResults()
+    /*    TimeSeries Results    */
     private DomContent printTimeSeriesResult(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
         List<DomContent> timeSeriesPlotDomList = new ArrayList<>();
         List<DomContent> maxPlotDom = new ArrayList<>();
@@ -269,13 +271,58 @@ public class HmsReportWriter extends ReportWriter {
 
         return div(attrs(".single-plot"), domContent);
     } // printTimeSeriesPlot()
+    private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult, String[] columnNames) {
+        Table timeSeriesPlot = null;
+
+        /* Get readable date format */
+        List<ZonedDateTime> zonedDateTimeList = timeSeriesResult.getTimes();
+        List<String> reformattedTimeList = new ArrayList<>();
+        String dateFormat = "yyyy-MM-dd kk:mm:ss";
+        for(ZonedDateTime zonedDateTime : zonedDateTimeList) {
+            String reformattedDate = TimeConverter.toString(zonedDateTime, dateFormat);
+            reformattedTimeList.add(reformattedDate);
+        } // Loop: to convert ZonedDateTime to acceptable format
+
+        /* Get readable value */
+        double[] valueArray = timeSeriesResult.getValues();
+        List<String> reformattedValueList = new ArrayList<>();
+        for(double value : valueArray) {
+            String reformattedValue = Double.toString(value);
+            reformattedValueList.add(reformattedValue);
+        } // Loop: to convert valueArray to String
+
+        /* Writing time and value out to a csv file */
+        try {
+            File outputFile = new File("src/resources/timeSeriesResult.csv");
+            FileWriter writer = new FileWriter(outputFile);
+            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(columnNames));
+
+            for(int i = 0; i < reformattedTimeList.size(); i++) {
+                String time = reformattedTimeList.get(i);
+                String value = reformattedValueList.get(i);
+                printer.printRecord(time, value);
+            } // Loop: to print out every time & value pair
+
+            // Flush Printer, and Close Writer
+            printer.flush();
+            writer.close();
+
+            // Read in CSV file to get a Table
+            timeSeriesPlot = Table.read().csv(outputFile);
+            timeSeriesPlot.setName(timeSeriesResult.getType());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return timeSeriesPlot;
+    } // timeSeriesToCsv
+    /*    TimeSeries Custom Plots    */
     private DomContent printTimeSeriesCombinedPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
         DomContent combinedPlotDom = null;
 
         // Get the DomContent of the Plot
-        switch(plotName) {
-            case "Precipitation and Outflow":
-                combinedPlotDom = getPrecipOutflowPlot(tsrMap, plotName, elementName);
+        if ("Precipitation and Outflow".equals(plotName)) {
+            combinedPlotDom = getPrecipOutflowPlot(tsrMap, plotName, elementName);
         } // Switch case for each type of Combined Plots
 
         return div(attrs(".single-plot"), combinedPlotDom);
@@ -328,49 +375,5 @@ public class HmsReportWriter extends ReportWriter {
 
         return combinedPlotMap;
     } // getCombinedPlotName()
-    private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult, String[] columnNames) {
-        Table timeSeriesPlot = null;
 
-        /* Get readable date format */
-        List<ZonedDateTime> zonedDateTimeList = timeSeriesResult.getTimes();
-        List<String> reformattedTimeList = new ArrayList<>();
-        String dateFormat = "yyyy-MM-dd kk:mm:ss";
-        for(ZonedDateTime zonedDateTime : zonedDateTimeList) {
-            String reformattedDate = TimeConverter.toString(zonedDateTime, dateFormat);
-            reformattedTimeList.add(reformattedDate);
-        } // Loop: to convert ZonedDateTime to acceptable format
-
-        /* Get readable value */
-        double[] valueArray = timeSeriesResult.getValues();
-        List<String> reformattedValueList = new ArrayList<>();
-        for(double value : valueArray) {
-            String reformattedValue = Double.toString(value);
-            reformattedValueList.add(reformattedValue);
-        } // Loop: to convert valueArray to String
-
-        /* Writing time and value out to a csv file */
-        try {
-            File outputFile = new File("src/resources/timeSeriesResult.csv");
-            FileWriter writer = new FileWriter(outputFile);
-            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(columnNames));
-
-            for(int i = 0; i < reformattedTimeList.size(); i++) {
-                String time = reformattedTimeList.get(i);
-                String value = reformattedValueList.get(i);
-                printer.printRecord(time, value);
-            } // Loop: to print out every time & value pair
-
-            // Flush Printer, and Close Writer
-            printer.flush();
-            writer.close();
-
-            // Read in CSV file to get a Table
-            timeSeriesPlot = Table.read().csv(outputFile);
-            timeSeriesPlot.setName(timeSeriesResult.getType());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return timeSeriesPlot;
-    } // timeSeriesToCsv
 } // HmsReportWriter class
