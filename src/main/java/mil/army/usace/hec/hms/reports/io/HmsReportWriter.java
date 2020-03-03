@@ -6,6 +6,7 @@ import mil.army.usace.hec.hms.reports.*;
 import mil.army.usace.hec.hms.reports.util.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.io.FileUtils;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.plotly.components.Figure;
 import tech.tablesaw.plotly.components.Page;
@@ -207,7 +208,7 @@ public class HmsReportWriter extends ReportWriter {
         int maxPlotsPerPage = 2;
 
         Map<String, TimeSeriesResult> timeSeriesResultMap = timeSeriesResultList.stream()
-                .filter(individual -> ValidCheck.validTimeSeriesPlot(individual.getType()))
+                .filter(individual -> ValidCheck.validTimeSeriesPlot(individual.getType(), this.chosenPlots))
                 .collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getTimeSeriesResult));
 
         Map<String, Map<String, TimeSeriesResult>> combinedPlotMap = getCombinedPlotName(timeSeriesResultMap);
@@ -293,7 +294,7 @@ public class HmsReportWriter extends ReportWriter {
 
         /* Writing time and value out to a csv file */
         try {
-            File outputFile = new File("src/resources/timeSeriesResult.csv");
+            File outputFile = new File("timeSeriesResult.csv");
             FileWriter writer = new FileWriter(outputFile);
             CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(columnNames));
 
@@ -310,6 +311,7 @@ public class HmsReportWriter extends ReportWriter {
             // Read in CSV file to get a Table
             timeSeriesPlot = Table.read().csv(outputFile);
             timeSeriesPlot.setName(timeSeriesResult.getType());
+            FileUtils.deleteQuietly(outputFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -353,7 +355,7 @@ public class HmsReportWriter extends ReportWriter {
         String divName = StringBeautifier.getPlotDivName(elementName, plotName);
 
         // Create Plot
-        Figure timeSeriesFigure = FigureCreator.createCombinedTimeSeriesPlot(plotName, topPlotTables, bottomPlotTables, xAxisTitle, y1AxisTitle, y2AxisTitle);
+        Figure timeSeriesFigure = FigureCreator.createPrecipOutflowPlot(plotName, topPlotTables, bottomPlotTables, xAxisTitle, y1AxisTitle, y2AxisTitle);
         Page page = Page.pageBuilder(timeSeriesFigure, divName).build();
 
         // Extract Plot's Javascript

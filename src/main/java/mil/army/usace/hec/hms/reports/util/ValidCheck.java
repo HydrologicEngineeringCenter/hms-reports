@@ -40,21 +40,14 @@ public class ValidCheck {
         return stringList;
     } // validStatisticResult()
 
-    public static Boolean validTimeSeriesPlot(String plotName) {
-        if(plotName.contains("Precipitation")) {
-            if(!plotName.contains("Cumulative"))
-                return true;
-        } // If: plotName contains Precipitation
+    public static Boolean validTimeSeriesPlot(String plotName, List<String> chosenPlots) {
 
-        if(plotName.contains("Outflow")) {
+        // Default Case
+        if(plotName.equals("Precipitation") || plotName.equals("Excess Precipitation") || plotName.equals("Outflow") || plotName.equals("Observed Outflow"))
             return true;
-        } // If: plotName contains Outflow
 
-        if(plotName.contains("Observed Flow")) {
-            return true;
-        } // If: plotName contains Observed Flow
-
-        return false;
+        // Chosen Plots
+        return chosenPlots.contains(plotName);
     } // validTimeSeriesPlot()
 
 

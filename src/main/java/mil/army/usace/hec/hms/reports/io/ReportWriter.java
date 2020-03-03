@@ -9,15 +9,18 @@ import java.util.List;
 public abstract class ReportWriter {
     Path pathToDestination;
     List<Element> elements;
+    List<String> chosenPlots;
 
     ReportWriter(Builder builder){
         this.pathToDestination = builder.pathToDestination;
         this.elements = builder.elements;
+        this.chosenPlots = builder.chosenPlots;
     }
 
     public static class Builder{
         private Path pathToDestination;
         private List<Element> elements;
+        private List<String> chosenPlots;
 
         public Builder pathToDestination(final String pathToDestinaton){
             this.pathToDestination = Paths.get(pathToDestinaton);
@@ -26,6 +29,11 @@ public abstract class ReportWriter {
 
         public Builder elements(final List<Element> elements){
             this.elements = elements;
+            return this;
+        }
+
+        public Builder chosenPlots(final List<String> chosenPlots){
+            this.chosenPlots = chosenPlots;
             return this;
         }
 

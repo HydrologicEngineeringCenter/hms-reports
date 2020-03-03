@@ -30,7 +30,7 @@ public class FigureCreator {
         return new Figure(plotLayout, plotTrace);
     } // createTimeSeriesPlot() -- Single
 
-    public static Figure createCombinedTimeSeriesPlot(String plotTitle, List<Table> topPlots, List<Table> bottomPlots, String xAxisTitle, String y1AxisTitle, String y2AxisTitle) {
+    public static Figure createPrecipOutflowPlot(String plotTitle, List<Table> topPlots, List<Table> bottomPlots, String xAxisTitle, String y1AxisTitle, String y2AxisTitle) {
 
         List<Trace> traceList = new ArrayList<>();
 

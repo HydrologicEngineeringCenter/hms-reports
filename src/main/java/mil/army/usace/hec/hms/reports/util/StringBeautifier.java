@@ -89,10 +89,11 @@ public class StringBeautifier {
         return isNumeric;
     } // isDouble()
     public static String getPlotDivName(String elementName, String plotName) {
-        String plotDivName = elementName.toLowerCase() + "_";
-        String reformatName = plotName.toLowerCase().replace(' ', '_');
 
-        return plotDivName + reformatName;
+        String plotDivName = elementName.toLowerCase() + "_";
+        String reformatName = plotName.toLowerCase();
+
+        return (plotDivName + reformatName).replace(' ', '_');
     } // getPlotDivName
 
 } // StringBeautifier class

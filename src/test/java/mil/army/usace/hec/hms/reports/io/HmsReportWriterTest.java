@@ -5,6 +5,7 @@ import mil.army.usace.hec.hms.reports.Element;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,6 +24,7 @@ class HmsReportWriterTest {
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToDestination("src/resources/output-mini.html")
                 .elements(elementList)
+                .chosenPlots(Arrays.asList("Air Temperature", ""))
                 .build();
 
         reportWriter.write();
@@ -39,6 +41,23 @@ class HmsReportWriterTest {
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToDestination("src/resources/output-big.html")
+                .elements(elementList)
+                .build();
+
+        reportWriter.write();
+    }
+
+    @Test
+    void writePunx() {
+        BasinParser parser = BasinParser.builder()
+                .pathToBasinInputFile("src/resources/Punx/punxsutawney.basin.json")
+                .pathToBasinResultsFile("src/resources/Punx/RUN_Sep_2018.results")
+                .build();
+
+        List<Element> elementList = parser.getElements();
+
+        ReportWriter reportWriter = ReportWriter.builder()
+                .pathToDestination("src/resources/output-punx.html")
                 .elements(elementList)
                 .build();
 
