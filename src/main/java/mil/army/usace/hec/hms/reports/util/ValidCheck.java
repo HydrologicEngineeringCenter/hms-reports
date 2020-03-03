@@ -50,6 +50,10 @@ public class ValidCheck {
             return true;
         } // If: plotName contains Outflow
 
+        if(plotName.contains("Observed Flow")) {
+            return true;
+        } // If: plotName contains Observed Flow
+
         return false;
     } // validTimeSeriesPlot()
 

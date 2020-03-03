@@ -321,9 +321,10 @@ public class HmsReportWriter extends ReportWriter {
         DomContent combinedPlotDom = null;
 
         // Get the DomContent of the Plot
-        if ("Precipitation and Outflow".equals(plotName)) {
+        if(plotName.equals("Precipitation and Outflow"))
             combinedPlotDom = getPrecipOutflowPlot(tsrMap, plotName, elementName);
-        } // Switch case for each type of Combined Plots
+        else if(plotName.equals("Outflow and Observed Flow"))
+            combinedPlotDom = getOutflowObservedFlowPlot(tsrMap, plotName, elementName);
 
         return div(attrs(".single-plot"), combinedPlotDom);
     } // printTimeSeriesCombinedPlot()
@@ -360,7 +361,28 @@ public class HmsReportWriter extends ReportWriter {
         DomContent domContent = HtmlModifier.extractPlotlyJavascript(plotHtml);
 
         return domContent;
-    } // printPrecipOutflowPlot()
+    } // getPrecipOutflowPlot()
+    private DomContent getOutflowObservedFlowPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
+        TimeSeriesResult outflowPlot = tsrMap.get("Outflow"), observedFlowPlot = tsrMap.get("Observed Flow");
+        Table outflowTable = getTimeSeriesTable(outflowPlot, new String[] {"Time", "Value"});
+        Table observedFlowTable = getTimeSeriesTable(observedFlowPlot, new String[] {"Time", "Value"});
+        List<Table> plotList = Arrays.asList(outflowTable, observedFlowTable);
+
+        // Setting Plot's configurations
+        String xAxisTitle = "Time";;
+        String yAxisTitle = outflowPlot.getUnitType();
+        String divName = StringBeautifier.getPlotDivName(elementName, plotName);
+
+        // Create Plot
+        Figure timeSeriesFigure = FigureCreator.createOutflowObservedFlowPlot(plotName, plotList, xAxisTitle, yAxisTitle);
+        Page page = Page.pageBuilder(timeSeriesFigure, divName).build();
+
+        // Extract Plot's Javascript
+        String plotHtml = page.asJavascript();
+        DomContent domContent = HtmlModifier.extractPlotlyJavascript(plotHtml);
+
+        return domContent;
+    } // getOutflowObservedFlowPlot()
     private Map<String, Map<String, TimeSeriesResult>> getCombinedPlotName(Map<String, TimeSeriesResult> tsrMap) {
         Map<String, Map<String, TimeSeriesResult>> combinedPlotMap = new HashMap<>();
 
@@ -372,6 +394,14 @@ public class HmsReportWriter extends ReportWriter {
             String plotName = "Precipitation and Outflow";
             combinedPlotMap.put(plotName, combinedMap);
         } // If: CombinedPlot is a 'Precipitation and Outflow'
+
+        if(tsrMap.containsKey("Outflow") && tsrMap.containsKey("Observed Flow")) {
+            Map<String, TimeSeriesResult> combinedMap = new HashMap<>();
+            combinedMap.put("Observed Flow", tsrMap.get("Observed Flow"));
+            combinedMap.put("Outflow", tsrMap.get("Outflow"));
+            String plotName = "Outflow and Observed Flow";
+            combinedPlotMap.put(plotName, combinedMap);
+        } // If: CombinedPlot is a 'Outflow and Observed Flow plot'
 
         return combinedPlotMap;
     } // getCombinedPlotName()
