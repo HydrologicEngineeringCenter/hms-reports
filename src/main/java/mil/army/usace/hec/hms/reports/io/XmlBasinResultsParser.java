@@ -7,6 +7,7 @@ import hec.heclib.util.HecTimeArray;
 import hec.io.TimeSeriesContainer;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
+import mil.army.usace.hec.hms.reports.util.FileUtil;
 import mil.army.usace.hec.hms.reports.util.TimeConverter;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
 import org.apache.commons.io.FileUtils;
@@ -17,10 +18,7 @@ import org.json.XML;
 import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class XmlBasinResultsParser extends BasinResultsParser {
 
@@ -58,9 +56,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     private ElementResults populateElement(JSONObject elementObject) {
         String name = elementObject.getString("name");
         JSONObject hydrologyObject = elementObject.getJSONObject("Hydrology");
-        // FIXME: Uncomment code below to populate TimeSeriesResults
         List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
-//        List<TimeSeriesResult> timeSeriesResult = new ArrayList<>();
         JSONObject statisticsArray = elementObject.getJSONObject("Statistics");
         List<StatisticResult> statisticResults = populateStatisticsResult(statisticsArray);
 
@@ -99,7 +95,8 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     } // populateTimeSeriesResult()
     private TimeSeriesResult populateSingleTimeSeriesResult (JSONObject timeObject) {
         String DssFileName = timeObject.getString("DssFileName");
-        String pathToDss = "src/resources/" + DssFileName;
+        String pathToDss = FileUtil.getFilePath(".", DssFileName);
+
 
         /* Read in TimeSeriesType */
         String type = timeObject.getJSONObject("TimeSeriesType").getString("displayString");

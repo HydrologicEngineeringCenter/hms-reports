@@ -4,6 +4,7 @@ import hec.heclib.util.HecTime;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class TimeConverter {
@@ -19,9 +20,11 @@ public class TimeConverter {
     }
 
     public static String toString(ZonedDateTime zonedDateTime, String dateFormat) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
-        Date toDate = Date.from(zonedDateTime.toInstant());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
+        String formattedString = zonedDateTime.format(formatter);
+        if(formattedString.contains("24:00"))
+            formattedString = formattedString.replace("24:00", "00:00");
 
-        return simpleDateFormat.format(toDate);
+        return formattedString;
     }
 }

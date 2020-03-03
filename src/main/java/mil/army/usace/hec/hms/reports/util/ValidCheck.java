@@ -43,11 +43,14 @@ public class ValidCheck {
     public static Boolean validTimeSeriesPlot(String plotName, List<String> chosenPlots) {
 
         // Default Case
-        if(plotName.equals("Precipitation") || plotName.equals("Excess Precipitation") || plotName.equals("Outflow") || plotName.equals("Observed Outflow"))
+        if(plotName.equals("Precipitation") || plotName.equals("Excess Precipitation") || plotName.equals("Outflow") || plotName.equals("Observed Flow"))
             return true;
 
         // Chosen Plots
-        return chosenPlots.contains(plotName);
+        if(chosenPlots != null && chosenPlots.contains(plotName))
+            return true;
+
+        return false;
     } // validTimeSeriesPlot()
 
 

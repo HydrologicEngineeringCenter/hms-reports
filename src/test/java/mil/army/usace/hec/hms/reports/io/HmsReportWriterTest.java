@@ -15,8 +15,8 @@ class HmsReportWriterTest {
     @Test
     void writeShort() {
         BasinParser parser = BasinParser.builder()
-                .pathToBasinInputFile("src/resources/MiddleColumbia_WY2017(mod).basin.json")
-                .pathToBasinResultsFile("src/resources/RUN_WY2017(mod).results")
+                .pathToBasinInputFile("src/resources/MiddleColumbia/MiddleColumbia_WY2017(mod).basin.json")
+                .pathToBasinResultsFile("src/resources/MiddleColumbia/RUN_WY2017(mod).results")
                 .build();
 
         List<Element> elementList = parser.getElements();

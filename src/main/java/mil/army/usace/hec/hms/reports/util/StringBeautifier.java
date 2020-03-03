@@ -92,8 +92,10 @@ public class StringBeautifier {
 
         String plotDivName = elementName.toLowerCase() + "_";
         String reformatName = plotName.toLowerCase();
+        String result = (plotDivName + reformatName).replace(' ', '_');
+        result = result.replace('-', '_');
 
-        return (plotDivName + reformatName).replace(' ', '_');
+        return result;
     } // getPlotDivName
 
 } // StringBeautifier class
