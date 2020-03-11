@@ -41,7 +41,6 @@ public class ValidCheck {
     } // validStatisticResult()
 
     public static Boolean validTimeSeriesPlot(String plotName, List<String> chosenPlots) {
-        System.out.println(plotName);
         // Default Case
         if(plotName.equals("Precipitation") || plotName.equals("Excess Precipitation") || plotName.equals("Outflow") || plotName.equals("Observed Flow"))
             return true;

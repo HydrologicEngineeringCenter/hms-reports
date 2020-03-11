@@ -16,4 +16,13 @@ class XmlBasinResultsParserTest {
 
         Map<String, ElementResults> inputs = parser.getElementResults();
     }
+
+    @Test
+    void getAvailablePlot() {
+        List<String> x = XmlBasinResultsParser.getAvailablePlots("src/resources/Punx/RUN_Sep_2018.results");
+
+        for(String item : x) {
+            System.out.println(item);
+        } // Loop
+    }
 }

@@ -40,7 +40,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return elementResultsList;
     } // getElementResults()
-    private JSONObject getJsonObject(String pathToJson) {
+    private static JSONObject getJsonObject(String pathToJson) {
         /* Read in XML File */
         File file = new File(pathToJson);
         String content = null;
@@ -184,4 +184,28 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         return statisticResultList;
     } // populateStatisticsResult()
 
+    public static List<String> getAvailablePlots(String pathToResultFile) {
+        List<String> availablePlots = new ArrayList<>();
+        JSONObject resultFile = getJsonObject(pathToResultFile);
+        JSONArray elemenentArray = resultFile.getJSONObject("RunResults").getJSONArray("BasinElement");
+
+        for(int i = 0; i < elemenentArray.length(); i++) {
+            JSONObject elementObject = elemenentArray.optJSONObject(i);
+            JSONObject hydrologyObject = elementObject.optJSONObject("Hydrology");
+            JSONArray timeSeriesArray = hydrologyObject.optJSONArray("TimeSeries");
+            for(int j = 0; j < timeSeriesArray.length(); j++) {
+                JSONObject timeSeriesObject = timeSeriesArray.optJSONObject(j);
+                JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
+                String timeSeriesType = timeSeriesTypeObject.optString("displayString");
+
+                if(!availablePlots.contains(timeSeriesType)) {
+                    availablePlots.add(timeSeriesType);
+                } // If: plot hasn't been added
+            } // Loop through all the timeSeriesArray
+        } // Loop through all element's results, and populate
+
+        Collections.sort(availablePlots); // Sort the list Alphabetically
+
+        return availablePlots;
+    } // getAvailablePlots()
 } // XmlBasinResultsParser class
