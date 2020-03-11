@@ -93,7 +93,8 @@ public class JsonBasinInputParser extends BasinInputParser {
         List<Parameter> parameters = new ArrayList<>();
         /* Check for Processes that does not have table-like parameters */
         if(elementObject.optJSONObject(keyName) == null) {
-            value = elementObject.opt(keyName).toString();
+            if(!elementObject.opt(keyName).toString().equals("NONE"))
+                value = elementObject.opt(keyName).toString();
         } // If: 'Process' is not type JSONObject. Ex: Reach's Name
         else { /* Populating Process with parameters */
             JSONObject processObject = elementObject.getJSONObject(keyName);
@@ -137,7 +138,7 @@ public class JsonBasinInputParser extends BasinInputParser {
         } // If: 'Parameter' is a JSONObject. Ex: Route
         else {
             String paramValue = processObject.opt(keyName).toString();
-            if(!paramValue.equals("NONE")) {
+            if(!paramValue.equals("NONE") && !paramValue.equals("UNKNOWN")) {
                 value = paramValue;
             } // If: processValue is not None -> saves value
         } // Else: 'Parameter' is not a JSONObject. Ex: Method

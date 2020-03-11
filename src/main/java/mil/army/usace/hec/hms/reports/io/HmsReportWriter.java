@@ -32,11 +32,36 @@ public class HmsReportWriter extends ReportWriter {
                 head(   title("Elements of Water and Fire"),
                         link().withRel("stylesheet").withHref("style.css"),
                         script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
-                body(printElementList(this.elements))
+                body(printGlobalSummary(this.elements), printElementList(this.elements))
         ).renderFormatted();
         /* Writing to HTML output file */
         HtmlModifier.writeToFile(this.pathToDestination.toString(), htmlOutput);
     } // write()
+    private DomContent printGlobalSummary(List<Element> elementList) {
+        List<DomContent> globalSummaryDomList = new ArrayList<>();
+        String tdAttribute = ".global-summary";
+
+        for(Element element : elementList) {
+            List<String> rowData = new ArrayList<>();
+            rowData.add(element.getName()); // Element Name
+            rowData.add(element.getElementResults().getDrainageArea().get("area")); // Drainage Area
+            rowData.add(element.getElementResults().getStatisticResultsMap().get("Maximum Outflow")); // Peak Discharge
+            rowData.add(element.getElementResults().getStatisticResultsMap().get("Time of Maximum Outflow")); // Time of Peak
+            rowData.add(element.getElementResults().getStatisticResultsMap().get("Outflow Depth")); // Volume
+            DomContent rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
+            globalSummaryDomList.add(rowDom);
+        }
+
+        /* Adding Head of the Table if there is a table */
+        if(!globalSummaryDomList.isEmpty()) {
+            DomContent head = HtmlModifier.printTableHeadRow(Arrays.asList("Hydrologic Element", "Drainage Area (MI2)",
+                    "Peak Discharge (CFS)", "Time of Peak", "Volume (IN)"), tdAttribute, tdAttribute);
+            globalSummaryDomList.add(0, head); // Add to front
+            globalSummaryDomList.add(0, caption("Global Summary"));
+        } // If: There is a table
+
+        return table(attrs(tdAttribute), globalSummaryDomList.toArray(new DomContent[]{}));
+    } // printStatisticResults()
     private DomContent printElementList(List<Element> elementList) {
         List<DomContent> elementDomList = new ArrayList<>();
 
@@ -192,7 +217,7 @@ public class HmsReportWriter extends ReportWriter {
             statisticResultDomList.add(row);
         } // Loop: to get DomContent rows for table
 
-        /* Addng Head of the Table if there is a table */
+        /* Adding Head of the Table if there is a table */
         if(!statisticResultDomList.isEmpty()) {
             DomContent head = HtmlModifier.printTableHeadRow(Arrays.asList("Name", "Value", "Unit"), ".statistic", ".statistic");
             statisticResultDomList.add(0, head); // Add to front

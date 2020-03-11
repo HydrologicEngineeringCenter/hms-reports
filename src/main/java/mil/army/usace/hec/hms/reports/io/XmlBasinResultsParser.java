@@ -59,11 +59,17 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
         JSONObject statisticsArray = elementObject.getJSONObject("Statistics");
         List<StatisticResult> statisticResults = populateStatisticsResult(statisticsArray);
+        JSONObject drainageArea = elementObject.getJSONObject("DrainageArea");
+        Map<String, String> drainageMap = new HashMap<>();
+        for(String key : drainageArea.keySet()) {
+            drainageMap.put(key, drainageArea.opt(key).toString());
+        } // Loop: to get drainageArea map
 
         ElementResults elementResults = ElementResults.builder()
                 .name(name)
                 .timeSeriesResults(timeSeriesResult)
                 .statisticResults(statisticResults)
+                .drainageArea(drainageMap)
                 .build();
 
         return elementResults;

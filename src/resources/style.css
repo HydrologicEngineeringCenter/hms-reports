@@ -60,6 +60,12 @@ table.statistic-result{
 	/* padding-bottom: 0.3in; */
 }
 
+/* CSS for GlobalSummary's table */
+table.global-summary{
+	width: 100%;
+	page-break-after: always;
+}
+
 /* CSS for all Data Columns */
 td{
 	text-align: center;
