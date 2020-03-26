@@ -47,6 +47,7 @@ class HmsReportWriterTest {
                 .pathToInput("src/resources/Punx/punxsutawney.basin.json")
                 .pathToResult("src/resources/Punx/RUN_Sep_2018.results")
                 .pathToDestination("src/resources/output-punx.html")
+                .projectDirectory("C:\\HyperNick\\Punx")
                 .chosenPlots(Arrays.asList("Air Temperature", "Aquifer Recharge", "Canopy Storage"))
                 .build();
 

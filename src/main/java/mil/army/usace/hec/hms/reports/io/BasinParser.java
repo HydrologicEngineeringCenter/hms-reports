@@ -13,15 +13,18 @@ import java.util.Map;
 public class BasinParser {
     private final Path pathToBasinInputFile;
     private final Path pathToBasinResultsFile;
+    private final Path pathToProjectDirectory;
 
     private BasinParser(Builder builder){
         this.pathToBasinInputFile = builder.pathToBasinInputFile;
         this.pathToBasinResultsFile = builder.pathToBasinResultsFile;
+        this.pathToProjectDirectory = builder.pathToProjectDirectory;
     }
 
     public static class Builder {
         Path pathToBasinInputFile;
         Path pathToBasinResultsFile;
+        Path pathToProjectDirectory;
 
         public Builder pathToBasinInputFile(final String pathToBasinFile){
             this.pathToBasinInputFile = Paths.get(pathToBasinFile);
@@ -30,6 +33,11 @@ public class BasinParser {
 
         public Builder pathToBasinResultsFile(final String pathToBasinResultsFile){
             this.pathToBasinResultsFile = Paths.get(pathToBasinResultsFile);
+            return this;
+        }
+
+        public Builder pathToProjectDirectory(final String pathToProjectDirectory){
+            this.pathToProjectDirectory = Paths.get(pathToProjectDirectory);
             return this;
         }
 
@@ -49,7 +57,8 @@ public class BasinParser {
                 .pathToBasinInputFile(this.pathToBasinInputFile.toString())
                 .build();
         BasinResultsParser resultsParser = BasinResultsParser.builder()
-                .pathToBasinResultsFile(this.pathToBasinResultsFile.toString())
+                .pathToBasinResultsFile(this.pathToBasinResultsFile.toAbsolutePath().toString())
+                .pathToProjectDirectory(this.pathToProjectDirectory.toAbsolutePath().toString())
                 .build();
 
         List<ElementInput> inputs = inputParser.getElementInput();

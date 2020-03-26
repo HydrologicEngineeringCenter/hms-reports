@@ -101,7 +101,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     } // populateTimeSeriesResult()
     private TimeSeriesResult populateSingleTimeSeriesResult (JSONObject timeObject) {
         String DssFileName = timeObject.getString("DssFileName");
-        String pathToDss = Utilities.getFilePath(".", DssFileName);
+        String pathToDss = Utilities.getFilePath(this.pathToProjectDirectory.toAbsolutePath().toString(), DssFileName);
 
         /* Read in TimeSeriesType */
         String type = timeObject.getJSONObject("TimeSeriesType").getString("displayString");

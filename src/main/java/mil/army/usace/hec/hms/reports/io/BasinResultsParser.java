@@ -10,16 +10,24 @@ import java.util.List;
 
 public abstract class BasinResultsParser {
     Path pathToBasinResultsFile;
+    Path pathToProjectDirectory;
 
     BasinResultsParser(Builder builder){
         this.pathToBasinResultsFile = builder.pathToBasinResultsFile;
+        this.pathToProjectDirectory = builder.pathToProjectDirectory;
     }
 
     public static class Builder {
         private Path pathToBasinResultsFile;
+        private Path pathToProjectDirectory;
 
         public Builder pathToBasinResultsFile(final String pathToBasinFile){
             this.pathToBasinResultsFile = Paths.get(pathToBasinFile);
+            return this;
+        }
+
+        public Builder pathToProjectDirectory(final String pathToProjectDirectory){
+            this.pathToProjectDirectory = Paths.get(pathToProjectDirectory);
             return this;
         }
 

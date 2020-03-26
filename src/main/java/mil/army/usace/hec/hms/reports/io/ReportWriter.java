@@ -10,12 +10,14 @@ public abstract class ReportWriter {
     Path pathToInput;
     Path pathToResult;
     Path pathToDestination;
+    Path projectDirectory;
     List<String> chosenPlots;
 
     ReportWriter(Builder builder){
         this.pathToInput = builder.pathToInput;
         this.pathToResult = builder.pathToResult;
         this.pathToDestination = builder.pathToDestination;
+        this.projectDirectory = builder.projectDirectory;
         this.chosenPlots = builder.chosenPlots;
     }
 
@@ -23,6 +25,7 @@ public abstract class ReportWriter {
         private Path pathToInput;
         private Path pathToResult;
         private Path pathToDestination;
+        private Path projectDirectory;
         private List<String> chosenPlots;
 
         public Builder pathToInput(final String pathToInput) {
@@ -37,6 +40,11 @@ public abstract class ReportWriter {
 
         public Builder pathToDestination(final String pathToDestinaton){
             this.pathToDestination = Paths.get(pathToDestinaton);
+            return this;
+        }
+
+        public Builder projectDirectory(final String projectDirectory) {
+            this.projectDirectory = Paths.get(projectDirectory);
             return this;
         }
 
