@@ -14,6 +14,8 @@ import tech.tablesaw.plotly.components.Page;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,16 +29,25 @@ public class HmsReportWriter extends ReportWriter {
 
     @Override
     public void write() {
+        /* Parse elements */
+        BasinParser parser = BasinParser.builder()
+                .pathToBasinInputFile(this.pathToInput.toAbsolutePath().toString())
+                .pathToBasinResultsFile(this.pathToResult.toAbsolutePath().toString())
+                .build();
+
+        List<Element> elementList = parser.getElements();
+
         /* HTML Layout */
         String htmlOutput = html(
                 head(   title("Elements of Water and Fire"),
                         link().withRel("stylesheet").withHref("style.css"),
                         script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
-                body(printGlobalSummary(this.elements), printElementList(this.elements))
+                body(printGlobalSummary(elementList), printElementList(elementList))
         ).renderFormatted();
         /* Writing to HTML output file */
         HtmlModifier.writeToFile(this.pathToDestination.toString(), htmlOutput);
     } // write()
+
     private DomContent printGlobalSummary(List<Element> elementList) {
         List<DomContent> globalSummaryDomList = new ArrayList<>();
         String tdAttribute = ".global-summary";

@@ -2,6 +2,7 @@ package mil.army.usace.hec.hms.reports.io;
 
 import hec.client.Report;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.util.Utilities;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -14,16 +15,10 @@ class HmsReportWriterTest {
 
     @Test
     void writeShort() {
-        BasinParser parser = BasinParser.builder()
-                .pathToBasinInputFile("src/resources/MiddleColumbia/MiddleColumbia_WY2017(mod).basin.json")
-                .pathToBasinResultsFile("src/resources/MiddleColumbia/RUN_WY2017(mod).results")
-                .build();
-
-        List<Element> elementList = parser.getElements();
-
         ReportWriter reportWriter = ReportWriter.builder()
+                .pathToInput("src/resources/MiddleColumbia/MiddleColumbia_WY2017(mod).basin.json")
+                .pathToResult("src/resources/MiddleColumbia/RUN_WY2017(mod).results")
                 .pathToDestination("src/resources/output-mini.html")
-                .elements(elementList)
                 .chosenPlots(Arrays.asList("Air Temperature", ""))
                 .build();
 
@@ -32,16 +27,10 @@ class HmsReportWriterTest {
 
     @Test
     void writeLong() {
-        BasinParser parser = BasinParser.builder()
-                .pathToBasinInputFile("src/resources/MiddleColumbia_WY2017.basin.json")
-                .pathToBasinResultsFile("src/resources/RUN_WY2017.results")
-                .build();
-
-        List<Element> elementList = parser.getElements();
-
         ReportWriter reportWriter = ReportWriter.builder()
+                .pathToInput("src/resources/MiddleColumbia_WY2017.basin.json")
+                .pathToResult("src/resources/RUN_WY2017.results")
                 .pathToDestination("src/resources/output-big.html")
-                .elements(elementList)
                 .build();
 
         reportWriter.write();
@@ -49,16 +38,16 @@ class HmsReportWriterTest {
 
     @Test
     void writePunx() {
-        BasinParser parser = BasinParser.builder()
-                .pathToBasinInputFile("src/resources/Punx/punxsutawney.basin.json")
-                .pathToBasinResultsFile("src/resources/Punx/RUN_Sep_2018.results")
-                .build();
-
-        List<Element> elementList = parser.getElements();
+        List<String> availablePlots = Utilities.getAvailablePlot("src/resources/Punx/RUN_Sep_2018.results");
+        for(String plotName : availablePlots) {
+            System.out.println(plotName);
+        }
 
         ReportWriter reportWriter = ReportWriter.builder()
+                .pathToInput("src/resources/Punx/punxsutawney.basin.json")
+                .pathToResult("src/resources/Punx/RUN_Sep_2018.results")
                 .pathToDestination("src/resources/output-punx.html")
-                .elements(elementList)
+                .chosenPlots(Arrays.asList("Air Temperature", "Aquifer Recharge", "Canopy Storage"))
                 .build();
 
         reportWriter.write();

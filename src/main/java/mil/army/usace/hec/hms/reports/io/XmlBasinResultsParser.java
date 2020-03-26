@@ -7,9 +7,9 @@ import hec.heclib.util.HecTimeArray;
 import hec.io.TimeSeriesContainer;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
-import mil.army.usace.hec.hms.reports.util.FileUtil;
 import mil.army.usace.hec.hms.reports.util.TimeConverter;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
+import mil.army.usace.hec.hms.reports.util.Utilities;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -101,8 +101,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     } // populateTimeSeriesResult()
     private TimeSeriesResult populateSingleTimeSeriesResult (JSONObject timeObject) {
         String DssFileName = timeObject.getString("DssFileName");
-        String pathToDss = FileUtil.getFilePath(".", DssFileName);
-
+        String pathToDss = Utilities.getFilePath(".", DssFileName);
 
         /* Read in TimeSeriesType */
         String type = timeObject.getJSONObject("TimeSeriesType").getString("displayString");

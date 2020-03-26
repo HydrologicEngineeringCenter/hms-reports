@@ -7,28 +7,36 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public abstract class ReportWriter {
+    Path pathToInput;
+    Path pathToResult;
     Path pathToDestination;
-    List<Element> elements;
     List<String> chosenPlots;
 
     ReportWriter(Builder builder){
+        this.pathToInput = builder.pathToInput;
+        this.pathToResult = builder.pathToResult;
         this.pathToDestination = builder.pathToDestination;
-        this.elements = builder.elements;
         this.chosenPlots = builder.chosenPlots;
     }
 
     public static class Builder{
+        private Path pathToInput;
+        private Path pathToResult;
         private Path pathToDestination;
-        private List<Element> elements;
         private List<String> chosenPlots;
 
-        public Builder pathToDestination(final String pathToDestinaton){
-            this.pathToDestination = Paths.get(pathToDestinaton);
+        public Builder pathToInput(final String pathToInput) {
+            this.pathToInput = Paths.get(pathToInput);
             return this;
         }
 
-        public Builder elements(final List<Element> elements){
-            this.elements = elements;
+        public Builder pathToResult(final String pathToResult) {
+            this.pathToResult = Paths.get(pathToResult);
+            return this;
+        }
+
+        public Builder pathToDestination(final String pathToDestinaton){
+            this.pathToDestination = Paths.get(pathToDestinaton);
             return this;
         }
 

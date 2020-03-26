@@ -19,7 +19,7 @@ class XmlBasinResultsParserTest {
 
     @Test
     void getAvailablePlot() {
-        List<String> x = XmlBasinResultsParser.getAvailablePlots("src/resources/Punx/RUN_Sep_2018.results");
+        List<String> x = XmlBasinResultsParser.getAvailablePlots("C:\\Projects\\hms-reports\\src\\resources\\Punx\\RUN_Sep_2018.results");
 
         for(String item : x) {
             System.out.println(item);
