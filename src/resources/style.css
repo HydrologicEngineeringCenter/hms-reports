@@ -7,6 +7,11 @@ body{
     height: 11in;
 }
 
+/* CSS for Global tables's div */
+div.global-parameter{
+    page-break-after: always;
+}
+
 /* CSS for each Element */
 div.element{
 	/* Page break after each element */
@@ -63,7 +68,13 @@ table.statistic-result{
 /* CSS for GlobalSummary's table */
 table.global-summary{
 	width: 100%;
-	page-break-after: always;
+	padding-bottom: 0.3in;
+}
+
+/* CSS for GlobalParameter's tables */
+table.global-parameter{
+    width: 100%;
+    padding-bottom: 0.3in;
 }
 
 /* CSS for all Data Columns */
@@ -88,6 +99,14 @@ td:nth-child(1){
 
 /* CSS for first Data Column of Non-Nested Tables under ElementInput */
 td.element-non-nested:nth-child(1){
+	text-align: left;
+	padding-left: 0.1in;
+	padding-right: 0.1in;
+	width: 32%;
+}
+
+/* CSS for first Data Column of Global Parameter Tables*/
+td.global-parameter:nth-child(1){
 	text-align: left;
 	padding-left: 0.1in;
 	padding-right: 0.1in;
