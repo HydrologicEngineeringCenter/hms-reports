@@ -14,8 +14,6 @@ import tech.tablesaw.plotly.components.Page;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,7 +38,7 @@ public class HmsReportWriter extends ReportWriter {
 
         /* HTML Layout */
         String htmlOutput = html(
-                head(   title("Elements of Water and Fire"),
+                head(   title("Standardized Report"),
                         link().withRel("stylesheet").withHref("style.css"),
                         script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
                 body(   printGlobalSummary(elementList),
@@ -59,7 +57,7 @@ public class HmsReportWriter extends ReportWriter {
         for(Element element : elementList) {
             List<String> rowData = new ArrayList<>();
             rowData.add(element.getName()); // Element Name
-            rowData.add(element.getElementResults().getDrainageArea().get("area")); // Drainage Area
+            rowData.add(element.getElementResults().getOtherResults().get("DrainageArea")); // Drainage Area
             rowData.add(element.getElementResults().getStatisticResultsMap().get("Maximum Outflow")); // Peak Discharge
             rowData.add(element.getElementResults().getStatisticResultsMap().get("Time of Maximum Outflow")); // Time of Peak
             rowData.add(element.getElementResults().getStatisticResultsMap().get("Outflow Depth")); // Volume
@@ -122,7 +120,7 @@ public class HmsReportWriter extends ReportWriter {
 
         List<String> rowData = new ArrayList<>();
         String mapData;
-        DomContent rowDom = null;
+        DomContent rowDom;
         Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
 
         /* Precipitation Volume */
@@ -175,7 +173,9 @@ public class HmsReportWriter extends ReportWriter {
         } // If: Data is found
 
         if(!globalParameterTableDom.isEmpty()) {
-            globalParameterTableDom.add(0, caption(element.getName()));
+            String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
+            String captionTitle = elementType + ": " + element.getName();
+            globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
@@ -186,7 +186,7 @@ public class HmsReportWriter extends ReportWriter {
 
         List<String> rowData = new ArrayList<>();
         String mapData;
-        DomContent rowDom = null;
+        DomContent rowDom;
         Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
 
         /* Peak Inflow */
@@ -210,7 +210,9 @@ public class HmsReportWriter extends ReportWriter {
 
         /* Table's Title/Caption */
         if(!globalParameterTableDom.isEmpty()) {
-            globalParameterTableDom.add(0, caption(element.getName()));
+            String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
+            String captionTitle = elementType + ": " + element.getName();
+            globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
@@ -221,7 +223,7 @@ public class HmsReportWriter extends ReportWriter {
 
         List<String> rowData = new ArrayList<>();
         String mapData;
-        DomContent rowDom = null;
+        DomContent rowDom;
         Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
 
         /* Precipitation Volume */
@@ -274,7 +276,9 @@ public class HmsReportWriter extends ReportWriter {
         } // If: Data is found
 
         if(!globalParameterTableDom.isEmpty()) {
-            globalParameterTableDom.add(0, caption(element.getName()));
+            String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
+            String captionTitle = elementType + ": " + element.getName();
+            globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
@@ -285,60 +289,63 @@ public class HmsReportWriter extends ReportWriter {
 
         List<String> rowData = new ArrayList<>();
         String mapData;
-        DomContent rowDom = null;
+        DomContent rowDom;
         Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
 
-        /* Precipitation Volume */
-        mapData = statisticResultsMap.get("Precipitation Volume");
+        /* Observed Flow Gage */
+        mapData = element.getElementResults().getOtherResults().get("ObservedFlowGage");
         if(mapData != null) {
-            rowData.add("Precipitation Volume (AC-FT)");
+            rowData.add("Observed Flow Gage");
             rowData.add(mapData);
             rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
             globalParameterTableDom.add(rowDom);
         } // If: Data is found
 
-        /* Loss Volume */
+        /* Observed Flow's Volume */
         rowData.clear();
-        mapData = statisticResultsMap.get("Loss Volume");
+        mapData = statisticResultsMap.get("Observed Flow Volume");
         if(mapData != null) {
-            rowData.add("Loss Volume (AC-FT)");
+            rowData.add("Observed Flow Volume (AC-FT)");
             rowData.add(mapData);
             rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
             globalParameterTableDom.add(rowDom);
         } // If: Data is found
 
-        /* Excess Volume */
+        /* Observed Flow's RMSE Stdev */
         rowData.clear();
-        mapData = statisticResultsMap.get("Excess Volume");
+        mapData = statisticResultsMap.get("Observed Flow RMSE Stdev");
         if(mapData != null) {
-            rowData.add("Excess Volume (AC-FT)");
+            rowData.add("Observed Flow's RMSE Stdev");
             rowData.add(mapData);
             rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
             globalParameterTableDom.add(rowDom);
         } // If: Data is found
 
-        /* Direct Runoff Volume */
+        /* Observed Flow's Percent Bias' */
         rowData.clear();
-        mapData = statisticResultsMap.get("Direct Flow Volume");
+        mapData = statisticResultsMap.get("Observed Flow Percent Bias");
+        mapData = StringBeautifier.beautifyString(mapData);
         if(mapData != null) {
-            rowData.add("Direct Runoff Volume (AC-FT)");
-            rowData.add(mapData);
+            rowData.add("Observed Flow's Percent Bias");
+            rowData.add(mapData + "%");
             rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
             globalParameterTableDom.add(rowDom);
         } // If: Data is found
 
-        /* Baseflow Volume */
+        /* Observed Flow's Nash Sutcliffe */
         rowData.clear();
-        mapData = statisticResultsMap.get("Baseflow Volume");
+        mapData = statisticResultsMap.get("Observed Flow Nash Sutcliffe");
         if(mapData != null) {
-            rowData.add("Baseflow Volume (AC-FT)");
+            rowData.add("Observed Flow's Nash Sutcliffe");
             rowData.add(mapData);
             rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
             globalParameterTableDom.add(rowDom);
         } // If: Data is found
 
         if(!globalParameterTableDom.isEmpty()) {
-            globalParameterTableDom.add(0, caption(element.getName()));
+            String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
+            String captionTitle = elementType + ": " + element.getName();
+            globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
@@ -349,7 +356,7 @@ public class HmsReportWriter extends ReportWriter {
 
         List<String> rowData = new ArrayList<>();
         String mapData;
-        DomContent rowDom = null;
+        DomContent rowDom;
         Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
 
         /* Precipitation Volume */
@@ -402,7 +409,9 @@ public class HmsReportWriter extends ReportWriter {
         } // If: Data is found
 
         if(!globalParameterTableDom.isEmpty()) {
-            globalParameterTableDom.add(0, caption(element.getName()));
+            String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
+            String captionTitle = elementType + ": " + element.getName();
+            globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
@@ -413,7 +422,7 @@ public class HmsReportWriter extends ReportWriter {
 
         List<String> rowData = new ArrayList<>();
         String mapData;
-        DomContent rowDom = null;
+        DomContent rowDom;
         Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
 
         /* Precipitation Volume */
@@ -466,7 +475,9 @@ public class HmsReportWriter extends ReportWriter {
         } // If: Data is found
 
         if(!globalParameterTableDom.isEmpty()) {
-            globalParameterTableDom.add(0, caption(element.getName()));
+            String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
+            String captionTitle = elementType + ": " + element.getName();
+            globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
@@ -806,7 +817,7 @@ public class HmsReportWriter extends ReportWriter {
         List<Table> plotList = Arrays.asList(outflowTable, observedFlowTable);
 
         // Setting Plot's configurations
-        String xAxisTitle = "Time";;
+        String xAxisTitle = "Time";
         String yAxisTitle = outflowPlot.getUnitType();
         String divName = StringBeautifier.getPlotDivName(elementName, plotName);
 

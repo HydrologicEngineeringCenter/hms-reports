@@ -9,21 +9,21 @@ public class ElementResults {
     private final String name;
     private final List<StatisticResult> statisticResults;
     private final List<TimeSeriesResult> timeSeriesResults;
-    private final Map<String, String> drainageArea;
+    private final Map<String, String> otherResults;
 
     /* Constructors */
     private ElementResults(Builder builder){
         this.name = builder.name;
         this.statisticResults = builder.statisticResults;
         this.timeSeriesResults = builder.timeSeriesResults;
-        this.drainageArea = builder.drainageArea;
+        this.otherResults = builder.otherResults;
     } // ElementResults Constructor
 
     public static class Builder{
         String name;
         List<StatisticResult> statisticResults;
         List<TimeSeriesResult> timeSeriesResults;
-        Map<String, String> drainageArea;
+        Map<String, String> otherResults;
 
         public Builder name(String name) {
             this.name = name;
@@ -40,10 +40,10 @@ public class ElementResults {
             return this;
         } // 'timeSeriesResults' constructor
 
-        public Builder drainageArea(Map<String, String> drainageArea) {
-            this.drainageArea = drainageArea;
+        public Builder otherResults(Map<String, String> otherResults) {
+            this.otherResults = otherResults;
             return this;
-        } // 'drainageArea' constructor
+        } // 'otherResults' constructor
 
         public ElementResults build(){
             return new ElementResults(this);
@@ -62,8 +62,8 @@ public class ElementResults {
     public List<TimeSeriesResult> getTimeSeriesResults(){
         return this.timeSeriesResults;
     }
-    public Map<String, String> getDrainageArea() {
-        return this.drainageArea;
+    public Map<String, String> getOtherResults() {
+        return this.otherResults;
     }
     public Map<String, String> getStatisticResultsMap() {
         Map<String, String> statisticMap = this.statisticResults.stream().collect(Collectors.toMap(StatisticResult::getName, StatisticResult::getValue));

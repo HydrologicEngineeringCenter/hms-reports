@@ -60,16 +60,18 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         JSONObject statisticsArray = elementObject.getJSONObject("Statistics");
         List<StatisticResult> statisticResults = populateStatisticsResult(statisticsArray);
         JSONObject drainageArea = elementObject.getJSONObject("DrainageArea");
-        Map<String, String> drainageMap = new HashMap<>();
-        for(String key : drainageArea.keySet()) {
-            drainageMap.put(key, drainageArea.opt(key).toString());
-        } // Loop: to get drainageArea map
+        Map<String, String> otherMap = new HashMap<>();
+        otherMap.put("DrainageArea", drainageArea.opt("area").toString());
+        JSONObject observedFlowGage = elementObject.optJSONObject("ObservedFlowGage");
+        if(observedFlowGage != null) {
+            otherMap.put("ObservedFlowGage", observedFlowGage.opt("name").toString());
+        } // If: observedFlowGage exists
 
         ElementResults elementResults = ElementResults.builder()
                 .name(name)
                 .timeSeriesResults(timeSeriesResult)
                 .statisticResults(statisticResults)
-                .drainageArea(drainageMap)
+                .otherResults(otherMap)
                 .build();
 
         return elementResults;
