@@ -1,9 +1,10 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'mil.army.usace.hec'
+version '1.1'
 
 sourceCompatibility = 1.8
 
@@ -19,9 +20,6 @@ dependencies {
     implementation 'tech.tablesaw:tablesaw-core:0.37.3'
     implementation 'tech.tablesaw:tablesaw-jsplot:0.37.3'
     implementation 'org.jsoup:jsoup:1.12.2'
-    implementation 'org.seleniumhq.selenium:selenium-java:3.8.1'
-    implementation 'com.openhtmltopdf:openhtmltopdf-core:1.0.1'
-    implementation 'com.openhtmltopdf:openhtmltopdf-pdfbox:1.0.1'
     implementation 'org.apache.commons:commons-csv:1.8'
 
     implementation 'com.rmanet:rma:6.0.0.51'
@@ -40,3 +38,25 @@ dependencies {
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.4.0"
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'hms-report'
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username = "$mavenUser"
+                password = "$mavenPassword"
+            }
+            def releasesRepoUrl = "https://www.hec.usace.army.mil/nexus/repository/maven-releases/"
+            def snapshotsRepoUrl = "https://www.hec.usace.army.mil/nexus/repository/maven-snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+publish.dependsOn jar
