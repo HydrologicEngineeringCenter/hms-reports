@@ -66,6 +66,11 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         if(observedFlowGage != null) {
             otherMap.put("ObservedFlowGage", observedFlowGage.opt("name").toString());
         } // If: observedFlowGage exists
+        JSONArray observedPoolGage = elementObject.optJSONArray("ObservedPoolElevationGage");
+        if(observedPoolGage != null) {
+            String observedPoolGageName = observedPoolGage.optJSONObject(0).optString("name");
+            otherMap.put("ObservedPoolElevationGage", observedPoolGageName);
+        } // If: observedFlowGage exists
 
         ElementResults elementResults = ElementResults.builder()
                 .name(name)

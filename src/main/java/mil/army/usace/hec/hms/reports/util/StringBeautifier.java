@@ -79,7 +79,13 @@ public class StringBeautifier {
     } // beautifyUpperUnderscore()
     private static String beautifyNumber(String name) {
         Double number = Double.parseDouble(name);
-        String roundedNumber = new DecimalFormat("#.##").format(number);
+        String roundedNumber;
+
+        if(number <= 100000 && number >= -100000)
+            roundedNumber = new DecimalFormat("#.##").format(number);
+        else
+            roundedNumber = new DecimalFormat("#.##E0").format(number);
+
         return roundedNumber;
     } // beautifyNumber()
     private static boolean isNumeric(String name) {

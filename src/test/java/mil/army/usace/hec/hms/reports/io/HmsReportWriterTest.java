@@ -15,11 +15,16 @@ class HmsReportWriterTest {
 
     @Test
     void writeShort() {
+        List<String> availablePlots = Utilities.getAvailablePlot("src/resources/Punx/RUN_Sep_2018.results");
+        for(String plotName : availablePlots) {
+            System.out.println(plotName);
+        }
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput("src/resources/MiddleColumbia/MiddleColumbia_WY2017(mod).basin.json")
                 .pathToResult("src/resources/MiddleColumbia/RUN_WY2017(mod).results")
-                .pathToDestination("src/resources/output-mini.html")
-                .chosenPlots(Arrays.asList("Air Temperature", ""))
+                .pathToDestination("src/resources/output-short.html")
+                .projectDirectory("C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia")
                 .build();
 
         reportWriter.write();

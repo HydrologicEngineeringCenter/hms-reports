@@ -73,6 +73,7 @@ table.global-summary{
 
 /* CSS for GlobalParameter's tables */
 table.global-parameter{
+    page-break-inside: avoid;
     width: 100%;
     padding-bottom: 0.3in;
 }

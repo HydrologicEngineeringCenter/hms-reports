@@ -61,6 +61,10 @@ public class HmsReportWriter extends ReportWriter {
             rowData.add(element.getElementResults().getStatisticResultsMap().get("Maximum Outflow")); // Peak Discharge
             rowData.add(element.getElementResults().getStatisticResultsMap().get("Time of Maximum Outflow")); // Time of Peak
             rowData.add(element.getElementResults().getStatisticResultsMap().get("Outflow Depth")); // Volume
+
+            rowData.replaceAll(t -> Objects.isNull(t) ? "N/A" : t);
+            rowData.replaceAll(t -> t.equals("") ? "Not specified" : t);
+
             DomContent rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
             globalSummaryDomList.add(rowDom);
         }
@@ -117,60 +121,30 @@ public class HmsReportWriter extends ReportWriter {
     private DomContent printSubbasinParameterTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
-
-        List<String> rowData = new ArrayList<>();
-        String mapData;
         DomContent rowDom;
-        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
+
+        /* Default Values */
+        globalParameterTableDom.addAll(printDefaultParameterData(element));
 
         /* Precipitation Volume */
-        mapData = statisticResultsMap.get("Precipitation Volume");
-        if(mapData != null) {
-            rowData.add("Precipitation Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Precipitation Volume", "Precipitation Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
 
         /* Loss Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Loss Volume");
-        if(mapData != null) {
-            rowData.add("Loss Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Loss Volume", "Loss Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
 
         /* Excess Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Excess Volume");
-        if(mapData != null) {
-            rowData.add("Excess Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Excess Volume", "Excess Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
 
         /* Direct Runoff Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Direct Flow Volume");
-        if(mapData != null) {
-            rowData.add("Direct Runoff Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Direct Flow Volume", "Direct Runoff Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
 
         /* Baseflow Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Baseflow Volume");
-        if(mapData != null) {
-            rowData.add("Baseflow Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Baseflow Volume", "Baseflow Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
@@ -183,32 +157,19 @@ public class HmsReportWriter extends ReportWriter {
     private DomContent printReachParameterTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
-
-        List<String> rowData = new ArrayList<>();
-        String mapData;
         DomContent rowDom;
-        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
 
-        /* Peak Inflow */
-        mapData = statisticResultsMap.get("Maximum Inflow");
-        if(mapData != null) {
-            rowData.add("Peak Inflow (CFS)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        /* Default Values */
+        globalParameterTableDom.addAll(printDefaultParameterData(element));
+
+        /* Maximum Inflow */
+        rowDom = printParameterTableRow(element, "Maximum Inflow", "Peak Inflow (CFS)");
+        globalParameterTableDom.add(rowDom);
 
         /* Inflow Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Inflow Volume");
-        if(mapData != null) {
-            rowData.add("Inflow Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Inflow Volume", "Inflow Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
 
-        /* Table's Title/Caption */
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
             String captionTitle = elementType + ": " + element.getName();
@@ -221,59 +182,8 @@ public class HmsReportWriter extends ReportWriter {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
 
-        List<String> rowData = new ArrayList<>();
-        String mapData;
-        DomContent rowDom;
-        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
-
-        /* Precipitation Volume */
-        mapData = statisticResultsMap.get("Precipitation Volume");
-        if(mapData != null) {
-            rowData.add("Precipitation Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
-
-        /* Loss Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Loss Volume");
-        if(mapData != null) {
-            rowData.add("Loss Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
-
-        /* Excess Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Excess Volume");
-        if(mapData != null) {
-            rowData.add("Excess Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
-
-        /* Direct Runoff Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Direct Flow Volume");
-        if(mapData != null) {
-            rowData.add("Direct Runoff Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
-
-        /* Baseflow Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Baseflow Volume");
-        if(mapData != null) {
-            rowData.add("Baseflow Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        /* Default Values */
+        globalParameterTableDom.addAll(printDefaultParameterData(element));
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
@@ -286,61 +196,30 @@ public class HmsReportWriter extends ReportWriter {
     private DomContent printSinkParameterTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
-
-        List<String> rowData = new ArrayList<>();
-        String mapData;
         DomContent rowDom;
-        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
+
+        /* Default Values */
+        globalParameterTableDom.addAll(printDefaultParameterData(element));
 
         /* Observed Flow Gage */
-        mapData = element.getElementResults().getOtherResults().get("ObservedFlowGage");
-        if(mapData != null) {
-            rowData.add("Observed Flow Gage");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "ObservedFlowGage", "Observed Flow Gage");
+        globalParameterTableDom.add(rowDom);
 
         /* Observed Flow's Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Observed Flow Volume");
-        if(mapData != null) {
-            rowData.add("Observed Flow Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Observed Flow Volume", "Observed Flow Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
 
         /* Observed Flow's RMSE Stdev */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Observed Flow RMSE Stdev");
-        if(mapData != null) {
-            rowData.add("Observed Flow's RMSE Stdev");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Observed Flow RMSE Stdev", "Observed Flow's RMSE Stdev");
+        globalParameterTableDom.add(rowDom);
 
         /* Observed Flow's Percent Bias' */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Observed Flow Percent Bias");
-        mapData = StringBeautifier.beautifyString(mapData);
-        if(mapData != null) {
-            rowData.add("Observed Flow's Percent Bias");
-            rowData.add(mapData + "%");
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Observed Flow Percent Bias", "Observed Flow's Percent Bias");
+        globalParameterTableDom.add(rowDom);
 
         /* Observed Flow's Nash Sutcliffe */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Observed Flow Nash Sutcliffe");
-        if(mapData != null) {
-            rowData.add("Observed Flow's Nash Sutcliffe");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        rowDom = printParameterTableRow(element, "Observed Flow Nash Sutcliffe", "Observed Flow's Nash Sutcliffe");
+        globalParameterTableDom.add(rowDom);
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
@@ -354,59 +233,8 @@ public class HmsReportWriter extends ReportWriter {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
 
-        List<String> rowData = new ArrayList<>();
-        String mapData;
-        DomContent rowDom;
-        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
-
-        /* Precipitation Volume */
-        mapData = statisticResultsMap.get("Precipitation Volume");
-        if(mapData != null) {
-            rowData.add("Precipitation Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
-
-        /* Loss Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Loss Volume");
-        if(mapData != null) {
-            rowData.add("Loss Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
-
-        /* Excess Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Excess Volume");
-        if(mapData != null) {
-            rowData.add("Excess Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
-
-        /* Direct Runoff Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Direct Flow Volume");
-        if(mapData != null) {
-            rowData.add("Direct Runoff Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
-
-        /* Baseflow Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Baseflow Volume");
-        if(mapData != null) {
-            rowData.add("Baseflow Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        /* Default Values */
+        globalParameterTableDom.addAll(printDefaultParameterData(element));
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
@@ -419,60 +247,58 @@ public class HmsReportWriter extends ReportWriter {
     private DomContent printReservoirParameterTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
-
-        List<String> rowData = new ArrayList<>();
-        String mapData;
         DomContent rowDom;
-        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
 
-        /* Precipitation Volume */
-        mapData = statisticResultsMap.get("Precipitation Volume");
-        if(mapData != null) {
-            rowData.add("Precipitation Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        /* Default Values */
+        globalParameterTableDom.addAll(printDefaultParameterData(element));
 
-        /* Loss Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Loss Volume");
-        if(mapData != null) {
-            rowData.add("Loss Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        /* Peak Inflow */
+        rowDom = printParameterTableRow(element, "Maximum Inflow", "Peak Inflow (CFS)");
+        globalParameterTableDom.add(rowDom);
 
-        /* Excess Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Excess Volume");
-        if(mapData != null) {
-            rowData.add("Excess Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        /* Time of Peak Inflow */
+        rowDom = printParameterTableRow(element, "Time of Maximum Inflow", "Time of Peak Inflow");
+        globalParameterTableDom.add(rowDom);
 
-        /* Direct Runoff Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Direct Flow Volume");
-        if(mapData != null) {
-            rowData.add("Direct Runoff Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        /* Inflow Volume */
+        rowDom = printParameterTableRow(element, "Inflow Volume", "Inflow Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
 
-        /* Baseflow Volume */
-        rowData.clear();
-        mapData = statisticResultsMap.get("Baseflow Volume");
-        if(mapData != null) {
-            rowData.add("Baseflow Volume (AC-FT)");
-            rowData.add(mapData);
-            rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
-            globalParameterTableDom.add(rowDom);
-        } // If: Data is found
+        /* Peak Storage */
+        rowDom = printParameterTableRow(element, "Maximum Storage", "Maximum Storage (AC-FT)");
+        globalParameterTableDom.add(rowDom);
+
+        /* Peak Elevation */
+        rowDom = printParameterTableRow(element, "Maximum Pool Elevation", "Peak Elevation (FT)");
+        globalParameterTableDom.add(rowDom);
+
+        /* Discharge Volume */
+        rowDom = printParameterTableRow(element, "Outflow Volume", "Discharge Volume (AC-FT)");
+        globalParameterTableDom.add(rowDom);
+
+        /* Observed Pool Elevation Gage */
+        rowDom = printParameterTableRow(element, "ObservedPoolElevationGage", "Observed Pool Elevation Gage");
+        globalParameterTableDom.add(rowDom);
+
+        /* Observed Peak Pool Elevation */
+        rowDom = printParameterTableRow(element, "Maximum Observed Pool Elevation", "Observed Peak Pool Elevation (FT)");
+        globalParameterTableDom.add(rowDom);
+
+        /* RMSE Std Dev (Observed) */
+        rowDom = printParameterTableRow(element, "Observed Pool Elevation RMSE Stdev", "Observed Pool Elevation RMSE Stdev");
+        globalParameterTableDom.add(rowDom);
+
+        /* Percent Bias (Observed) */
+        rowDom = printParameterTableRow(element, "Observed Pool Elevation Percent Bias", "Observed Pool Elevation Percent Bias");
+        globalParameterTableDom.add(rowDom);
+
+        /* Time of Peak Pool Elevation (Observed) */
+        rowDom = printParameterTableRow(element, "Time of Maximum Observed Pool Elevation", "Time of Maximum Observed Pool Elevation");
+        globalParameterTableDom.add(rowDom);
+
+        /* Nash-Sutcliffe (Observed) */
+        rowDom = printParameterTableRow(element, "Observed Pool Elevation Nash Sutcliffe", "Observed Pool Elevation Nash Sutcliffe");
+        globalParameterTableDom.add(rowDom);
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
@@ -502,6 +328,48 @@ public class HmsReportWriter extends ReportWriter {
 
         return main(elementDomList.toArray(new DomContent[]{}));
     } // printElementList()
+    private List<DomContent> printDefaultParameterData(Element element) {
+        List<DomContent> defaultDomList = new ArrayList<>();
+        DomContent rowDom;
+
+        /* Peak Discharge */
+        rowDom = printParameterTableRow(element, "Maximum Outflow", "Peak Discharge (CFS)");
+        defaultDomList.add(rowDom);
+
+        /* Time of Peak */
+        rowDom = printParameterTableRow(element, "Time of Maximum Outflow", "Time of Peak Discharge");
+        defaultDomList.add(rowDom);
+
+        /* Volume */
+        rowDom = printParameterTableRow(element, "Outflow Depth", "Volume (IN)");
+        defaultDomList.add(rowDom);
+
+        return defaultDomList;
+    } // printDefaultParameterData()
+    private DomContent printParameterTableRow(Element element, String mapKey, String dataName) {
+        String tdAttribute = ".global-parameter";
+        String mapData;
+        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
+        Map<String, String> otherResultsMap = element.getElementResults().getOtherResults();
+
+        if(statisticResultsMap.containsKey(mapKey)) {
+            mapData = statisticResultsMap.get(mapKey);
+        } // If: the mapKey is in statisticResultsMap
+        else if(otherResultsMap.containsKey(mapKey)) {
+            mapData = otherResultsMap.get(mapKey);
+        } // Else if: the mapKey is in otherResultsMap
+        else {
+            mapData = "Not specified";
+        } // Else: mapKey is not found
+
+        if(mapKey.contains("Percent")) {
+            mapData = mapData + "%";
+        } // If: is a percentage
+
+        List<String> rowData = Arrays.asList(dataName, mapData);
+        DomContent rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
+        return rowDom;
+    } // printParameterTableRow()
 
     /* ---------------------------------------------------------------------------------------------------------- */
     /* Element Input */
