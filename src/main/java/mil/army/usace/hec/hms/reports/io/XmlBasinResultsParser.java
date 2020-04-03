@@ -18,9 +18,12 @@ import org.json.XML;
 import java.io.File;
 import java.io.IOException;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class XmlBasinResultsParser extends BasinResultsParser {
+    private HecTime startTime;
+    private HecTime endTime;
 
     XmlBasinResultsParser(Builder builder) {
         super(builder);
@@ -29,8 +32,16 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     @Override
     public Map<String,ElementResults> getElementResults() {
         Map<String, ElementResults> elementResultsList = new HashMap<>();
-        JSONObject resultFile = getJsonObject(this.pathToBasinResultsFile.toString());
-        JSONArray elemenentArray = resultFile.getJSONObject("RunResults").getJSONArray("BasinElement");
+        JSONObject resultFile  = getJsonObject(this.pathToBasinResultsFile.toString());
+        JSONObject runResults  = resultFile.getJSONObject("RunResults");
+        String startTimeString = runResults.optString("StartTime") + " GMT";
+        String endTimeString   = runResults.optString("EndTime") + " GMT";
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dMMMyyyy, HH:mm z");
+        this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
+        this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
+
+        JSONArray elemenentArray = runResults.getJSONArray("BasinElement");
 
         for(int i = 0; i < elemenentArray.length(); i++) {
             System.out.println("Element Index: " + i);
@@ -115,7 +126,9 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         /* Using HEC DSS to read in Time Series Container */
         TimeSeriesContainer container = new TimeSeriesContainer();
-        container.fullName = (timeObject.getString("DssPathname"));
+        container.setFullName(timeObject.getString("DssPathname"));
+        container.setStartTime(this.startTime);
+        container.setEndTime(this.endTime);
         HecTimeSeries dssTimeSeriesRead = new HecTimeSeries();
         dssTimeSeriesRead.setDSSFileName(pathToDss);
 

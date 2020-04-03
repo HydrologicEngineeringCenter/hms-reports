@@ -33,9 +33,10 @@ class HmsReportWriterTest {
     @Test
     void writeLong() {
         ReportWriter reportWriter = ReportWriter.builder()
-                .pathToInput("src/resources/MiddleColumbia_WY2017.basin.json")
-                .pathToResult("src/resources/RUN_WY2017.results")
-                .pathToDestination("src/resources/output-big.html")
+                .pathToInput("src/resources/MiddleColumbia/MiddleColumbia_WY2017.basin.json")
+                .pathToResult("src/resources/MiddleColumbia/RUN_WY2017.results")
+                .pathToDestination("src/resources/output-long.html")
+                .projectDirectory("C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia")
                 .build();
 
         reportWriter.write();
@@ -49,9 +50,9 @@ class HmsReportWriterTest {
         }
 
         ReportWriter reportWriter = ReportWriter.builder()
-                .pathToInput("src/resources/Punx/punxsutawney.basin.json")
-                .pathToResult("src/resources/Punx/RUN_Sep_2018.results")
-                .pathToDestination("src/resources/output-punx.html")
+                .pathToInput("C:\\HyperNick\\Punx\\punxsutawney.basin.json")
+                .pathToResult("C:\\HyperNick\\Punx\\results\\RUN_Sep_2018.results")
+                .pathToDestination("C:\\HyperNick\\HmsReportOutput\\hms-output.html")
                 .projectDirectory("C:\\HyperNick\\Punx")
                 .build();
 
