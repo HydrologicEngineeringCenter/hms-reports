@@ -11,13 +11,17 @@ public abstract class ReportWriter {
     Path pathToResult;
     Path pathToDestination;
     Path projectDirectory;
+    List<SummaryChoice> reportSummaryChoice;
     List<String> chosenPlots;
+
+    public enum SummaryChoice {GLOBAL_SUMMARY, PARAMETER_SUMMARY}
 
     ReportWriter(Builder builder){
         this.pathToInput = builder.pathToInput;
         this.pathToResult = builder.pathToResult;
         this.pathToDestination = builder.pathToDestination;
         this.projectDirectory = builder.projectDirectory;
+        this.reportSummaryChoice = builder.reportSummaryChoice;
         this.chosenPlots = builder.chosenPlots;
     }
 
@@ -26,6 +30,7 @@ public abstract class ReportWriter {
         private Path pathToResult;
         private Path pathToDestination;
         private Path projectDirectory;
+        private List<SummaryChoice> reportSummaryChoice;
         private List<String> chosenPlots;
 
         public Builder pathToInput(final String pathToInput) {
@@ -45,6 +50,11 @@ public abstract class ReportWriter {
 
         public Builder projectDirectory(final String projectDirectory) {
             this.projectDirectory = Paths.get(projectDirectory);
+            return this;
+        }
+
+        public Builder reportSummaryChoice(final List<SummaryChoice> reportSummaryChoice) {
+            this.reportSummaryChoice  = reportSummaryChoice;
             return this;
         }
 

@@ -54,6 +54,7 @@ class HmsReportWriterTest {
                 .pathToResult("C:\\HyperNick\\Punx\\results\\RUN_Sep_2018.results")
                 .pathToDestination("C:\\HyperNick\\HmsReportOutput\\hms-output.html")
                 .projectDirectory("C:\\HyperNick\\Punx")
+                .reportSummaryChoice(Arrays.asList(ReportWriter.SummaryChoice.GLOBAL_SUMMARY, ReportWriter.SummaryChoice.PARAMETER_SUMMARY))
                 .build();
 
         reportWriter.write();

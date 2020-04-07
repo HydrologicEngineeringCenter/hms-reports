@@ -51,6 +51,10 @@ public class HmsReportWriter extends ReportWriter {
 
     /* Global Summary Table */
     private DomContent printGlobalSummary(List<Element> elementList) {
+        if(reportSummaryChoice == null || !reportSummaryChoice.contains(SummaryChoice.GLOBAL_SUMMARY)) {
+            return null;
+        } // If: Report Summary Choice contains GLOBAL_SUMMARY
+
         List<DomContent> globalSummaryDomList = new ArrayList<>();
         String tdAttribute = ".global-summary";
 
@@ -82,6 +86,10 @@ public class HmsReportWriter extends ReportWriter {
     /* ---------------------------------------------------------------------------------------------------------- */
     /* Global Parameter Tables */
     private DomContent printListGlobalParameter(List<Element> elementList) {
+        if(reportSummaryChoice == null || !reportSummaryChoice.contains(SummaryChoice.PARAMETER_SUMMARY)) {
+            return null;
+        } // If: Report Summary Choice contains PARAMETER_SUMMARY
+
         List<DomContent> globalParameterDomList = new ArrayList<>();
         String divAttribute = ".global-parameter";
 

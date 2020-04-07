@@ -59,6 +59,7 @@ public class HtmlModifier {
     public static void writeToFile(String pathToHtml, String content) {
         /* Writing to HTML file */
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
+        content = content.replace("layout);", "layout, {staticPlot: true});");
         String fullPathToCss = Paths.get(pathToHtml).getParent().toAbsolutePath().toString() + File.separator + "style.css";
         try {
             FileUtils.writeStringToFile(new File(pathToHtml), content, StandardCharsets.UTF_8);
@@ -66,7 +67,7 @@ public class HtmlModifier {
         }
         catch (IOException e) { e.printStackTrace(); }
         setPlotlyFont(fullPathToHtml, "Vollkorn, serif", "12");
-        convertPlotlyToStatic(fullPathToHtml);
+//        convertPlotlyToStatic(fullPathToHtml);
     } // writeToFile()
 
     private static void convertPlotlyToStatic(String pathToHtml) {
