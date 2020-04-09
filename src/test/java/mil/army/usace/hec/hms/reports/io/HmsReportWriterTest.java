@@ -5,9 +5,7 @@ import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.util.Utilities;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,12 +47,18 @@ class HmsReportWriterTest {
             System.out.println(plotName);
         }
 
+        Map<String, List<String>> globalParameterChoices = new HashMap<>();
+        globalParameterChoices.put("Subbasin", Arrays.asList("Canopy", "Loss Rate", "Transform"));
+        globalParameterChoices.put("Reach", Arrays.asList("Route"));
+        globalParameterChoices.put("Sink", Arrays.asList("Observed Hydrograph"));
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput("C:\\HyperNick\\Punx\\punxsutawney.basin.json")
                 .pathToResult("C:\\HyperNick\\Punx\\results\\RUN_Sep_2018.results")
                 .pathToDestination("C:\\HyperNick\\HmsReportOutput\\hms-output.html")
                 .projectDirectory("C:\\HyperNick\\Punx")
-                .reportSummaryChoice(Arrays.asList(ReportWriter.SummaryChoice.GLOBAL_SUMMARY, ReportWriter.SummaryChoice.PARAMETER_SUMMARY))
+                .reportSummaryChoice(Arrays.asList(ReportWriter.SummaryChoice.GLOBAL_RESULTS_SUMMARY, ReportWriter.SummaryChoice.GLOBAL_PARAMETER_SUMMARY, ReportWriter.SummaryChoice.ELEMENT_RESULTS_SUMMARY))
+                .globalParameterChoices(globalParameterChoices)
                 .build();
 
         reportWriter.write();

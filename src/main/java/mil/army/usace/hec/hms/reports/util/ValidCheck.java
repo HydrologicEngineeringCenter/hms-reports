@@ -13,6 +13,16 @@ public class ValidCheck {
         return stringList;
     } // unnecessarySingleProcesses()
 
+    public static List<String> unnecessaryGlobalParameterProcesses() {
+        List<String> stringList = new ArrayList<>();
+        stringList.add("name");
+        stringList.add("elementType");
+        stringList.add("longitude");
+        stringList.add("latitude");
+        stringList.add("downstream");
+        return stringList;
+    } // unnecessaryGlobalParameterProcesses()
+
     public static List<String> validStatisticResult() {
         List<String> stringList = new ArrayList<>();
 

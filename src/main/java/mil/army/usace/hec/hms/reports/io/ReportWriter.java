@@ -5,6 +5,7 @@ import mil.army.usace.hec.hms.reports.Element;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 public abstract class ReportWriter {
     Path pathToInput;
@@ -12,9 +13,10 @@ public abstract class ReportWriter {
     Path pathToDestination;
     Path projectDirectory;
     List<SummaryChoice> reportSummaryChoice;
+    Map<String, List<String>> globalParameterChoices;
     List<String> chosenPlots;
 
-    public enum SummaryChoice {GLOBAL_SUMMARY, PARAMETER_SUMMARY}
+    public enum SummaryChoice {GLOBAL_RESULTS_SUMMARY, ELEMENT_RESULTS_SUMMARY, GLOBAL_PARAMETER_SUMMARY}
 
     ReportWriter(Builder builder){
         this.pathToInput = builder.pathToInput;
@@ -23,6 +25,7 @@ public abstract class ReportWriter {
         this.projectDirectory = builder.projectDirectory;
         this.reportSummaryChoice = builder.reportSummaryChoice;
         this.chosenPlots = builder.chosenPlots;
+        this.globalParameterChoices = builder.globalParameterChoices;
     }
 
     public static class Builder{
@@ -32,6 +35,7 @@ public abstract class ReportWriter {
         private Path projectDirectory;
         private List<SummaryChoice> reportSummaryChoice;
         private List<String> chosenPlots;
+        private Map<String, List<String>> globalParameterChoices;
 
         public Builder pathToInput(final String pathToInput) {
             this.pathToInput = Paths.get(pathToInput);
@@ -62,6 +66,11 @@ public abstract class ReportWriter {
             this.chosenPlots = chosenPlots;
             return this;
         }
+
+        public Builder globalParameterChoices(final Map<String, List<String>> globalParameterChoices) {
+            this.globalParameterChoices = globalParameterChoices;
+            return this;
+        } // globalParameterChoices()
 
         public ReportWriter build(){
             if (pathToDestination.toString().matches(".*.html")){
