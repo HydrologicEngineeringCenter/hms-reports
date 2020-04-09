@@ -2,6 +2,8 @@ package mil.army.usace.hec.hms.reports.io;
 
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.ElementInput;
+import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
@@ -107,16 +109,59 @@ public class GlobalParametersWriter {
         /* TODO: Subbasin's parameters (Area, Loss Rate, Canopy, Transform, Baseflow) */
         List<DomContent> subbasinParameterDomList = new ArrayList<>(); // Contains (Area table, Loss Rate table, etc...)
         /* For each table: Loop through subbasinElements List, get necessary data to get a DomContent table */
+        List<String> areaRowList = new ArrayList<>();
+        List<String> lossRowList = new ArrayList<>();
+        List<String> canopyRowList = new ArrayList<>();
+        List<String> transformRowList = new ArrayList<>();
+        Map<String, List<String>> baseflowRowList = new HashMap<>();
 
-        /* Parameter Table: Area */
+        for(Element element : subbasinElements) {
+            /* Map of the element's list of processes */
+            Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
+                    .collect(Collectors.toMap(Process::getName, x -> x));
 
-        /* Parameter Table: Loss Rate */
+            /* Parameter Table: Area */
+            areaRowList.add(element.getName());
+            areaRowList.add(elementProcesses.get("area").getValue()); // Area
 
-        /* Parameter Table: Canopy */
+            /* Parameter Table: Loss Rate */
+            Map<String, Parameter> lossParameters = elementProcesses.get("lossRate").getParameters().stream()
+                    .collect(Collectors.toMap(Parameter::getName, x -> x));
 
-        /* Parameter Table: Transform */
+            lossRowList.add(element.getName());
+            lossRowList.add(lossParameters.get("initialDeficit").getValue());  // Initial Deficit (IN)
+            lossRowList.add(lossParameters.get("maximumDeficit").getValue());  // Maximum Storage (IN)
+            lossRowList.add(lossParameters.get("percolationRate").getValue()); // Constant Rate (IN/HR)
+            lossRowList.add(lossParameters.get("percentImperviousArea").getValue()); // Impervious (%)
 
-        /* Parameter Table: Baseflow */
+            /* Parameter Table: Canopy */
+            Map<String, Parameter> canopyParameters = elementProcesses.get("canopy").getParameters().stream()
+                    .collect(Collectors.toMap(Parameter::getName, x -> x));
+
+            canopyRowList.add(element.getName());
+            canopyRowList.add(canopyParameters.get("initialStorage").getValue() + "%");  // Initial Storage (%)
+            canopyRowList.add(canopyParameters.get("storageCapacity").getValue()); // Max Storage (IN)
+            canopyRowList.add(canopyParameters.get("cropCoefficient").getValue()); // Crop Coefficient
+            String evapotranspiration = canopyParameters.get("allowSimultaneousPrecipEt").getValue();
+            if(evapotranspiration.equals("false")) { canopyRowList.add("Only Dry Periods"); }
+            else { canopyRowList.add("Positive Periods ----"); } // Evapotranspiration
+            canopyRowList.add(StringBeautifier.beautifyString(canopyParameters.get("uptakeMethod").getValue())); // Uptake Method
+
+            /* Parameter Table: Transform */
+            Map<String, Parameter> transformParameters = elementProcesses.get("transform").getParameters().stream()
+                    .collect(Collectors.toMap(Parameter::getName, x -> x));
+
+            transformRowList.add(element.getName());
+            transformRowList.add(transformParameters.get("timeOfConcentration").getValue()); // Time of Concentration (HR)
+            transformRowList.add(transformParameters.get("storageCoefficient").getValue());  // Storage Coefficient (HR)
+
+            /* Parameter Table: Baseflow */
+            Map<String, Parameter> baseflowParameters = elementProcesses.get("baseflow").getParameters().stream()
+                    .collect(Collectors.toMap(Parameter::getName, x -> x));
+
+        } // Loop: through all subbasin-type elements
+
+        /* Call function to get a DomContent table. (Baseflow needs a unique table) */
 
         return null;
     } // printSubbasinParameterList()
