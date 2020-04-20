@@ -23,15 +23,21 @@ import static j2html.TagCreator.*;
 public class ElementParametersWriter {
     private List<Element> elementList;
     private List<String> chosenPlots;
+    private List<ReportWriter.SummaryChoice> reportSummaryChoice;
+    private Map<String, List<String>> elementParameterizationChoice;
 
     /* Constructors */
     private ElementParametersWriter(Builder builder){
         this.elementList = builder.elementList;
         this.chosenPlots = builder.chosenPlots;
+        this.reportSummaryChoice = builder.reportSummaryChoice;
+        this.elementParameterizationChoice = builder.elementParameterizationChoice;
     } // ElementParametersWriter Constructor
     public static class Builder{
         List<Element> elementList;
         List<String> chosenPlots;
+        List<ReportWriter.SummaryChoice> reportSummaryChoice;
+        Map<String, List<String>> elementParameterizationChoice;
 
         public Builder elementList(List<Element> elementList){
             this.elementList = elementList;
@@ -42,6 +48,16 @@ public class ElementParametersWriter {
             this.chosenPlots = chosenPlots;
             return this;
         } // 'chosenPlots' constructor
+
+        public Builder reportSummaryChoice(List<ReportWriter.SummaryChoice> reportSummaryChoice) {
+            this.reportSummaryChoice = reportSummaryChoice;
+            return this;
+        } // 'reportSummaryChoice' constructor
+
+        public Builder elementParameterizationChoice(Map<String, List<String>> elementParameterizationChoice) {
+            this.elementParameterizationChoice = elementParameterizationChoice;
+            return this;
+        } // 'elementParameterizationChoice' constructor
 
         public ElementParametersWriter build(){
             return new ElementParametersWriter(this);
@@ -54,9 +70,15 @@ public class ElementParametersWriter {
     /* Main Function */
     DomContent printElementList() {
         List<DomContent> elementDomList = new ArrayList<>();
+        ElementResultsWriter elementResultsWriter = ElementResultsWriter.builder().elementList(elementList).reportSummaryChoice(reportSummaryChoice).build();
+        Map<String, DomContent> elementResultsMap = elementResultsWriter.printListResultsWriter();
 
         /* For each element, print: ElementInput and ElementResults */
         for(Element element : this.elementList) {
+            if(!this.elementParameterizationChoice.containsKey(StringBeautifier.beautifyString(element.getElementInput().getElementType()))) {
+                continue;
+            } // Skip: element types that were not chosen
+
             List<DomContent> elementDom = new ArrayList<>(); // Holds elementInput and elementResult
             // Getting ElementInput DomContent
             ElementInput elementInput = element.getElementInput();
@@ -64,7 +86,7 @@ public class ElementParametersWriter {
             if(elementInputDom != null) { elementDom.add(elementInputDom); }
             // Getting ElementResults DomContent
             ElementResults elementResults = element.getElementResults();
-            DomContent elementResultsDom = printElementResults(elementResults);
+            DomContent elementResultsDom = printElementResults(elementResults, elementResultsMap.get(element.getName()));
             if(elementResultsDom != null) { elementDom.add(elementResultsDom); }
             // Creating a 'div', 'class: element'
             elementDomList.add(div(attrs(".element"), elementDom.toArray(new DomContent[]{})));
@@ -125,6 +147,17 @@ public class ElementParametersWriter {
 
         for(Process process : tableProcesses) {
             String reformatName = StringBeautifier.beautifyString(process.getName());
+            boolean skipProcess = false;
+            for(String keyName : this.elementParameterizationChoice.keySet()) {
+                if(!this.elementParameterizationChoice.get(keyName).contains(reformatName)) {
+                    skipProcess = true;
+                    break;
+                } // If: Unnecessary
+            } // Loop: through all of the user's options
+
+            if(skipProcess){
+                continue;
+            } // Skip: Processes that were not chosen
             List<Parameter> parameterList = process.getParameters();
             DomContent tableDom  = printParameterTable(parameterList, reformatName); // The Table of Parameters
             tableProcessesDomList.add(tableDom);
@@ -179,12 +212,14 @@ public class ElementParametersWriter {
     } // printParameterTable()
 
     /* Element Results */
-    private DomContent printElementResults(ElementResults elementResults) {
+    private DomContent printElementResults(ElementResults elementResults, DomContent summaryResults) {
         List<DomContent> elementResultsDomList = new ArrayList<>();
 
+        /* Get Summary Results Dom */
+        elementResultsDomList.add(summaryResults);
         /* Get Statistic Results Dom */
-        DomContent statisticResults = printStatisticResult(elementResults.getStatisticResults());
-        elementResultsDomList.add(statisticResults);
+//        DomContent statisticResults = printStatisticResult(elementResults.getStatisticResults());
+//        elementResultsDomList.add(statisticResults);
         /* Get TimeSeries Results Dom */
         String elementName = elementResults.getName();
         DomContent timeSeriesResults = printTimeSeriesResult(elementResults.getTimeSeriesResults(), elementName);
