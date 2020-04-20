@@ -71,9 +71,13 @@ public class GlobalResultsWriter {
             DomContent head = HtmlModifier.printTableHeadRow(Arrays.asList("Hydrologic Element", "Drainage Area (MI2)",
                     "Peak Discharge (CFS)", "Time of Peak", "Volume (IN)"), tdAttribute, tdAttribute);
             globalSummaryDomList.add(0, head); // Add to front
-            globalSummaryDomList.add(0, caption("Global Summary"));
         } // If: There is a table
 
-        return table(attrs(tdAttribute), globalSummaryDomList.toArray(new DomContent[]{}));
+        DomContent globalSummaryTable = table(attrs(tdAttribute), globalSummaryDomList.toArray(new DomContent[]{}));
+        globalSummaryDomList.clear();
+        globalSummaryDomList.add(h2(attrs(tdAttribute), "Global Summary"));
+        globalSummaryDomList.add(globalSummaryTable);
+
+        return div(attrs(tdAttribute), globalSummaryDomList.toArray(new DomContent[]{}));
     } // printGlobalSummary()
 }

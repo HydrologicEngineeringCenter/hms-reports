@@ -13,7 +13,7 @@ public class HmsReportWriter extends ReportWriter {
     }
 
     @Override
-    public void write() {
+    public List<Element> write() {
         /* Parse elements */
         BasinParser parser = BasinParser.builder()
                 .pathToBasinInputFile(this.pathToInput.toAbsolutePath().toString())
@@ -37,11 +37,8 @@ public class HmsReportWriter extends ReportWriter {
         ElementParametersWriter elementParametersWriter = ElementParametersWriter.builder()
                 .elementList(elementList)
                 .chosenPlots(this.chosenPlots)
-                .build();
-
-        ElementResultsWriter elementResultsWriter = ElementResultsWriter.builder()
-                .elementList(elementList)
                 .reportSummaryChoice(this.reportSummaryChoice)
+                .elementParameterizationChoice(this.elementParameterizationChoice)
                 .build();
 
         /* HTML Layout */
@@ -51,11 +48,12 @@ public class HmsReportWriter extends ReportWriter {
                         script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
                 body(   globalResultsWriter.printGlobalSummary(),
                         globalParametersWriter.printListGlobalParameter(),
-                        elementResultsWriter.printListResultsWriter(),
                         elementParametersWriter.printElementList())
         ).renderFormatted();
         /* Writing to HTML output file */
         HtmlModifier.writeToFile(this.pathToDestination.toString(), htmlOutput);
+
+        return elementList;
     } // write()
 
 } // HmsReportWriter class

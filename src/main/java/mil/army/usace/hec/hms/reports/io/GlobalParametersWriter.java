@@ -401,4 +401,4 @@ public class GlobalParametersWriter {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{})); // Table Row type
     } // printTableDataRow()
-}
+} // GlobalParametersWriter()
