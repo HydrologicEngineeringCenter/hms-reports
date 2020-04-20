@@ -5,10 +5,7 @@ import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static j2html.TagCreator.*;
 
@@ -44,12 +41,12 @@ public class ElementResultsWriter {
     }
 
     /* Element Results Tables */
-    DomContent printListResultsWriter() {
+    Map<String, DomContent> printListResultsWriter() {
         if(reportSummaryChoice == null || !reportSummaryChoice.contains(ReportWriter.SummaryChoice.ELEMENT_RESULTS_SUMMARY)) {
             return null;
         } // If: Report Summary Choice contains PARAMETER_SUMMARY
 
-        List<DomContent> globalParameterDomList = new ArrayList<>();
+        Map<String, DomContent> elementResultsMap = new HashMap<>();
         String divAttribute = ".global-parameter";
 
         for(Element element: this.elementList) {
@@ -78,11 +75,10 @@ public class ElementResultsWriter {
                 default:
                     System.out.println("This element type is not supported: " + elementType);
             } // Switch case: for element's type
-
-            globalParameterDomList.add(tableDom);
+            elementResultsMap.put(element.getName(), tableDom);
         } // Loop: through all elements to print its element results table
 
-        return div(attrs(divAttribute), globalParameterDomList.toArray(new DomContent[]{}));
+        return elementResultsMap;
     } // printListResultsWriter()
 
     private DomContent printSubbasinResultsTable(Element element) {
@@ -115,7 +111,7 @@ public class ElementResultsWriter {
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
-            String captionTitle = elementType + ": " + element.getName();
+            String captionTitle = "Results" + ": " + element.getName();
             globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
@@ -139,7 +135,7 @@ public class ElementResultsWriter {
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
-            String captionTitle = elementType + ": " + element.getName();
+            String captionTitle = "Results" + ": " + element.getName();
             globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
@@ -154,7 +150,7 @@ public class ElementResultsWriter {
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
-            String captionTitle = elementType + ": " + element.getName();
+            String captionTitle = "Results" + ": " + element.getName();
             globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
@@ -190,7 +186,7 @@ public class ElementResultsWriter {
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
-            String captionTitle = elementType + ": " + element.getName();
+            String captionTitle = "Results" + ": " + element.getName();
             globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
@@ -205,7 +201,7 @@ public class ElementResultsWriter {
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
-            String captionTitle = elementType + ": " + element.getName();
+            String captionTitle = "Results" + ": " + element.getName();
             globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
@@ -269,7 +265,7 @@ public class ElementResultsWriter {
 
         if(!globalParameterTableDom.isEmpty()) {
             String elementType = StringBeautifier.beautifyString(element.getElementInput().getElementType());
-            String captionTitle = elementType + ": " + element.getName();
+            String captionTitle = "Results" + ": " + element.getName();
             globalParameterTableDom.add(0, caption(captionTitle));
         } // If: table is not empty
 
@@ -310,7 +306,12 @@ public class ElementResultsWriter {
         } // Else: mapKey is not found
 
         if(mapKey.contains("Percent")) {
-            mapData = mapData + "%";
+            if(mapData.equals("Not specified")) {
+                mapData = StringBeautifier.beautifyString(mapData);
+            } // If: Not specified
+            else {
+                mapData = StringBeautifier.beautifyString(mapData) + "%";
+            } // Else: Specified
         } // If: is a percentage
 
         List<String> rowData = Arrays.asList(dataName, mapData);

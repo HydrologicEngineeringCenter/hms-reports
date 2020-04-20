@@ -15,6 +15,7 @@ public abstract class ReportWriter {
     List<SummaryChoice> reportSummaryChoice;
     Map<String, List<String>> globalParameterChoices;
     List<String> chosenPlots;
+    Map<String, List<String>> elementParameterizationChoice;
 
     public enum SummaryChoice {GLOBAL_RESULTS_SUMMARY, ELEMENT_RESULTS_SUMMARY, GLOBAL_PARAMETER_SUMMARY}
 
@@ -26,6 +27,7 @@ public abstract class ReportWriter {
         this.reportSummaryChoice = builder.reportSummaryChoice;
         this.chosenPlots = builder.chosenPlots;
         this.globalParameterChoices = builder.globalParameterChoices;
+        this.elementParameterizationChoice = builder.elementParameterizationChoice;
     }
 
     public static class Builder{
@@ -36,6 +38,7 @@ public abstract class ReportWriter {
         private List<SummaryChoice> reportSummaryChoice;
         private List<String> chosenPlots;
         private Map<String, List<String>> globalParameterChoices;
+        private Map<String, List<String>> elementParameterizationChoice;
 
         public Builder pathToInput(final String pathToInput) {
             this.pathToInput = Paths.get(pathToInput);
@@ -72,6 +75,11 @@ public abstract class ReportWriter {
             return this;
         } // globalParameterChoices()
 
+        public Builder elementParameterizationChoice(final Map<String, List<String>> elementParameterizationChoice) {
+            this.elementParameterizationChoice = elementParameterizationChoice;
+            return this;
+        } // elementParameterizationChoice()
+
         public ReportWriter build(){
             if (pathToDestination.toString().matches(".*.html")){
                 return new HmsReportWriter(this);
@@ -83,5 +91,5 @@ public abstract class ReportWriter {
 
     public static Builder builder() { return new Builder(); }
 
-    public abstract void write();
+    public abstract List<Element> write();
 }
