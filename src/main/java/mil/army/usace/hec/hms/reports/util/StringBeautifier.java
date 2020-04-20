@@ -10,6 +10,10 @@ public class StringBeautifier {
     public static String beautifyString (String name) {
         String result = "";
 
+        if(name.equals("")) {
+            return name;
+        } // If: empty, return
+
         String camelCasePattern = "[a-z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*"; // Ex: camelCase, camelCaseATest3
         String pascalCasePattern = "[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*"; // Ex: PascalCase, PascalCaseATest
         String upperUnderscorePattern = "([A-Z]+[_])+[A-Z]+"; // Ex: UNDER_SCORE, UNDER_SCORE_TEST
@@ -30,7 +34,7 @@ public class StringBeautifier {
             result = name;
         } // Else: Doesn't match any special
 
-        return result;
+        return result.trim();
     } // beautifyString
     private static String beautifyCamelCase (String name) {
         // Capitalizing the first letter. Turn into PascalCase

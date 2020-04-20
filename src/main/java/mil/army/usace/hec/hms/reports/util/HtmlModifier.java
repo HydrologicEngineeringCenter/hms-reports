@@ -36,7 +36,7 @@ public class HtmlModifier {
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{}));
     } // printTableHeadRow()
 
-     public static DomContent printTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
+    public static DomContent printTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
         List<DomContent> domList = new ArrayList<>();
 
         for(String data : dataRow) {
@@ -235,6 +235,5 @@ public class HtmlModifier {
 
         return content;
     } // getStyleCss()
-
 
 } // FigureCreator class
