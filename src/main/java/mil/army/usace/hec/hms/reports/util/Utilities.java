@@ -3,6 +3,7 @@ package mil.army.usace.hec.hms.reports.util;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Process;
+import mil.army.usace.hec.hms.reports.enums.ParameterSummary;
 import mil.army.usace.hec.hms.reports.io.BasinInputParser;
 import mil.army.usace.hec.hms.reports.io.XmlBasinResultsParser;
 
@@ -40,7 +41,7 @@ public class Utilities {
         return x[0];
     } // getFilePath()
 
-    public static Map<String, List<String>> getParameterMap(String pathToJsonInput, String parameterChoice) {
+    public static Map<String, List<String>> getParameterMap(String pathToJsonInput, ParameterSummary parameterChoice) {
         Map<String, List<String>> parameterMap = new HashMap<>();
         BasinInputParser basinInputParser = BasinInputParser.builder().pathToBasinInputFile(pathToJsonInput).build();
         List<ElementInput> elementList = basinInputParser.getElementInput();
@@ -53,12 +54,12 @@ public class Utilities {
                 List<Process> processList = element.getProcesses();
 
                 for(Process process : processList) {
-                    if(parameterChoice.equals("global")) {
+                    if(parameterChoice == ParameterSummary.GLOBAL_PARAMETER) {
                         if(ValidCheck.unnecessaryGlobalParameterProcesses().contains(process.getName())) {
                             continue;
                         } // Skip: unnecessary processes
                     } // If: Global Parameters
-                    else if(parameterChoice.equals("element")) {
+                    else if(parameterChoice == ParameterSummary.ELEMENT_PARAMETER) {
                         if(ValidCheck.unnecessarySingleProcesses().contains(process.getName())) {
                             continue;
                         } // Skip: unnecessary element processes
@@ -73,7 +74,7 @@ public class Utilities {
         } // Loop: through all elements
 
         /* These four basin types do not contain Global Parameters */
-        if(parameterChoice.equals("global")) {
+        if(parameterChoice == ParameterSummary.GLOBAL_PARAMETER) {
             parameterMap.remove("Sink");
             parameterMap.remove("Source");
             parameterMap.remove("Reservoir");

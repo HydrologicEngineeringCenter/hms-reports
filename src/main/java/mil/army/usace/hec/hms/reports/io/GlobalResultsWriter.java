@@ -2,6 +2,7 @@ package mil.army.usace.hec.hms.reports.io;
 
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import static j2html.TagCreator.*;
 
 public class GlobalResultsWriter {
     private List<Element> elementList;
-    private List<ReportWriter.SummaryChoice> reportSummaryChoice;
+    private List<SummaryChoice> reportSummaryChoice;
 
     /* Constructors */
     private GlobalResultsWriter(Builder builder){
@@ -22,14 +23,14 @@ public class GlobalResultsWriter {
     } // GlobalResultsWriter Constructor
     public static class Builder{
         List<Element> elementList;
-        List<ReportWriter.SummaryChoice> reportSummaryChoice;
+        List<SummaryChoice> reportSummaryChoice;
 
         public Builder elementList(List<Element> elementList){
             this.elementList = elementList;
             return this;
         } // 'elementList' constructor
 
-        public Builder reportSummaryChoice(List<ReportWriter.SummaryChoice> reportSummaryChoice) {
+        public Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
             this.reportSummaryChoice = reportSummaryChoice;
             return this;
         } // 'reportSummaryChoice' constructor
@@ -44,7 +45,7 @@ public class GlobalResultsWriter {
 
     /* Global Summary Table */
     DomContent printGlobalSummary() {
-        if(reportSummaryChoice == null || !reportSummaryChoice.contains(ReportWriter.SummaryChoice.GLOBAL_RESULTS_SUMMARY)) {
+        if(reportSummaryChoice == null || !reportSummaryChoice.contains(SummaryChoice.GLOBAL_RESULTS_SUMMARY)) {
             return null;
         } // If: Report Summary Choice contains GLOBAL_SUMMARY
 

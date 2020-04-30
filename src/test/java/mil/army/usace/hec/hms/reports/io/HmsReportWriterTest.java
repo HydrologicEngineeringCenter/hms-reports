@@ -1,6 +1,8 @@
 package mil.army.usace.hec.hms.reports.io;
 
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.enums.ParameterSummary;
+import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.Utilities;
 import org.junit.jupiter.api.Test;
 
@@ -39,7 +41,7 @@ class HmsReportWriterTest {
                 .pathToResult("src/resources/MiddleColumbia/RUN_WY2017.results")
                 .pathToDestination("src/resources/output-long.html")
                 .projectDirectory("C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia")
-                .reportSummaryChoice(Arrays.asList(ReportWriter.SummaryChoice.GLOBAL_RESULTS_SUMMARY, ReportWriter.SummaryChoice.GLOBAL_PARAMETER_SUMMARY, ReportWriter.SummaryChoice.ELEMENT_RESULTS_SUMMARY))
+                .reportSummaryChoice(Arrays.asList(SummaryChoice.GLOBAL_RESULTS_SUMMARY, SummaryChoice.GLOBAL_PARAMETER_SUMMARY, SummaryChoice.ELEMENT_RESULTS_SUMMARY))
                 .globalParameterChoices(globalParameterChoices)
                 .build();
 
@@ -54,15 +56,32 @@ class HmsReportWriterTest {
         String projectDirectory = "C:\\HyperNick\\Punx";
 
         /* The user choosing what global parameters to hide/not print out */
-        Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, "global");
-        Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, "element");
+        Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
+        Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
+
+        /* Removing Element Parameters */
+//        availableElementParameter.remove("Subbasin");
+//        availableElementParameter.remove("Reach");
+
+        availableElementParameter.get("Subbasin").remove("Loss Rate");
+
+        /* Removing Global Parameters */
+//        availableGlobalParameter.remove("Subbasin");
+//        availableGlobalParameter.remove("Reach");
+
+        availableGlobalParameter.get("Subbasin").remove("Area");
+        availableGlobalParameter.get("Subbasin").remove("Loss Rate");
+        availableGlobalParameter.get("Subbasin").remove("Canopy");
+        availableGlobalParameter.get("Subbasin").remove("Transform");
+//        availableGlobalParameter.get("Subbasin").remove("Baseflow");
+        availableGlobalParameter.get("Reach").remove("Route");
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)
                 .pathToDestination(pathToDestination)
                 .projectDirectory(projectDirectory)
-                .reportSummaryChoice(Arrays.asList(ReportWriter.SummaryChoice.GLOBAL_RESULTS_SUMMARY, ReportWriter.SummaryChoice.GLOBAL_PARAMETER_SUMMARY, ReportWriter.SummaryChoice.ELEMENT_RESULTS_SUMMARY))
+                .reportSummaryChoice(Arrays.asList(SummaryChoice.GLOBAL_RESULTS_SUMMARY, SummaryChoice.GLOBAL_PARAMETER_SUMMARY, SummaryChoice.ELEMENT_RESULTS_SUMMARY))
                 .elementParameterizationChoice(availableElementParameter)
                 .globalParameterChoices(availableGlobalParameter)
                 .build();

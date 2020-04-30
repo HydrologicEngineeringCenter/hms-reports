@@ -1,6 +1,7 @@
 package mil.army.usace.hec.hms.reports.io;
 
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,8 +17,6 @@ public abstract class ReportWriter {
     Map<String, List<String>> globalParameterChoices;
     List<String> chosenPlots;
     Map<String, List<String>> elementParameterizationChoice;
-
-    public enum SummaryChoice {GLOBAL_RESULTS_SUMMARY, ELEMENT_RESULTS_SUMMARY, GLOBAL_PARAMETER_SUMMARY}
 
     ReportWriter(Builder builder){
         this.pathToInput = builder.pathToInput;

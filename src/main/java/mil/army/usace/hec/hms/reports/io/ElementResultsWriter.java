@@ -2,6 +2,7 @@ package mil.army.usace.hec.hms.reports.io;
 
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 
@@ -11,7 +12,7 @@ import static j2html.TagCreator.*;
 
 public class ElementResultsWriter {
     private List<Element> elementList;
-    private List<ReportWriter.SummaryChoice> reportSummaryChoice;
+    private List<SummaryChoice> reportSummaryChoice;
 
     /* Constructors */
     private ElementResultsWriter(Builder builder){
@@ -20,14 +21,14 @@ public class ElementResultsWriter {
     } // ElementResultsWriter Constructor
     public static class Builder{
         List<Element> elementList;
-        List<ReportWriter.SummaryChoice> reportSummaryChoice;
+        List<SummaryChoice> reportSummaryChoice;
 
         public Builder elementList(List<Element> elementList){
             this.elementList = elementList;
             return this;
         } // 'elementList' constructor
 
-        public Builder reportSummaryChoice(List<ReportWriter.SummaryChoice> reportSummaryChoice) {
+        public Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
             this.reportSummaryChoice = reportSummaryChoice;
             return this;
         } // 'reportSummaryChoice' constructor
@@ -42,7 +43,7 @@ public class ElementResultsWriter {
 
     /* Element Results Tables */
     Map<String, DomContent> printListResultsWriter() {
-        if(reportSummaryChoice == null || !reportSummaryChoice.contains(ReportWriter.SummaryChoice.ELEMENT_RESULTS_SUMMARY)) {
+        if(reportSummaryChoice == null || !reportSummaryChoice.contains(SummaryChoice.ELEMENT_RESULTS_SUMMARY)) {
             return null;
         } // If: Report Summary Choice contains PARAMETER_SUMMARY
 

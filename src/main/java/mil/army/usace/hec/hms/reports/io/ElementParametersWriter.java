@@ -3,6 +3,7 @@ package mil.army.usace.hec.hms.reports.io;
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.*;
 import mil.army.usace.hec.hms.reports.Process;
+import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.*;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -23,7 +24,7 @@ import static j2html.TagCreator.*;
 public class ElementParametersWriter {
     private List<Element> elementList;
     private List<String> chosenPlots;
-    private List<ReportWriter.SummaryChoice> reportSummaryChoice;
+    private List<SummaryChoice> reportSummaryChoice;
     private Map<String, List<String>> elementParameterizationChoice;
 
     /* Constructors */
@@ -36,7 +37,7 @@ public class ElementParametersWriter {
     public static class Builder{
         List<Element> elementList;
         List<String> chosenPlots;
-        List<ReportWriter.SummaryChoice> reportSummaryChoice;
+        List<SummaryChoice> reportSummaryChoice;
         Map<String, List<String>> elementParameterizationChoice;
 
         public Builder elementList(List<Element> elementList){
@@ -49,7 +50,7 @@ public class ElementParametersWriter {
             return this;
         } // 'chosenPlots' constructor
 
-        public Builder reportSummaryChoice(List<ReportWriter.SummaryChoice> reportSummaryChoice) {
+        public Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
             this.reportSummaryChoice = reportSummaryChoice;
             return this;
         } // 'reportSummaryChoice' constructor
@@ -110,6 +111,10 @@ public class ElementParametersWriter {
         List<Process> processTable = new ArrayList<>();  // For Processes with Parameters to make a table
 
         for(Process process : processList) {
+            if(!this.elementParameterizationChoice.get(elementType).contains(StringBeautifier.beautifyString(process.getName()))) {
+                continue;
+            } // If: Choice doesn't contain process's name, skip
+
             if(process.getParameters().isEmpty())
                 processSingle.add(process);
             else
@@ -147,17 +152,6 @@ public class ElementParametersWriter {
 
         for(Process process : tableProcesses) {
             String reformatName = StringBeautifier.beautifyString(process.getName());
-            boolean skipProcess = false;
-            for(String keyName : this.elementParameterizationChoice.keySet()) {
-                if(!this.elementParameterizationChoice.get(keyName).contains(reformatName)) {
-                    skipProcess = true;
-                    break;
-                } // If: Unnecessary
-            } // Loop: through all of the user's options
-
-            if(skipProcess){
-                continue;
-            } // Skip: Processes that were not chosen
             List<Parameter> parameterList = process.getParameters();
             DomContent tableDom  = printParameterTable(parameterList, reformatName); // The Table of Parameters
             tableProcessesDomList.add(tableDom);

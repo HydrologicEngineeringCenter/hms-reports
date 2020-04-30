@@ -4,6 +4,7 @@ import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
+import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 
@@ -14,7 +15,7 @@ import static j2html.TagCreator.*;
 
 public class GlobalParametersWriter {
     private List<Element> elementList;
-    private List<ReportWriter.SummaryChoice> reportSummaryChoice;
+    private List<SummaryChoice> reportSummaryChoice;
     private Map<String, List<String>> globalParameterChoices; // {"Subbasin", ["Canopy", "Loss", etc...]}
 
     /* Constructors */
@@ -25,7 +26,7 @@ public class GlobalParametersWriter {
     } // GlobalParametersWriter Constructor
     public static class Builder{
         List<Element> elementList;
-        List<ReportWriter.SummaryChoice> reportSummaryChoice;
+        List<SummaryChoice> reportSummaryChoice;
         private Map<String, List<String>> globalParameterChoices;
 
         public Builder elementList(List<Element> elementList){
@@ -33,7 +34,7 @@ public class GlobalParametersWriter {
             return this;
         } // 'elementList' constructor
 
-        public Builder reportSummaryChoice(List<ReportWriter.SummaryChoice> reportSummaryChoice) {
+        public Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
             this.reportSummaryChoice = reportSummaryChoice;
             return this;
         } // 'reportSummaryChoice' constructor
@@ -53,7 +54,7 @@ public class GlobalParametersWriter {
 
     /* Main functions */
     DomContent printListGlobalParameter() {
-        if(reportSummaryChoice == null || !reportSummaryChoice.contains(ReportWriter.SummaryChoice.GLOBAL_PARAMETER_SUMMARY)) {
+        if(reportSummaryChoice == null || !reportSummaryChoice.contains(SummaryChoice.GLOBAL_PARAMETER_SUMMARY)) {
             return null;
         } // If: Report Summary Choice contains PARAMETER_SUMMARY
 
@@ -219,45 +220,45 @@ public class GlobalParametersWriter {
             DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
             areaRowDomList.add(0, headerDom);
             areaRowDomList.add(0, caption("Area"));
+            DomContent parameterTable = table(attrs(tdAttribute), areaRowDomList.toArray(new DomContent[]{}));
+            subbasinParameterDomList.add(parameterTable);
         } // Add Header for table if it's not empty
-        DomContent parameterTable = table(attrs(tdAttribute), areaRowDomList.toArray(new DomContent[]{}));
-        subbasinParameterDomList.add(parameterTable);
 
         if(!lossRowDomList.isEmpty()) {
             List<String> headerData = Arrays.asList("Element Name", "Initial Deficit (IN)", "Maximum Storage (IN)", "Constant Rate (IN/HR)", "Impervious (%)");
             DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
             lossRowDomList.add(0, headerDom);
             lossRowDomList.add(0, caption("Loss Rate"));
+            DomContent parameterTable = table(attrs(tdAttribute), lossRowDomList.toArray(new DomContent[]{}));
+            subbasinParameterDomList.add(parameterTable);
         } // Add Header for table if it's not empty
-        parameterTable = table(attrs(tdAttribute), lossRowDomList.toArray(new DomContent[]{}));
-        subbasinParameterDomList.add(parameterTable);
 
         if(!canopyRowDomList.isEmpty()) {
             List<String> headerData = Arrays.asList("Element Name", "Initial Storage (%)", "Max Storage (IN)", "Crop Coefficient", "Evapotranspiration", "Uptake Method");
             DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
             canopyRowDomList.add(0, headerDom);
             canopyRowDomList.add(0, caption("Canopy"));
+            DomContent parameterTable = table(attrs(tdAttribute), canopyRowDomList.toArray(new DomContent[]{}));
+            subbasinParameterDomList.add(parameterTable);
         } // Add Header for table if it's not empty
-        parameterTable = table(attrs(tdAttribute), canopyRowDomList.toArray(new DomContent[]{}));
-        subbasinParameterDomList.add(parameterTable);
 
         if(!transformRowDomList.isEmpty()) {
             List<String> headerData = Arrays.asList("Element Name", "Time of Concentration (HR)", "Storage Coefficient (HR)");
             DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
             transformRowDomList.add(0, headerDom);
             transformRowDomList.add(0, caption("Transform"));
+            DomContent parameterTable = table(attrs(tdAttribute), transformRowDomList.toArray(new DomContent[]{}));
+            subbasinParameterDomList.add(parameterTable);
         } // Add Header for table if it's not empty
-        parameterTable = table(attrs(tdAttribute), transformRowDomList.toArray(new DomContent[]{}));
-        subbasinParameterDomList.add(parameterTable);
 
         if(!baseflowRowDomList.isEmpty()) {
             List<String> headerData = Arrays.asList("Element Name", "Initial (CFS)", "Fraction", "Coefficient (HR)", "Steps");
             DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
             baseflowRowDomList.add(0, headerDom);
             baseflowRowDomList.add(0, caption("Baseflow"));
+            DomContent parameterTable = table(attrs(tdAttribute), baseflowRowDomList.toArray(new DomContent[]{}));
+            subbasinParameterDomList.add(parameterTable);
         } // Add Header for table if it's not empty
-        parameterTable = table(attrs(tdAttribute), baseflowRowDomList.toArray(new DomContent[]{}));
-        subbasinParameterDomList.add(parameterTable);
 
         if(!subbasinParameterDomList.isEmpty()) {
             subbasinParameterDomList.add(0, h2(attrs(".global-header"), "Global Parameter - Subbasin"));
@@ -319,15 +320,16 @@ public class GlobalParametersWriter {
             List<String> headerList = Arrays.asList("Reach", "Initial Type", methodName + " K (HR)", methodName + " X", "Number of Subreaches");
             routeRowDomList.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
             routeRowDomList.add(0, caption("Route"));
+            DomContent parameterTable = table(attrs(tdAttribute), routeRowDomList.toArray(new DomContent[]{}));
+            reachParameterDomList.add(parameterTable);
         } // If: Muskingum Method
         else if(methodName.equals(StringBeautifier.beautifyString("MUSKINGUM_CUNGE"))) {
             List<String> headerList = Arrays.asList("Reach", "Initial Type", "Length (FT)", "Slope (FT/FT)", "Manning's n", "Space-Time Method", "Index Method", "Index Flow", "Shape");
             routeRowDomList.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
             routeRowDomList.add(0, caption("Route"));
+            DomContent parameterTable = table(attrs(tdAttribute), routeRowDomList.toArray(new DomContent[]{}));
+            reachParameterDomList.add(parameterTable);
         } // Else If: Muskingum Cunge Method
-
-        DomContent parameterTable = table(attrs(tdAttribute), routeRowDomList.toArray(new DomContent[]{}));
-        reachParameterDomList.add(parameterTable);
 
         if(!reachParameterDomList.isEmpty()) {
             reachParameterDomList.add(0, h2(attrs(".global-header"), "Global Parameter - Reach"));
