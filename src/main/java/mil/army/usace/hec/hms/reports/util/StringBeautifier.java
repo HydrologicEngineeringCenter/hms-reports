@@ -1,8 +1,13 @@
 package mil.army.usace.hec.hms.reports.util;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class StringBeautifier {
     private StringBeautifier() {}
@@ -107,5 +112,15 @@ public class StringBeautifier {
 
         return result;
     } // getPlotDivName
+    public static String readFileToString(File file) {
+        StringBuilder contentBuilder = new StringBuilder();
+        try (Stream<String> stream = Files.lines(file.toPath(), StandardCharsets.UTF_8))
+        { stream.forEach(s -> contentBuilder.append(s).append("\n")); }
+        catch (IOException e) { e.printStackTrace(); }
+        return contentBuilder.toString();
+    } // readFileToString()
+    public static void writeStringToFile(File outputFile, String content) {
+        try { Files.write(outputFile.toPath(), content.getBytes()); } catch (IOException e) { e.printStackTrace(); }
+    } // writeStringToFile()
 
 } // StringBeautifier class

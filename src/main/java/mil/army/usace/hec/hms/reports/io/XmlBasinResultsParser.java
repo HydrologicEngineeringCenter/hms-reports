@@ -7,16 +7,16 @@ import hec.heclib.util.HecTimeArray;
 import hec.io.TimeSeriesContainer;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
-import mil.army.usace.hec.hms.reports.util.TimeConverter;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
+import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.TimeConverter;
 import mil.army.usace.hec.hms.reports.util.Utilities;
-import org.apache.commons.io.FileUtils;
+import mil.army.usace.hec.hms.reports.util.ValidCheck;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -54,12 +54,8 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     private static JSONObject getJsonObject(String pathToJson) {
         /* Read in XML File */
         File file = new File(pathToJson);
-        String content = null;
         /* Read XML's content to 'content' */
-        try { content = FileUtils.readFileToString(file, "utf-8"); }
-        catch (IOException e) { e.printStackTrace(); }
-        /* Convert XML string to JSONObject */
-        assert content != null;
+        String content = StringBeautifier.readFileToString(file);
         JSONObject object = XML.toJSONObject(content);
 
         return object;
@@ -217,9 +213,9 @@ public class XmlBasinResultsParser extends BasinResultsParser {
                 JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
                 String timeSeriesType = timeSeriesTypeObject.optString("displayString");
 
-                if(!availablePlots.contains(timeSeriesType)) {
+                if(!availablePlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
                     availablePlots.add(timeSeriesType);
-                } // If: plot hasn't been added
+                } // If: plot hasn't been added and plot is not a default plot; then add plot
             } // Loop through all the timeSeriesArray
         } // Loop through all element's results, and populate
 

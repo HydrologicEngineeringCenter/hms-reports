@@ -3,12 +3,11 @@ package mil.army.usace.hec.hms.reports.io;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
-import org.apache.commons.io.FileUtils;
+import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,18 +34,9 @@ public class JsonBasinInputParser extends BasinInputParser {
     private JSONObject getJsonObject(String pathToJson) {
         /* Read in Json File */
         File file = new File(pathToJson);
-        String content = null;
-
-        try {
-            content = FileUtils.readFileToString(file, "utf-8");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } // Read Json's content to 'content'
-
+        String content = StringBeautifier.readFileToString(file);
         /* Convert JSON string to JSONObject */
-        assert content != null;
         return new JSONObject(content);
-
     } // getJsonObject()
     private ElementInput populateElement(JSONObject object) {
         /* Parsing each ElementInput for its: name, elementType, and Processes */

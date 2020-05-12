@@ -1,25 +1,16 @@
 package mil.army.usace.hec.hms.reports.util;
 
 import j2html.tags.DomContent;
-import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import tech.tablesaw.api.Table;
-import tech.tablesaw.plotly.components.*;
-import tech.tablesaw.plotly.traces.ScatterTrace;
-import tech.tablesaw.plotly.traces.Trace;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static j2html.TagCreator.*;
-import static j2html.TagCreator.tr;
 
 public class HtmlModifier {
     private HtmlModifier() {}
@@ -35,7 +26,6 @@ public class HtmlModifier {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{}));
     } // printTableHeadRow()
-
     public static DomContent printTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
         List<DomContent> domList = new ArrayList<>();
 
@@ -47,7 +37,6 @@ public class HtmlModifier {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{})); // Table Row type
     } // printTableDataRow()
-
     public static DomContent extractPlotlyJavascript(String plotHtml) {
         Document doc = Jsoup.parse(plotHtml);
         Elements elements = doc.select("body").first().children();
@@ -55,45 +44,22 @@ public class HtmlModifier {
         DomContent domContent = join(content);
         return domContent;
     } // extractPlotlyJavascript()
-
     public static void writeToFile(String pathToHtml, String content) {
         /* Writing to HTML file */
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
         content = content.replace("layout);", "layout, {staticPlot: true});");
         String fullPathToCss = Paths.get(pathToHtml).getParent().toAbsolutePath().toString() + File.separator + "style.css";
-        try {
-            FileUtils.writeStringToFile(new File(pathToHtml), content, StandardCharsets.UTF_8);
-            FileUtils.writeStringToFile(new File(fullPathToCss), getStyleCss(), StandardCharsets.UTF_8);
-        }
-        catch (IOException e) { e.printStackTrace(); }
+        StringBeautifier.writeStringToFile(new File(pathToHtml), content);
+        StringBeautifier.writeStringToFile(new File(fullPathToCss), getStyleCss());
         setPlotlyFont(fullPathToHtml, "Vollkorn, serif", "12");
-//        convertPlotlyToStatic(fullPathToHtml);
     } // writeToFile()
-
-    private static void convertPlotlyToStatic(String pathToHtml) {
-        try {
-            String htmlContent = FileUtils.readFileToString(new File(pathToHtml), StandardCharsets.UTF_8);
-            htmlContent = htmlContent.replace("layout);", "layout, {staticPlot: true});");
-            String pathToStaticPlotHtml = pathToHtml.replace(".html", "-static.html");
-            File staticPlotHtml = new File(pathToStaticPlotHtml);
-            FileUtils.writeStringToFile(staticPlotHtml, htmlContent, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    } // convertPlotlyToStatic()
-
     private static void setPlotlyFont(String pathToHtml, String fontFamily, String fontSize) {
-        try {
-            String htmlContent = FileUtils.readFileToString(new File(pathToHtml), StandardCharsets.UTF_8);
-            htmlContent = htmlContent.replace("var layout = {",
-                    "var layout = { font: { family: '" + fontFamily + "', size: " + fontSize + "},");
-            File staticPlotHtml = new File(pathToHtml);
-            FileUtils.writeStringToFile(staticPlotHtml, htmlContent, StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String htmlContent = StringBeautifier.readFileToString(new File(pathToHtml));
+        htmlContent = htmlContent.replace("var layout = {",
+                "var layout = { font: { family: '" + fontFamily + "', size: " + fontSize + "},");
+        File staticPlotHtml = new File(pathToHtml);
+        StringBeautifier.writeStringToFile(staticPlotHtml, htmlContent);
     } // setPlotlyFont()
-
     private static String getStyleCss() {
         String content = "@import url('https://fonts.googleapis.com/css?family=Vollkorn:400,700&display=swap');\n" +
                 "\n" +
@@ -106,13 +72,18 @@ public class HtmlModifier {
                 "\n" +
                 "/* CSS for Global tables's div */\n" +
                 "div.global-parameter{\n" +
-                "    page-break-after: always;\n" +
+                "    page-break-before: always;\n" +
                 "}\n" +
                 "\n" +
                 "/* CSS for each Element */\n" +
                 "div.element{\n" +
                 "\t/* Page break after each element */\n" +
                 "    page-break-after: always;\n" +
+                "}\n" +
+                "\n" +
+                "/* CSS for each ElementInput */\n" +
+                "div.element-input{\n" +
+                "\tpage-break-before: always;\n" +
                 "}\n" +
                 "\n" +
                 "/* CSS for each ElementInput's All Tables of Processes */\n" +
@@ -173,6 +144,10 @@ public class HtmlModifier {
                 "    page-break-inside: avoid;\n" +
                 "    width: 100%;\n" +
                 "    padding-bottom: 0.3in;\n" +
+                "}\n" +
+                "\n" +
+                "table.global-parameter:nth-child(2) {\n" +
+                "\tpage-break-inside: auto;\n" +
                 "}\n" +
                 "\n" +
                 "/* CSS for all Data Columns */\n" +

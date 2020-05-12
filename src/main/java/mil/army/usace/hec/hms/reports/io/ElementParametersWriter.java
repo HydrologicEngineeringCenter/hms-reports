@@ -1,19 +1,15 @@
 package mil.army.usace.hec.hms.reports.io;
 
 import j2html.tags.DomContent;
-import mil.army.usace.hec.hms.reports.*;
 import mil.army.usace.hec.hms.reports.Process;
+import mil.army.usace.hec.hms.reports.*;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.*;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.io.FileUtils;
 import tech.tablesaw.api.Table;
 import tech.tablesaw.plotly.components.Figure;
 import tech.tablesaw.plotly.components.Page;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -45,17 +41,17 @@ public class ElementParametersWriter {
             return this;
         } // 'elementList' constructor
 
-        public Builder chosenPlots(List<String> chosenPlots) {
+        Builder chosenPlots(List<String> chosenPlots) {
             this.chosenPlots = chosenPlots;
             return this;
         } // 'chosenPlots' constructor
 
-        public Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
+        Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
             this.reportSummaryChoice = reportSummaryChoice;
             return this;
         } // 'reportSummaryChoice' constructor
 
-        public Builder elementParameterizationChoice(Map<String, List<String>> elementParameterizationChoice) {
+        Builder elementParameterizationChoice(Map<String, List<String>> elementParameterizationChoice) {
             this.elementParameterizationChoice = elementParameterizationChoice;
             return this;
         } // 'elementParameterizationChoice' constructor
@@ -337,28 +333,20 @@ public class ElementParametersWriter {
         } // Loop: to convert valueArray to String
 
         /* Writing time and value out to a csv file */
-        try {
-            File outputFile = new File("timeSeriesResult.csv");
-            FileWriter writer = new FileWriter(outputFile);
-            CSVPrinter printer = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(columnNames));
+        List<String> csvRowList = new ArrayList<>();
+        String headRow = columnNames[0] + "," + columnNames[1];
+        csvRowList.add(headRow);
+        for(int i = 0; i < reformattedTimeList.size(); i++) {
+            String row = reformattedTimeList.get(i) + "," + reformattedValueList.get(i);
+            csvRowList.add(row);
+        } // Loop: to get a csv-style list of string (rows)
+        String csvFileString = String.join("\n", csvRowList);
 
-            for(int i = 0; i < reformattedTimeList.size(); i++) {
-                String time = reformattedTimeList.get(i);
-                String value = reformattedValueList.get(i);
-                printer.printRecord(time, value);
-            } // Loop: to print out every time & value pair
-
-            // Flush Printer, and Close Writer
-            printer.flush();
-            writer.close();
-
-            // Read in CSV file to get a Table
-            timeSeriesPlot = Table.read().csv(outputFile);
-            timeSeriesPlot.setName(timeSeriesResult.getType());
-            FileUtils.deleteQuietly(outputFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        File outputFile = new File("timeSeriesResult.csv");
+        StringBeautifier.writeStringToFile(outputFile, csvFileString);
+        try { timeSeriesPlot = Table.read().csv(outputFile); } catch (IOException e) { e.printStackTrace(); }
+        assert timeSeriesPlot != null;
+        timeSeriesPlot.setName(timeSeriesResult.getType());
 
         return timeSeriesPlot;
     } // timeSeriesToCsv
