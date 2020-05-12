@@ -76,7 +76,7 @@ public class GlobalResultsWriter {
 
         DomContent globalSummaryTable = table(attrs(tdAttribute), globalSummaryDomList.toArray(new DomContent[]{}));
         globalSummaryDomList.clear();
-        globalSummaryDomList.add(h2(attrs(tdAttribute), "Global Summary"));
+        globalSummaryDomList.add(h2(attrs(tdAttribute), "Global Results Summary"));
         globalSummaryDomList.add(globalSummaryTable);
 
         return div(attrs(tdAttribute), globalSummaryDomList.toArray(new DomContent[]{}));

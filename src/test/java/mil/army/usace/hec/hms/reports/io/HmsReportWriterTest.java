@@ -7,7 +7,6 @@ import mil.army.usace.hec.hms.reports.util.Utilities;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,17 +31,22 @@ class HmsReportWriterTest {
 
     @Test
     void writeLong() {
-        Map<String, List<String>> globalParameterChoices = new HashMap<>();
-        globalParameterChoices.put("Subbasin", Arrays.asList("Area", "Canopy", "Loss Rate", "Transform", "Baseflow"));
-        globalParameterChoices.put("Reach", Arrays.asList("Route"));
+        String pathToInput  = "src/resources/MiddleColumbia/MiddleColumbia_WY2017.basin.json";
+        String pathToResult = "src/resources/MiddleColumbia/RUN_WY2017.results";
+        String pathToOutput = "src/resources/output-long.html";
+        String projectDir   = "C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia";
+
+        Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
+        Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
         ReportWriter reportWriter = ReportWriter.builder()
-                .pathToInput("src/resources/MiddleColumbia/MiddleColumbia_WY2017.basin.json")
-                .pathToResult("src/resources/MiddleColumbia/RUN_WY2017.results")
-                .pathToDestination("src/resources/output-long.html")
-                .projectDirectory("C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia")
+                .pathToInput(pathToInput)
+                .pathToResult(pathToResult)
+                .pathToDestination(pathToOutput)
+                .projectDirectory(projectDir)
                 .reportSummaryChoice(Arrays.asList(SummaryChoice.GLOBAL_RESULTS_SUMMARY, SummaryChoice.GLOBAL_PARAMETER_SUMMARY, SummaryChoice.ELEMENT_RESULTS_SUMMARY))
-                .globalParameterChoices(globalParameterChoices)
+                .globalParameterChoices(availableGlobalParameter)
+                .elementParameterizationChoice(availableElementParameter)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -63,18 +67,18 @@ class HmsReportWriterTest {
 //        availableElementParameter.remove("Subbasin");
 //        availableElementParameter.remove("Reach");
 
-        availableElementParameter.get("Subbasin").remove("Loss Rate");
+//        availableElementParameter.get("Subbasin").remove("Loss Rate");
 
         /* Removing Global Parameters */
 //        availableGlobalParameter.remove("Subbasin");
 //        availableGlobalParameter.remove("Reach");
 
-        availableGlobalParameter.get("Subbasin").remove("Area");
-        availableGlobalParameter.get("Subbasin").remove("Loss Rate");
-        availableGlobalParameter.get("Subbasin").remove("Canopy");
-        availableGlobalParameter.get("Subbasin").remove("Transform");
+//        availableGlobalParameter.get("Subbasin").remove("Area");
+//        availableGlobalParameter.get("Subbasin").remove("Loss Rate");
+//        availableGlobalParameter.get("Subbasin").remove("Canopy");
+//        availableGlobalParameter.get("Subbasin").remove("Transform");
 //        availableGlobalParameter.get("Subbasin").remove("Baseflow");
-        availableGlobalParameter.get("Reach").remove("Route");
+//        availableGlobalParameter.get("Reach").remove("Route");
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)

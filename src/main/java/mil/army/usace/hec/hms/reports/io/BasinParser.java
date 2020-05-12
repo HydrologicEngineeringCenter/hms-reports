@@ -36,7 +36,7 @@ public class BasinParser {
             return this;
         }
 
-        public Builder pathToProjectDirectory(final String pathToProjectDirectory){
+        Builder pathToProjectDirectory(final String pathToProjectDirectory){
             this.pathToProjectDirectory = Paths.get(pathToProjectDirectory);
             return this;
         }

@@ -34,12 +34,12 @@ public class GlobalParametersWriter {
             return this;
         } // 'elementList' constructor
 
-        public Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
+        Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
             this.reportSummaryChoice = reportSummaryChoice;
             return this;
         } // 'reportSummaryChoice' constructor
 
-        public Builder globalParameterChoices(Map<String, List<String>> globalParameterChoices) {
+        Builder globalParameterChoices(Map<String, List<String>> globalParameterChoices) {
             this.globalParameterChoices = globalParameterChoices;
             return this;
         } // 'globalParameterChoices' constructor
@@ -261,78 +261,40 @@ public class GlobalParametersWriter {
         } // Add Header for table if it's not empty
 
         if(!subbasinParameterDomList.isEmpty()) {
-            subbasinParameterDomList.add(0, h2(attrs(".global-header"), "Global Parameter - Subbasin"));
+            subbasinParameterDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Subbasin"));
         } // Add section title if there is subbasin global parameter
 
         /* Return a 'div' that contains all Subbasin's parameter tables */
         return div(attrs(tdAttribute), subbasinParameterDomList.toArray(new DomContent[]{}));
     } // printSubbasinParameterList()
     private DomContent printReachParameterList(List<Element> reachElements, List<String> processChoices) {
-        /* Reach's Parameter (Route) */
+        /* Return 'null' if processChoices does not contain 'route' */
+        if(!processChoices.contains(StringBeautifier.beautifyString("route"))) { return null; }
+
+        /* Reach's Parameter (Route). DomList contains all tables */
         List<DomContent> reachParameterDomList = new ArrayList<>();
-        String methodName = "";
-        String tdAttribute = ".global-parameter";
 
-        List<DomContent> routeRowDomList = new ArrayList<>();
-        for(Element element : reachElements) {
-            /* Map of the element's list of processes */
-            Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
-                    .collect(Collectors.toMap(Process::getName, x -> x));
+        /* Split the Reach-type Elements by their respective method type (Muskingnum, etc...) */
+        List<Element> muskingumMethod = reachElements.stream()
+                .filter(element -> getRouteMethod(element).equals("MUSKINGUM"))
+                .collect(Collectors.toList());
+        List<Element> muskingumCungeMethod = reachElements.stream()
+                .filter(element -> getRouteMethod(element).equals("MUSKINGUM_CUNGE"))
+                .collect(Collectors.toList());
 
-            /* Parameter Table: Route (Muskingum, Muskingum Cunge) */
-            if(processChoices.contains(StringBeautifier.beautifyString("route"))) {
-                Map<String, Parameter> routeParameters = elementProcesses.get("route").getParameters().stream()
-                        .collect(Collectors.toMap(Parameter::getName, x -> x));
-                methodName = StringBeautifier.beautifyString(routeParameters.get("method").getValue());
+        /* For each method, call their respective function to get a Table DOM */
+        if(!muskingumMethod.isEmpty()) {
+            DomContent muskingumTableDom = printMuskingumTable(muskingumMethod);
+            reachParameterDomList.add(muskingumTableDom);
+        } // If: There are Reach Elements with Muskingum Method
+        if(!muskingumCungeMethod.isEmpty()) {
+            DomContent muskingumCungeTableDom = printMuskingumCungeTable(muskingumCungeMethod);
+            reachParameterDomList.add(muskingumCungeTableDom);
+        } // If: There are Reach Elements with Muskingum-Cunge Method
 
-                if(methodName.equals(StringBeautifier.beautifyString("MUSKINGUM"))) {
-                    List<String> routeRowList = new ArrayList<>();
-
-                    routeRowList.add(element.getName()); // Element Name
-                    routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("initialVariable").getValue())); // Initial Type
-                    routeRowList.add(routeParameters.get("k").getValue()); // K value
-                    routeRowList.add(routeParameters.get("x").getValue()); // X value
-                    routeRowList.add(routeParameters.get("steps").getValue()); // Number of Subreaches
-
-                    routeRowDomList.add(HtmlModifier.printTableDataRow(routeRowList, tdAttribute, tdAttribute));
-                } // Muskingum Method
-                else if(methodName.equals(StringBeautifier.beautifyString("MUSKINGUM_CUNGE"))) {
-                    List<String> routeRowList = new ArrayList<>();
-                    Map<String, Parameter> channelParameters = routeParameters.get("channel").getSubParameters().stream()
-                            .collect(Collectors.toMap(Parameter::getName, x -> x));
-
-                    routeRowList.add(element.getName()); // Element Name
-                    routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("initialVariable").getValue())); // Initial Type
-                    routeRowList.add(channelParameters.get("length").getValue()); // Length (FT)
-                    routeRowList.add(channelParameters.get("energySlope").getValue()); // Slope (FT/FT)
-                    routeRowList.add(channelParameters.get("manningsN").getValue()); // Manning's n
-                    routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("spaceTimeMethod").getValue())); // Space-Time Method
-                    routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("indexParameterType").getValue())); // Index Method
-                    routeRowList.add(routeParameters.get("indexFlow").getValue()); // Index Flow (CFS)
-                    routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("channelType").getValue())); // Shape
-
-                    routeRowDomList.add(HtmlModifier.printTableDataRow(routeRowList, tdAttribute, tdAttribute));
-                } // Musking Cunge Method
-            } // If: Route Parameter
-        } // Loop: through all elements to get their row content
-
-        if(methodName.equals(StringBeautifier.beautifyString("MUSKINGUM"))) {
-            List<String> headerList = Arrays.asList("Reach", "Initial Type", methodName + " K (HR)", methodName + " X", "Number of Subreaches");
-            routeRowDomList.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
-            routeRowDomList.add(0, caption("Route"));
-            DomContent parameterTable = table(attrs(tdAttribute), routeRowDomList.toArray(new DomContent[]{}));
-            reachParameterDomList.add(parameterTable);
-        } // If: Muskingum Method
-        else if(methodName.equals(StringBeautifier.beautifyString("MUSKINGUM_CUNGE"))) {
-            List<String> headerList = Arrays.asList("Reach", "Initial Type", "Length (FT)", "Slope (FT/FT)", "Manning's n", "Space-Time Method", "Index Method", "Index Flow", "Shape");
-            routeRowDomList.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
-            routeRowDomList.add(0, caption("Route"));
-            DomContent parameterTable = table(attrs(tdAttribute), routeRowDomList.toArray(new DomContent[]{}));
-            reachParameterDomList.add(parameterTable);
-        } // Else If: Muskingum Cunge Method
-
+        /* Add headings for Global Parameter Summary - Reach */
         if(!reachParameterDomList.isEmpty()) {
-            reachParameterDomList.add(0, h2(attrs(".global-header"), "Global Parameter - Reach"));
+            reachParameterDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Reach"));
         } // Add section title if there is subbasin global parameter
 
         return div(attrs(".global-parameter"), reachParameterDomList.toArray(new DomContent[]{}));
@@ -355,6 +317,72 @@ public class GlobalParametersWriter {
         /* Reservoir-type Basins don't have Parameter Tables */
         return null;
     } // printReservoirParameterList()
+    private DomContent printMuskingumTable(List<Element> muskingumMethod) {
+        List<DomContent> tableRows = new ArrayList<>();
+        String tdAttribute = ".global-parameter";
+
+        /* Loop through all Elements with Muskingum route method */
+        for(Element element : muskingumMethod) {
+            /* Get all information necessary for this element's row */
+            Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
+                    .collect(Collectors.toMap(Process::getName, x -> x));
+            Map<String, Parameter> routeParameters = elementProcesses.get("route").getParameters().stream()
+                    .collect(Collectors.toMap(Parameter::getName, x -> x));
+
+            List<String> routeRowList = new ArrayList<>();
+            routeRowList.add(element.getName()); // Element Name
+            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("initialVariable").getValue())); // Initial Type
+            routeRowList.add(routeParameters.get("k").getValue()); // K value
+            routeRowList.add(routeParameters.get("x").getValue()); // X value
+            routeRowList.add(routeParameters.get("steps").getValue()); // Number of Subreaches
+
+            tableRows.add(HtmlModifier.printTableDataRow(routeRowList, tdAttribute, tdAttribute));
+        } // Loop: through each element
+
+        /* Creating the table's header */
+        String methodName  = StringBeautifier.beautifyString(getRouteMethod(muskingumMethod.get(0)));
+        List<String> headerList = Arrays.asList("Reach", "Initial Type", methodName + " K (HR)", methodName + " X", "Number of Subreaches");
+        tableRows.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
+        tableRows.add(0, caption("Route - " + methodName + " Method"));
+
+        return table(attrs(tdAttribute), tableRows.toArray(new DomContent[]{}));
+    } // printMuskingumTable()
+    private DomContent printMuskingumCungeTable(List<Element> muskingumCungeMethod) {
+        List<DomContent> tableRows = new ArrayList<>();
+        String tdAttribute = ".global-parameter";
+
+        /* Loop through all Elements with Muskingum-Cunge route method */
+        for(Element element : muskingumCungeMethod) {
+            /* Get all information necessary for this element's row */
+            Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
+                    .collect(Collectors.toMap(Process::getName, x -> x));
+            Map<String, Parameter> routeParameters = elementProcesses.get("route").getParameters().stream()
+                    .collect(Collectors.toMap(Parameter::getName, x -> x));
+            Map<String, Parameter> channelParameters = routeParameters.get("channel").getSubParameters().stream()
+                    .collect(Collectors.toMap(Parameter::getName, x -> x));
+
+            List<String> routeRowList = new ArrayList<>();
+            routeRowList.add(element.getName()); // Element Name
+            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("initialVariable").getValue())); // Initial Type
+            routeRowList.add(channelParameters.get("length").getValue()); // Length (FT)
+            routeRowList.add(channelParameters.get("energySlope").getValue()); // Slope (FT/FT)
+            routeRowList.add(channelParameters.get("manningsN").getValue()); // Manning's n
+            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("spaceTimeMethod").getValue())); // Space-Time Method
+            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("indexParameterType").getValue())); // Index Method
+            routeRowList.add(routeParameters.get("indexFlow").getValue()); // Index Flow (CFS)
+            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("channelType").getValue())); // Shape
+
+            tableRows.add(HtmlModifier.printTableDataRow(routeRowList, tdAttribute, tdAttribute));
+        } // Loop: through each element
+
+        /* Creating the table's header */
+        String methodName  = StringBeautifier.beautifyString(getRouteMethod(muskingumCungeMethod.get(0)));
+        List<String> headerList = Arrays.asList("Reach", "Initial Type", "Length (FT)", "Slope (FT/FT)", "Manning's n", "Space-Time Method", "Index Method", "Index Flow", "Shape");
+        tableRows.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
+        tableRows.add(0, caption("Route - " + methodName + " Method"));
+
+        return table(attrs(tdAttribute), tableRows.toArray(new DomContent[]{}));
+    } // printMuskingumCungeTable()
 
     /* Helper functions */
     private Map<String, List<Element>> separateElementsByType(List<Element> listElement) {
@@ -392,6 +420,14 @@ public class GlobalParametersWriter {
 
         return separatedElementMap;
     } // separateElementsByType()
+    private String getRouteMethod(Element element) {
+        Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
+                .collect(Collectors.toMap(Process::getName, x -> x));
+        Map<String, Parameter> routeParameters = elementProcesses.get("route").getParameters().stream()
+                .collect(Collectors.toMap(Parameter::getName, x -> x));
+
+        return routeParameters.get("method").getValue();
+    } // getRouteMethod()
     private DomContent printBaseflowTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
         List<DomContent> domList = new ArrayList<>();
 

@@ -9,13 +9,18 @@ body{
 
 /* CSS for Global tables's div */
 div.global-parameter{
-    page-break-after: always;
+    page-break-before: always;
 }
 
 /* CSS for each Element */
 div.element{
 	/* Page break after each element */
     page-break-after: always;
+}
+
+/* CSS for each ElementInput */
+div.element-input{
+	page-break-before: always;
 }
 
 /* CSS for each ElementInput's All Tables of Processes */
@@ -76,6 +81,10 @@ table.global-parameter{
     page-break-inside: avoid;
     width: 100%;
     padding-bottom: 0.3in;
+}
+
+table.global-parameter:nth-child(2) {
+	page-break-inside: auto;
 }
 
 /* CSS for all Data Columns */

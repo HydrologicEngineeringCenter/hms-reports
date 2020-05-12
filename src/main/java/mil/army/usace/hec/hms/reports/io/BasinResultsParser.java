@@ -1,12 +1,10 @@
 package mil.army.usace.hec.hms.reports.io;
 
-  import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.ElementResults;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-  import java.util.Map;
+import java.util.Map;
 
 public abstract class BasinResultsParser {
     Path pathToBasinResultsFile;
@@ -26,7 +24,7 @@ public abstract class BasinResultsParser {
             return this;
         }
 
-        public Builder pathToProjectDirectory(final String pathToProjectDirectory){
+        Builder pathToProjectDirectory(final String pathToProjectDirectory){
             this.pathToProjectDirectory = Paths.get(pathToProjectDirectory);
             return this;
         }

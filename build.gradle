@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'mil.army.usace.hec'
-version '1.1'
+version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
@@ -15,12 +15,10 @@ repositories {
 
 dependencies {
     implementation 'org.json:json:20190722'
-    implementation 'commons-io:commons-io:2.6'
     implementation 'com.j2html:j2html:1.4.0'
     implementation 'tech.tablesaw:tablesaw-core:0.37.3'
     implementation 'tech.tablesaw:tablesaw-jsplot:0.37.3'
     implementation 'org.jsoup:jsoup:1.12.2'
-    implementation 'org.apache.commons:commons-csv:1.8'
 
     implementation 'com.rmanet:rma:6.0.0.51'
     implementation 'com.rmanet:rmadev:6.0.0.51'
@@ -39,10 +37,14 @@ dependencies {
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.4.0"
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = 'hms-report'
+            artifactId = 'hms-reports'
             from components.java
         }
     }
