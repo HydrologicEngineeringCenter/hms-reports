@@ -39,6 +39,8 @@ class HmsReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
+        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult);
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)

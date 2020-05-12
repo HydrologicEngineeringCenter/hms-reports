@@ -208,15 +208,26 @@ public class XmlBasinResultsParser extends BasinResultsParser {
             JSONObject elementObject = elemenentArray.optJSONObject(i);
             JSONObject hydrologyObject = elementObject.optJSONObject("Hydrology");
             JSONArray timeSeriesArray = hydrologyObject.optJSONArray("TimeSeries");
-            for(int j = 0; j < timeSeriesArray.length(); j++) {
-                JSONObject timeSeriesObject = timeSeriesArray.optJSONObject(j);
+            if(timeSeriesArray == null) {
+                JSONObject timeSeriesObject = hydrologyObject.optJSONObject("TimeSeries");
                 JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
                 String timeSeriesType = timeSeriesTypeObject.optString("displayString");
 
                 if(!availablePlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
                     availablePlots.add(timeSeriesType);
                 } // If: plot hasn't been added and plot is not a default plot; then add plot
-            } // Loop through all the timeSeriesArray
+            } // If: Only one type of TimeSeries Plot
+            else {
+                for(int j = 0; j < timeSeriesArray.length(); j++) {
+                    JSONObject timeSeriesObject = timeSeriesArray.optJSONObject(j);
+                    JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
+                    String timeSeriesType = timeSeriesTypeObject.optString("displayString");
+
+                    if(!availablePlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
+                        availablePlots.add(timeSeriesType);
+                    } // If: plot hasn't been added and plot is not a default plot; then add plot
+                } // Loop through all the timeSeriesArray
+            } // Else: More than one type of TimeSeries Plots
         } // Loop through all element's results, and populate
 
         Collections.sort(availablePlots); // Sort the list Alphabetically
