@@ -1,6 +1,5 @@
 package mil.army.usace.hec.hms.reports.io;
 
-import hec.heclib.dss.HecDataManager;
 import hec.heclib.dss.HecTimeSeries;
 import hec.heclib.util.HecTime;
 import hec.heclib.util.HecTimeArray;
@@ -109,8 +108,6 @@ public class XmlBasinResultsParser extends BasinResultsParser {
             System.out.println("Invalid object");
         } // Else: invalid object
 
-        HecDataManager.closeAllFiles(); // Closing Hec
-
         return timeSeriesResultList;
     } // populateTimeSeriesResult()
     private TimeSeriesResult populateSingleTimeSeriesResult (JSONObject timeObject) {
@@ -130,6 +127,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         int operationStatus = dssTimeSeriesRead.read(container, true);
         if(operationStatus != 0) { System.out.println("Time Read not Successful"); }
+        dssTimeSeriesRead.done();
 
         double[] values = container.getValues();
         List<ZonedDateTime> times  = getZonedDateTimeArray(container.getTimes());
