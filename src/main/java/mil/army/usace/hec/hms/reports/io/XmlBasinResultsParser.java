@@ -50,7 +50,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return elementResultsList;
     } // getElementResults()
-    private static JSONObject getJsonObject(String pathToJson) {
+    public static JSONObject getJsonObject(String pathToJson) {
         /* Read in XML File */
         File file = new File(pathToJson);
         /* Read XML's content to 'content' */

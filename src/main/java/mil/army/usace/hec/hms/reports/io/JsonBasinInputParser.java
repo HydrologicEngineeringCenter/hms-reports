@@ -3,11 +3,10 @@ package mil.army.usace.hec.hms.reports.io;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.Utilities;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -21,7 +20,7 @@ public class JsonBasinInputParser extends BasinInputParser {
     @Override
     public List<ElementInput> getElementInput() {
         List<ElementInput> elementInputList = new ArrayList<>(); // List of ElementInputs
-        JSONObject jsonFile = getJsonObject(this.pathToBasinInputFile.toString()); // Get Json Object
+        JSONObject jsonFile = Utilities.getJsonObject(this.pathToBasinInputFile.toString()); // Get Json Object
         JSONArray elementArray = jsonFile.getJSONObject("elementList").getJSONArray("elements");
 
         for(int i = 0; i < elementArray.length(); i++) {
@@ -31,13 +30,6 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return elementInputList;
     } // getElementInput()
-    private JSONObject getJsonObject(String pathToJson) {
-        /* Read in Json File */
-        File file = new File(pathToJson);
-        String content = StringBeautifier.readFileToString(file);
-        /* Convert JSON string to JSONObject */
-        return new JSONObject(content);
-    } // getJsonObject()
     private ElementInput populateElement(JSONObject object) {
         /* Parsing each ElementInput for its: name, elementType, and Processes */
         String name = object.getString("name");

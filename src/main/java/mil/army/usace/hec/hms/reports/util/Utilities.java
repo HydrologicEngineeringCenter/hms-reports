@@ -1,12 +1,14 @@
 package mil.army.usace.hec.hms.reports.util;
 
-import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.enums.ParameterSummary;
 import mil.army.usace.hec.hms.reports.io.BasinInputParser;
 import mil.army.usace.hec.hms.reports.io.XmlBasinResultsParser;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -21,7 +23,6 @@ public class Utilities {
     public static List<String> getAvailablePlot(String pathToResult) {
         return XmlBasinResultsParser.getAvailablePlots(pathToResult);
     }
-
     public static String getFilePath(String directoryToSearch, String fileName) {
         final String[] x = new String[1];
 
@@ -40,7 +41,6 @@ public class Utilities {
 
         return x[0];
     } // getFilePath()
-
     public static Map<String, List<String>> getParameterMap(String pathToJsonInput, ParameterSummary parameterChoice) {
         Map<String, List<String>> parameterMap = new HashMap<>();
         BasinInputParser basinInputParser = BasinInputParser.builder().pathToBasinInputFile(pathToJsonInput).build();
@@ -83,7 +83,13 @@ public class Utilities {
 
         return parameterMap;
     } // getParameterMap()
-
+    public static JSONObject getJsonObject(String pathToJson) {
+        /* Read in Json File */
+        File file = new File(pathToJson);
+        String content = StringBeautifier.readFileToString(file);
+        /* Convert JSON string to JSONObject */
+        return new JSONObject(content);
+    } // getJsonObject()
     public static List<String> getAvailableBasinType(String pathToJsonInput) {
         List<String> availableBasinType = new ArrayList<>();
         BasinInputParser basinInputParser = BasinInputParser.builder().pathToBasinInputFile(pathToJsonInput).build();
@@ -98,6 +104,9 @@ public class Utilities {
 
         return availableBasinType;
     } // getAvailableBasinType()
-
-
+    public static int getNumberOfElements(String pathToBasinInput) {
+        JSONObject jsonFile = getJsonObject(pathToBasinInput); // Get Json Object
+        JSONArray elementArray = jsonFile.getJSONObject("elementList").getJSONArray("elements");
+        return elementArray.length();
+    } // getNumberOfElements()
 } // Utilities class

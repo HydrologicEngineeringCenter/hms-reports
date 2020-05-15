@@ -347,6 +347,7 @@ public class ElementParametersWriter {
         try { timeSeriesPlot = Table.read().csv(outputFile); } catch (IOException e) { e.printStackTrace(); }
         assert timeSeriesPlot != null;
         timeSeriesPlot.setName(timeSeriesResult.getType());
+        outputFile.deleteOnExit();
 
         return timeSeriesPlot;
     } // timeSeriesToCsv
