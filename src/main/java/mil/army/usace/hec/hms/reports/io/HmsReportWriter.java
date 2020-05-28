@@ -1,9 +1,9 @@
 package mil.army.usace.hec.hms.reports.io;
 
-import mil.army.usace.hec.hms.reports.*;
-import mil.army.usace.hec.hms.reports.util.*;
+import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 
-import java.util.*;
+import java.util.List;
 
 import static j2html.TagCreator.*;
 
@@ -46,8 +46,8 @@ public class HmsReportWriter extends ReportWriter {
                 head(   title("Standardized Report"),
                         link().withRel("stylesheet").withHref("style.css"),
                         script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
-                body(   globalResultsWriter.printGlobalSummary(),
-                        globalParametersWriter.printListGlobalParameter(),
+                body(   globalParametersWriter.printListGlobalParameter(),
+                        globalResultsWriter.printGlobalSummary(),
                         elementParametersWriter.printElementList())
         ).renderFormatted();
         /* Writing to HTML output file */
