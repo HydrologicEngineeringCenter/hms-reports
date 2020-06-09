@@ -44,13 +44,13 @@ public class HtmlModifier {
         DomContent domContent = join(content);
         return domContent;
     } // extractPlotlyJavascript()
-    public static void writeToFile(String pathToHtml, String content) {
+    public static void writeStandardReportToFile(String pathToHtml, String content) {
         /* Writing to HTML file */
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
         content = content.replace("layout);", "layout, {staticPlot: true});");
-        String fullPathToCss = Paths.get(pathToHtml).getParent().toAbsolutePath().toString() + File.separator + "style.css";
+        String fullPathToCss = Paths.get(pathToHtml).getParent().toAbsolutePath().toString() + File.separator + "styleStandard.css";
         StringBeautifier.writeStringToFile(new File(pathToHtml), content);
-        StringBeautifier.writeStringToFile(new File(fullPathToCss), getStyleCss());
+        StringBeautifier.writeStringToFile(new File(fullPathToCss), getStandardReportCSS());
         setPlotlyFont(fullPathToHtml, "Vollkorn, serif", "12");
     } // writeToFile()
     private static void setPlotlyFont(String pathToHtml, String fontFamily, String fontSize) {
@@ -60,7 +60,7 @@ public class HtmlModifier {
         File staticPlotHtml = new File(pathToHtml);
         StringBeautifier.writeStringToFile(staticPlotHtml, htmlContent);
     } // setPlotlyFont()
-    private static String getStyleCss() {
+    private static String getStandardReportCSS() {
         String content = "@import url('https://fonts.googleapis.com/css?family=Vollkorn:400,700&display=swap');\n" +
                 "\n" +
                 "body{\n" +

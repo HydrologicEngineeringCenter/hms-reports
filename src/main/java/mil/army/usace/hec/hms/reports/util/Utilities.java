@@ -3,8 +3,8 @@ package mil.army.usace.hec.hms.reports.util;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.enums.ParameterSummary;
-import mil.army.usace.hec.hms.reports.io.BasinInputParser;
-import mil.army.usace.hec.hms.reports.io.XmlBasinResultsParser;
+import mil.army.usace.hec.hms.reports.io.parser.BasinInputParser;
+import mil.army.usace.hec.hms.reports.io.parser.XmlBasinResultsParser;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

@@ -2,6 +2,7 @@ package mil.army.usace.hec.hms.reports.io;
 
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.enums.ParameterSummary;
+import mil.army.usace.hec.hms.reports.enums.ReportWriterType;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.Utilities;
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-class HmsReportWriterTest {
+class StandardReportWriterTest {
 
     @Test
     void writeShort() {
@@ -24,6 +25,7 @@ class HmsReportWriterTest {
                 .pathToResult("src/resources/MiddleColumbia/RUN_WY2017(mod).results")
                 .pathToDestination("src/resources/output-short.html")
                 .projectDirectory("C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia")
+                .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .build();
 
         reportWriter.write();
@@ -50,6 +52,7 @@ class HmsReportWriterTest {
                 .reportSummaryChoice(Arrays.asList(SummaryChoice.GLOBAL_RESULTS_SUMMARY, SummaryChoice.GLOBAL_PARAMETER_SUMMARY, SummaryChoice.ELEMENT_RESULTS_SUMMARY))
                 .globalParameterChoices(availableGlobalParameter)
                 .elementParameterizationChoice(availableElementParameter)
+                .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -91,6 +94,7 @@ class HmsReportWriterTest {
                 .reportSummaryChoice(Arrays.asList(SummaryChoice.GLOBAL_RESULTS_SUMMARY, SummaryChoice.GLOBAL_PARAMETER_SUMMARY, SummaryChoice.ELEMENT_RESULTS_SUMMARY))
                 .elementParameterizationChoice(availableElementParameter)
                 .globalParameterChoices(availableGlobalParameter)
+                .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .build();
 
         List<Element> elementList = reportWriter.write();

@@ -1,6 +1,8 @@
 package mil.army.usace.hec.hms.reports.io;
 
 import mil.army.usace.hec.hms.reports.ElementResults;
+import mil.army.usace.hec.hms.reports.io.parser.BasinResultsParser;
+import mil.army.usace.hec.hms.reports.io.parser.XmlBasinResultsParser;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
