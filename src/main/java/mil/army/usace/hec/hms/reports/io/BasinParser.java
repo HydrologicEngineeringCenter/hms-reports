@@ -3,6 +3,8 @@ package mil.army.usace.hec.hms.reports.io;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.ElementResults;
+import mil.army.usace.hec.hms.reports.io.parser.BasinInputParser;
+import mil.army.usace.hec.hms.reports.io.parser.BasinResultsParser;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,7 +38,7 @@ public class BasinParser {
             return this;
         }
 
-        Builder pathToProjectDirectory(final String pathToProjectDirectory){
+        public Builder pathToProjectDirectory(final String pathToProjectDirectory){
             this.pathToProjectDirectory = Paths.get(pathToProjectDirectory);
             return this;
         }

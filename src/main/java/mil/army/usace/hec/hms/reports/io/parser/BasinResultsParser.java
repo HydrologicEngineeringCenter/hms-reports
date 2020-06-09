@@ -1,4 +1,4 @@
-package mil.army.usace.hec.hms.reports.io;
+package mil.army.usace.hec.hms.reports.io.parser;
 
 import mil.army.usace.hec.hms.reports.ElementResults;
 
@@ -24,7 +24,7 @@ public abstract class BasinResultsParser {
             return this;
         }
 
-        Builder pathToProjectDirectory(final String pathToProjectDirectory){
+        public Builder pathToProjectDirectory(final String pathToProjectDirectory){
             this.pathToProjectDirectory = Paths.get(pathToProjectDirectory);
             return this;
         }

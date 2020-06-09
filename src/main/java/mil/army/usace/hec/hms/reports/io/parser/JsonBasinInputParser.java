@@ -1,4 +1,4 @@
-package mil.army.usace.hec.hms.reports.io;
+package mil.army.usace.hec.hms.reports.io.parser;
 
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Parameter;

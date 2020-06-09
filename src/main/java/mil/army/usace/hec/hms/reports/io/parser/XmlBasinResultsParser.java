@@ -1,4 +1,4 @@
-package mil.army.usace.hec.hms.reports.io;
+package mil.army.usace.hec.hms.reports.io.parser;
 
 import hec.heclib.dss.HecTimeSeries;
 import hec.heclib.util.HecTime;

@@ -1,7 +1,12 @@
 package mil.army.usace.hec.hms.reports.io;
 
+import mil.army.usace.hec.hms.reports.DisplayRange;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.enums.ReportWriterType;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
+import mil.army.usace.hec.hms.reports.enums.SummaryStatistics;
+import mil.army.usace.hec.hms.reports.io.standard.StandardReportWriter;
+import mil.army.usace.hec.hms.reports.io.statistics.SummaryStatisticsReportWriter;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,16 +14,17 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class ReportWriter {
-    Path pathToInput;
-    Path pathToResult;
-    Path pathToDestination;
-    Path projectDirectory;
-    List<SummaryChoice> reportSummaryChoice;
-    Map<String, List<String>> globalParameterChoices;
-    List<String> chosenPlots;
-    Map<String, List<String>> elementParameterizationChoice;
+    protected Path pathToInput;
+    protected Path pathToResult;
+    protected Path pathToDestination;
+    protected Path projectDirectory;
+    protected List<SummaryChoice> reportSummaryChoice;
+    protected Map<String, List<String>> globalParameterChoices;
+    protected List<String> chosenPlots;
+    protected Map<String, List<String>> elementParameterizationChoice;
+    protected Map<SummaryStatistics, List<DisplayRange>> displayRangeMap;
 
-    ReportWriter(Builder builder){
+    protected ReportWriter(Builder builder){
         this.pathToInput = builder.pathToInput;
         this.pathToResult = builder.pathToResult;
         this.pathToDestination = builder.pathToDestination;
@@ -27,6 +33,7 @@ public abstract class ReportWriter {
         this.chosenPlots = builder.chosenPlots;
         this.globalParameterChoices = builder.globalParameterChoices;
         this.elementParameterizationChoice = builder.elementParameterizationChoice;
+        this.displayRangeMap = builder.displayRangeMap;
     }
 
     public static class Builder{
@@ -38,6 +45,8 @@ public abstract class ReportWriter {
         private List<String> chosenPlots;
         private Map<String, List<String>> globalParameterChoices;
         private Map<String, List<String>> elementParameterizationChoice;
+        private ReportWriterType reportWriterType;
+        private Map<SummaryStatistics, List<DisplayRange>> displayRangeMap;
 
         public Builder pathToInput(final String pathToInput) {
             this.pathToInput = Paths.get(pathToInput);
@@ -79,16 +88,32 @@ public abstract class ReportWriter {
             return this;
         } // elementParameterizationChoice()
 
+        public Builder reportWriterType(final ReportWriterType reportWriterType) {
+            this.reportWriterType = reportWriterType;
+            return this;
+        } // reportWriterType()
+
+        public Builder displayRangeMap(final  Map<SummaryStatistics, List<DisplayRange>> displayRangeMap) {
+            this.displayRangeMap = displayRangeMap;
+            return this;
+        } // displayRangeMap()
+
         public ReportWriter build(){
-            if (pathToDestination.toString().matches(".*.html")){
-                return new HmsReportWriter(this);
-            } else {
+            if(reportWriterType == ReportWriterType.STANDARD_REPORT) {
+                return new StandardReportWriter(this);
+            } // If: Standard Report
+            else if(reportWriterType == ReportWriterType.SUMMARY_STATISTICS_REPORT) {
+                return new SummaryStatisticsReportWriter(this);
+            } // Else If: Summary Statistics Report
+            else {
                 throw new IllegalArgumentException("File type not supported");
-            }
-        }
-    }
+            } // Else: Non-supported report
+        } // build()
+
+    } // Builder Class
 
     public static Builder builder() { return new Builder(); }
 
     public abstract List<Element> write();
-}
+
+} // Report Writer Class

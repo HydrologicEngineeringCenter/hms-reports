@@ -1,14 +1,16 @@
-package mil.army.usace.hec.hms.reports.io;
+package mil.army.usace.hec.hms.reports.io.standard;
 
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.io.BasinParser;
+import mil.army.usace.hec.hms.reports.io.ReportWriter;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 
 import java.util.List;
 
 import static j2html.TagCreator.*;
 
-public class HmsReportWriter extends ReportWriter {
-    HmsReportWriter(Builder builder) {
+public class StandardReportWriter extends ReportWriter {
+    public StandardReportWriter(Builder builder) {
         super(builder);
     }
 
@@ -44,16 +46,16 @@ public class HmsReportWriter extends ReportWriter {
         /* HTML Layout */
         String htmlOutput = html(
                 head(   title("Standardized Report"),
-                        link().withRel("stylesheet").withHref("style.css"),
+                        link().withRel("stylesheet").withHref("styleStandard.css"),
                         script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
                 body(   globalParametersWriter.printListGlobalParameter(),
                         globalResultsWriter.printGlobalSummary(),
                         elementParametersWriter.printElementList())
         ).renderFormatted();
         /* Writing to HTML output file */
-        HtmlModifier.writeToFile(this.pathToDestination.toString(), htmlOutput);
+        HtmlModifier.writeStandardReportToFile(this.pathToDestination.toString(), htmlOutput);
 
         return elementList;
     } // write()
 
-} // HmsReportWriter class
+} // StandardReportWriter class
