@@ -3,8 +3,8 @@ package mil.army.usace.hec.hms.reports.io;
 import mil.army.usace.hec.hms.reports.DisplayRange;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.enums.ReportWriterType;
+import mil.army.usace.hec.hms.reports.enums.StatisticsType;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
-import mil.army.usace.hec.hms.reports.enums.SummaryStatistics;
 import mil.army.usace.hec.hms.reports.io.standard.StandardReportWriter;
 import mil.army.usace.hec.hms.reports.io.statistics.SummaryStatisticsReportWriter;
 
@@ -22,7 +22,7 @@ public abstract class ReportWriter {
     protected Map<String, List<String>> globalParameterChoices;
     protected List<String> chosenPlots;
     protected Map<String, List<String>> elementParameterizationChoice;
-    protected Map<SummaryStatistics, List<DisplayRange>> displayRangeMap;
+    protected Map<StatisticsType, List<DisplayRange>> displayRangeMap;
 
     protected ReportWriter(Builder builder){
         this.pathToInput = builder.pathToInput;
@@ -46,7 +46,7 @@ public abstract class ReportWriter {
         private Map<String, List<String>> globalParameterChoices;
         private Map<String, List<String>> elementParameterizationChoice;
         private ReportWriterType reportWriterType;
-        private Map<SummaryStatistics, List<DisplayRange>> displayRangeMap;
+        private Map<StatisticsType, List<DisplayRange>> displayRangeMap;
 
         public Builder pathToInput(final String pathToInput) {
             this.pathToInput = Paths.get(pathToInput);
@@ -93,7 +93,7 @@ public abstract class ReportWriter {
             return this;
         } // reportWriterType()
 
-        public Builder displayRangeMap(final  Map<SummaryStatistics, List<DisplayRange>> displayRangeMap) {
+        public Builder displayRangeMap(final  Map<StatisticsType, List<DisplayRange>> displayRangeMap) {
             this.displayRangeMap = displayRangeMap;
             return this;
         } // displayRangeMap()

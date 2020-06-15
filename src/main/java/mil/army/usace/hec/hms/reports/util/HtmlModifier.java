@@ -52,7 +52,14 @@ public class HtmlModifier {
         StringBeautifier.writeStringToFile(new File(pathToHtml), content);
         StringBeautifier.writeStringToFile(new File(fullPathToCss), getStandardReportCSS());
         setPlotlyFont(fullPathToHtml, "Vollkorn, serif", "12");
-    } // writeToFile()
+    } // writeStandardReportToFile()
+    public static void writeStatisticsReportToFile(String pathToHtml, String content) {
+        /* Writing to HTML file */
+        String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
+        String fullPathToCss = Paths.get(pathToHtml).getParent().toAbsolutePath().toString() + File.separator + "styleStatistics.css";
+        StringBeautifier.writeStringToFile(new File(fullPathToHtml), content);
+        StringBeautifier.writeStringToFile(new File(fullPathToCss), getStatisticsCSS());
+    } // writeStatisticsReportToFile()
     private static void setPlotlyFont(String pathToHtml, String fontFamily, String fontSize) {
         String htmlContent = StringBeautifier.readFileToString(new File(pathToHtml));
         htmlContent = htmlContent.replace("var layout = {",
@@ -209,6 +216,65 @@ public class HtmlModifier {
                 "} */\n";
 
         return content;
-    } // getStyleCss()
+    } // getStandardReportCSS()
+    private static String getStatisticsCSS() {
+        String content = "@import url('https://fonts.googleapis.com/css?family=Vollkorn:400,700&display=swap');\n" +
+                "\n" +
+                "body{\n" +
+                "\tbackground-color: white;\n" +
+                "\tfont-family: 'Vollkorn', serif;\n" +
+                "\twidth: 8.5in;\n" +
+                "\theight: 11in;\n" +
+                "\t-webkit-print-color-adjust: exact;\n" +
+                "}\n" +
+                "\n" +
+                "table {\n" +
+                "\tborder: solid 1px;\n" +
+                "\tborder-radius: 15px;\n" +
+                "\tpadding: 2px;\n" +
+                "\twidth: 100%;\n" +
+                "}\n" +
+                "\n" +
+                "/* CSS for the Caption of all Tables */\n" +
+                "caption{\n" +
+                "\tcaption-side: top;\n" +
+                "\tfont-weight: bold;\n" +
+                "\tmargin-bottom: 15px;\n" +
+                "}\n" +
+                "\n" +
+                "/* CSS for all Data Columns */\n" +
+                "td{\n" +
+                "\ttext-align: center;\n" +
+                "\tpadding-left: 0.2in;\n" +
+                "\tpadding-right: 0.2in;\n" +
+                "}\n" +
+                "\n" +
+                "/* CSS for all Header Columns */\n" +
+                "th{\n" +
+                "\ttext-align: center;\n" +
+                "\tborder-bottom: 1px solid black;\n" +
+                "}\n" +
+                "\n" +
+                "/* CSS for first Data Column */\n" +
+                "td:nth-child(1){\n" +
+                "\ttext-align: left;\n" +
+                "\tpadding-left: 0.1in;\n" +
+                "\tpadding-right: 0.1in;\n" +
+                "}\n" +
+                "\n" +
+                "/* CSS for odd Table Rows */\n" +
+                "tr:nth-child(even){\n" +
+                "\tbackground-color: #eee;\n" +
+                "}\n" +
+                "\n" +
+                "/* CSS for button-styled data */\n" +
+                "button {\n" +
+                "\tborder: none;\n" +
+                "\tborder-radius: 15px;\n" +
+                "\twidth: 70%;\n" +
+                "\tcolor: white;\n" +
+                "}";
+        return content;
+    } // getStatisticsCSS()
 
 } // FigureCreator class
