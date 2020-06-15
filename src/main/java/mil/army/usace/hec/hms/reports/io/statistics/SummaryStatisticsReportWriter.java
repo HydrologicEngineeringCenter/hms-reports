@@ -89,7 +89,8 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
         Map<String, String> statisticsMap = element.getElementResults().getStatisticResultsMap();
         Map<StatisticsType, List<DisplayRange>> statisticsDisplayRangeMap;
 
-        statisticsDisplayRangeMap = this.displayRangeMap;
+        if(this.displayRangeMap == null || this.displayRangeMap.isEmpty()) { statisticsDisplayRangeMap = getDefaultDisplayMap(); }
+        else { statisticsDisplayRangeMap = this.displayRangeMap; }
 
         String nashColor = getColorCode(Double.parseDouble(statisticsMap.get(nashSutcliffe)), statisticsDisplayRangeMap.get(StatisticsType.NASH_SUTCLIFFE_EFFICIENCY));
         String rmseColor = getColorCode(Double.parseDouble(statisticsMap.get(rmseStdev)), statisticsDisplayRangeMap.get(StatisticsType.RMSE_STDEV));
@@ -101,6 +102,43 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
         return colorMap;
     } // classifyStatisticsColor()
+
+    private static Map<StatisticsType, List<DisplayRange>> getDefaultDisplayMap() {
+        Map<StatisticsType, List<DisplayRange>> defaultDisplayMap = new HashMap<>();
+
+        defaultDisplayMap.put(StatisticsType.NASH_SUTCLIFFE_EFFICIENCY, getDefaultDisplayRanges(StatisticsType.NASH_SUTCLIFFE_EFFICIENCY));
+        defaultDisplayMap.put(StatisticsType.RMSE_STDEV, getDefaultDisplayRanges(StatisticsType.RMSE_STDEV));
+        defaultDisplayMap.put(StatisticsType.PERCENT_BIAS, getDefaultDisplayRanges(StatisticsType.PERCENT_BIAS));
+
+        return defaultDisplayMap;
+    } // getDefaultDisplayMap()
+
+    private static List<DisplayRange> getDefaultDisplayRanges(StatisticsType statisticsType) {
+        DisplayRange ratingVeryGood = null, ratingGood = null, ratingSatisfactory = null, ratingUnsatisfactory = null;
+
+        if(statisticsType == StatisticsType.NASH_SUTCLIFFE_EFFICIENCY) {
+            ratingVeryGood = new DisplayRange(0.75,1, "#7dca5c");
+            ratingGood = new DisplayRange(0.65, 0.75, "#FFD700");
+            ratingSatisfactory = new DisplayRange(0.50, 0.75, "#fab144");
+            ratingUnsatisfactory = new DisplayRange(Double.NEGATIVE_INFINITY, 0.50, "#f24430");
+        } // If: Nash Sutcliffe Efficiency
+        else if(statisticsType == StatisticsType.RMSE_STDEV) {
+            ratingVeryGood = new DisplayRange(Double.NEGATIVE_INFINITY,0.50, "#7dca5c");
+            ratingGood = new DisplayRange(0.50, 0.60, "#FFD700");
+            ratingSatisfactory = new DisplayRange(0.60, 0.70, "#fab144");
+            ratingUnsatisfactory = new DisplayRange(0.70, Double.POSITIVE_INFINITY, "#f24430");
+        } // Else if: RMSE Standard Deviation
+        else if(statisticsType == StatisticsType.PERCENT_BIAS) {
+            ratingVeryGood = new DisplayRange(-10,10, "#7dca5c");
+            ratingGood = new DisplayRange(-15, 15, "#FFD700");
+            ratingSatisfactory = new DisplayRange(-25, 25, "#fab144");
+            ratingUnsatisfactory = new DisplayRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, "#f24430");
+        } // Else If: Percent Bias
+
+        List<DisplayRange> defaultDisplayRanges = Arrays.asList(ratingVeryGood, ratingGood, ratingSatisfactory, ratingUnsatisfactory);
+
+        return defaultDisplayRanges;
+    } // getDefaultDisplayRanges()
 
     private static String getColorCode(double value, List<DisplayRange> displayRanges) {
         /* Find the first displayRange that the value matched with. If none matched, return null. */

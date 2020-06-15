@@ -33,6 +33,7 @@ class SummaryStatisticsReportWriterTest {
         String pathToOutput = "C:\\HyperNick\\HmsReportOutput\\statistic-report-long.html";
         String projectDir   = "C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia";
 
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)
