@@ -68,16 +68,13 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
                 DomContent dataButton = button(reformatData).withStyle("background-color:" + colorMap.get(statisticsType));
                 DomContent dataDom = td(dataButton);
                 dataDomList.add(dataDom);
-
-                /* FIXME: Add to test CSS design with five columns */
-                if(statisticsType.equals(percentBias)) { dataDomList.add(dataDom); }
             } // Loop: through Summary-Statistics data
 
             rowDomList.add(tr(dataDomList.toArray(new DomContent[]{})));
         } // Loop: through all Summary-Statistics Elements
 
         /* Creating the table's header */
-        List<String> headerList = Arrays.asList("Computation Point", "RMSE Stdev", "Nash Sutcliffe", "Percent Bias", "R2");
+        List<String> headerList = Arrays.asList("Computation Point", "RMSE Stdev", "Nash Sutcliffe", "Percent Bias");
         rowDomList.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
         rowDomList.add(0, caption("Summary Statistics Table"));
 
