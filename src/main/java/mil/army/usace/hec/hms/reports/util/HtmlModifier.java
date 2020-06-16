@@ -247,6 +247,7 @@ public class HtmlModifier {
                 "\ttext-align: center;\n" +
                 "\tpadding-left: 0.2in;\n" +
                 "\tpadding-right: 0.2in;\n" +
+                "\twidth: 100px;\n" +
                 "}\n" +
                 "\n" +
                 "/* CSS for all Header Columns */\n" +

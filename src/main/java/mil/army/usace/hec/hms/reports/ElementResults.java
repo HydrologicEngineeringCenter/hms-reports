@@ -69,5 +69,9 @@ public class ElementResults {
         Map<String, String> statisticMap = this.statisticResults.stream().collect(Collectors.toMap(StatisticResult::getName, StatisticResult::getValue));
         return statisticMap;
     }
+    public Map<String, double[]> getTimeSeriesResultsMap() {
+        Map<String, double[]> timeSeriesMap = this.timeSeriesResults.stream().collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getValues));
+        return timeSeriesMap;
+    }
 
 } // ElementResults Class
