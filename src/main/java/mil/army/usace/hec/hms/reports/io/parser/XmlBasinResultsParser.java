@@ -43,7 +43,6 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         JSONArray elemenentArray = runResults.getJSONArray("BasinElement");
 
         for(int i = 0; i < elemenentArray.length(); i++) {
-            System.out.println("Element Index: " + i);
             ElementResults elementResults = populateElement(elemenentArray.getJSONObject(i));
             elementResultsList.put(elementResults.getName(), elementResults);
         } // Loop through all element's results, and populate

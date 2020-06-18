@@ -45,7 +45,7 @@ public class StandardReportWriter extends ReportWriter {
 
         /* HTML Layout */
         String htmlOutput = html(
-                head(   title("Standardized Report"),
+                head(   title("Standard Report"),
                         link().withRel("stylesheet").withHref("styleStandard.css"),
                         script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
                 body(   globalParametersWriter.printListGlobalParameter(),
