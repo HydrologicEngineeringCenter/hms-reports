@@ -33,7 +33,8 @@ class StandardReportWriterTest {
 
     @Test
     void writeLong() {
-        String pathToInput  = "src/resources/MiddleColumbia/MiddleColumbia_WY2017.basin.json";
+//        String pathToInput  = "src/resources/MiddleColumbia/MiddleColumbia_WY2017.basin.json";
+        String pathToInput  = "C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia\\MiddleColumbia_WY2017.basin";
         String pathToResult = "src/resources/MiddleColumbia/RUN_WY2017.results";
         String pathToOutput = "src/resources/output-long.html";
         String projectDir   = "C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia";
@@ -60,7 +61,8 @@ class StandardReportWriterTest {
 
     @Test
     void writePunx() {
-        String pathToInput = "C:\\HyperNick\\Punx\\punxsutawney.basin.json";
+//        String pathToInput = "C:\\HyperNick\\Punx\\punxsutawney.basin.json";
+        String pathToInput = "C:\\HyperNick\\Punx\\punxsutawney.basin";
         String pathToResult = "C:\\HyperNick\\Punx\\results\\RUN_Sep_2018.results";
         String pathToDestination = "C:\\HyperNick\\HmsReportOutput\\hms-output.html";
         String projectDirectory = "C:\\HyperNick\\Punx";

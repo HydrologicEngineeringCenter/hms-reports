@@ -51,7 +51,7 @@ public class ElementResultsWriter {
         String divAttribute = ".global-parameter";
 
         for(Element element: this.elementList) {
-            String elementType = element.getElementInput().getElementType();
+            String elementType = element.getElementInput().getElementType().toUpperCase();
             DomContent tableDom = null;
 
             switch(elementType) {

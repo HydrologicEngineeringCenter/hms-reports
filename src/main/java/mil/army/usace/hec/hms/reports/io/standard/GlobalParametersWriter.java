@@ -142,60 +142,95 @@ public class GlobalParametersWriter {
             if(processChoices.contains(StringBeautifier.beautifyString("area"))) {
                 List<String> areaRowList = new ArrayList<>();
                 areaRowList.add(element.getName()); // Element Name
-                areaRowList.add(elementProcesses.get("area").getValue()); // Area
+                Set<String> keySet = elementProcesses.keySet();
+                String matchedKey = findMatchingKey(keySet, "area", false);
+                areaRowList.add(elementProcesses.get(matchedKey).getValue()); // Area
                 areaRowDomList.add(HtmlModifier.printTableDataRow(areaRowList, tdAttribute, tdAttribute)); // To DomContent
             }
 
             /* Parameter Table: Loss Rate */
             if(processChoices.contains(StringBeautifier.beautifyString("lossRate"))) {
-                Map<String, Parameter> lossParameters = elementProcesses.get("lossRate").getParameters().stream()
+                Set<String> keySet = elementProcesses.keySet();
+                String matchedKey = findMatchingKey(keySet, "loss", false);
+
+                Map<String, Parameter> lossParameters = elementProcesses.get(matchedKey).getParameters().stream()
                         .collect(Collectors.toMap(Parameter::getName, x -> x));
                 List<String> lossRowList = new ArrayList<>();
 
                 lossRowList.add(element.getName()); // Element Name
-                lossRowList.add(lossParameters.get("initialDeficit").getValue());  // Initial Deficit (IN)
-                lossRowList.add(lossParameters.get("maximumDeficit").getValue());  // Maximum Storage (IN)
-                lossRowList.add(lossParameters.get("percolationRate").getValue()); // Constant Rate (IN/HR)
-                lossRowList.add(lossParameters.get("percentImperviousArea").getValue()); // Impervious (%)
+
+                Set<String> lossKeySet = lossParameters.keySet();
+                String initialKey = findMatchingKey(lossKeySet, "initial", false);
+                String maximumKey = findMatchingKey(lossKeySet, "maximum", false);
+                String percolationKey = findMatchingKey(lossKeySet, "percolation", false);
+                String imperviousKey = findMatchingKey(lossKeySet, "impervious", false);
+
+                lossRowList.add(lossParameters.get(initialKey).getValue());  // Initial Deficit (IN)
+                lossRowList.add(lossParameters.get(maximumKey).getValue());  // Maximum Storage (IN)
+                lossRowList.add(lossParameters.get(percolationKey).getValue()); // Constant Rate (IN/HR)
+                lossRowList.add(lossParameters.get(imperviousKey).getValue()); // Impervious (%)
                 lossRowDomList.add(HtmlModifier.printTableDataRow(lossRowList, tdAttribute, tdAttribute)); // To DomContent
             }
 
             /* Parameter Table: Canopy */
             if(processChoices.contains(StringBeautifier.beautifyString("canopy"))) {
-                Map<String, Parameter> canopyParameters = elementProcesses.get("canopy").getParameters().stream()
+                Set<String> keySet = elementProcesses.keySet();
+                String matchedKey = findMatchingKey(keySet, "canopy", false);
+
+                Map<String, Parameter> canopyParameters = elementProcesses.get(matchedKey).getParameters().stream()
                         .collect(Collectors.toMap(Parameter::getName, x -> x));
                 List<String> canopyRowList = new ArrayList<>();
 
                 canopyRowList.add(element.getName()); // Element Name
-                canopyRowList.add(StringBeautifier.beautifyString(canopyParameters.get("initialStorage").getValue()));  // Initial Storage (%)
-                canopyRowList.add(canopyParameters.get("storageCapacity").getValue()); // Max Storage (IN)
-                canopyRowList.add(canopyParameters.get("cropCoefficient").getValue()); // Crop Coefficient
-                String evapotranspiration = canopyParameters.get("allowSimultaneousPrecipEt").getValue();
-                if(evapotranspiration.equals("false")) { canopyRowList.add("Only Dry Periods"); }
+                Set<String> canopyKeySet = canopyParameters.keySet();
+                String initialKey = findMatchingKey(canopyKeySet, "initial", false);
+                String capacityKey = findMatchingKey(canopyKeySet, "capacity", false);
+                String cropKey = findMatchingKey(canopyKeySet, "crop", false);
+                String evaKey = findMatchingKey(canopyKeySet, "allow", false);
+                String uptakeKey = findMatchingKey(canopyKeySet, "uptake", false);
+
+                canopyRowList.add(StringBeautifier.beautifyString(canopyParameters.get(initialKey).getValue()));  // Initial Storage (%)
+                canopyRowList.add(canopyParameters.get(capacityKey).getValue()); // Max Storage (IN)
+                canopyRowList.add(canopyParameters.get(cropKey).getValue()); // Crop Coefficient
+                String evapotranspiration = canopyParameters.get(evaKey).getValue();
+                if(evapotranspiration.equals("false") || evapotranspiration.equals("No")) { canopyRowList.add("Only Dry Periods"); }
                 else { canopyRowList.add("Wet and Dry Periods"); } // Evapotranspiration
-                canopyRowList.add(StringBeautifier.beautifyString(canopyParameters.get("uptakeMethod").getValue())); // Uptake Method
+                canopyRowList.add(StringBeautifier.beautifyString(canopyParameters.get(uptakeKey).getValue())); // Uptake Method
                 canopyRowDomList.add(HtmlModifier.printTableDataRow(canopyRowList, tdAttribute, tdAttribute)); // To DomContent
             }
 
             /* Parameter Table: Transform */
             if(processChoices.contains(StringBeautifier.beautifyString("transform"))) {
-                Map<String, Parameter> transformParameters = elementProcesses.get("transform").getParameters().stream()
+                Set<String> keySet = elementProcesses.keySet();
+                String matchedKey = findMatchingKey(keySet, "transform", false);
+
+                Map<String, Parameter> transformParameters = elementProcesses.get(matchedKey).getParameters().stream()
                         .collect(Collectors.toMap(Parameter::getName, x -> x));
                 List<String> transformRowList = new ArrayList<>();
 
                 transformRowList.add(element.getName()); // Element Name
-                transformRowList.add(transformParameters.get("timeOfConcentration").getValue()); // Time of Concentration (HR)
-                transformRowList.add(transformParameters.get("storageCoefficient").getValue());  // Storage Coefficient (HR)
+                Set<String> transformKeySet = transformParameters.keySet();
+                String timeKey = findMatchingKey(transformKeySet, "time", false);
+                String storageKey = findMatchingKey(transformKeySet, "storage", false);
+
+                transformRowList.add(transformParameters.get(timeKey).getValue()); // Time of Concentration (HR)
+                transformRowList.add(transformParameters.get(storageKey).getValue());  // Storage Coefficient (HR)
                 transformRowDomList.add(HtmlModifier.printTableDataRow(transformRowList, tdAttribute, tdAttribute)); // To DomContent
             }
 
             /* Parameter Table: Baseflow --- this will contain 'n + 1' number of rows, where n = # layers */
             if(processChoices.contains(StringBeautifier.beautifyString("baseflow"))) {
-                Map<String, Parameter> baseflowParameters = elementProcesses.get("baseflow").getParameters().stream()
+                Set<String> keySet = elementProcesses.keySet();
+                String matchedKey = findMatchingKey(keySet, "baseflow", false);
+
+                Map<String, Parameter> baseflowParameters = elementProcesses.get(matchedKey).getParameters().stream()
                         .collect(Collectors.toMap(Parameter::getName, x -> x));
                 List<String> firstRow = Arrays.asList(element.getName(), "", "", "", "");
                 baseflowRowDomList.add(printBaseflowTableDataRow(firstRow, tdAttribute, tdAttribute)); // To DomContent
-                List<Parameter> baseflowLayerList = baseflowParameters.get("baseflowLayerList").getSubParameters();
+
+                Set<String> baseflowKeySet = baseflowParameters.keySet();
+                String layerKey = findMatchingKey(baseflowKeySet, "list", false);
+                List<Parameter> baseflowLayerList = baseflowParameters.get(layerKey).getSubParameters();
 
                 // Rows: of each layer for this element
                 for(Parameter baseflowLayer : baseflowLayerList) {
@@ -204,10 +239,16 @@ public class GlobalParametersWriter {
                     Map<String, Parameter> layerInfoMap = baseflowLayer.getSubParameters().stream()
                             .collect(Collectors.toMap(Parameter::getName, x -> x));
 
-                    layerRowList.add(layerInfoMap.get("initialRate").getValue());        // Initial (CFS)
-                    layerRowList.add(layerInfoMap.get("baseflowFraction").getValue());   // Fraction
-                    layerRowList.add(layerInfoMap.get("storageCoefficient").getValue()); // Coefficient (HR)
-                    layerRowList.add(layerInfoMap.get("numberSteps").getValue());        // Steps
+                    Set<String> layerInfoKeySet = layerInfoMap.keySet();
+                    String initialKey = findMatchingKey(layerInfoKeySet, "initial", false);
+                    String fractionKey = findMatchingKey(layerInfoKeySet, "fraction", false);
+                    String coefficientKey = findMatchingKey(layerInfoKeySet, "coefficient", false);
+                    String numberKey = findMatchingKey(layerInfoKeySet, "number", false);
+
+                    layerRowList.add(layerInfoMap.get(initialKey).getValue());     // Initial (CFS)
+                    layerRowList.add(layerInfoMap.get(fractionKey).getValue());    // Fraction
+                    layerRowList.add(layerInfoMap.get(coefficientKey).getValue()); // Coefficient (HR)
+                    layerRowList.add(layerInfoMap.get(numberKey).getValue());      // Steps
                     baseflowRowDomList.add(HtmlModifier.printTableDataRow(layerRowList, tdAttribute, tdAttribute)); // To DomContent
                 } // Loop: through each layer
             }
@@ -276,10 +317,10 @@ public class GlobalParametersWriter {
 
         /* Split the Reach-type Elements by their respective method type (Muskingnum, etc...) */
         List<Element> muskingumMethod = reachElements.stream()
-                .filter(element -> getRouteMethod(element).equals("MUSKINGUM"))
+                .filter(element -> getRouteMethod(element).toUpperCase().equals("MUSKINGUM"))
                 .collect(Collectors.toList());
         List<Element> muskingumCungeMethod = reachElements.stream()
-                .filter(element -> getRouteMethod(element).equals("MUSKINGUM_CUNGE"))
+                .filter(element -> getRouteMethod(element).toUpperCase().equals("MUSKINGUM_CUNGE"))
                 .collect(Collectors.toList());
 
         /* For each method, call their respective function to get a Table DOM */
@@ -326,15 +367,21 @@ public class GlobalParametersWriter {
             /* Get all information necessary for this element's row */
             Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
                     .collect(Collectors.toMap(Process::getName, x -> x));
-            Map<String, Parameter> routeParameters = elementProcesses.get("route").getParameters().stream()
+            String routeKey = findMatchingKey(elementProcesses.keySet(), "route", false);
+            Map<String, Parameter> routeParameters = elementProcesses.get(routeKey).getParameters().stream()
                     .collect(Collectors.toMap(Parameter::getName, x -> x));
 
             List<String> routeRowList = new ArrayList<>();
             routeRowList.add(element.getName()); // Element Name
-            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("initialVariable").getValue())); // Initial Type
-            routeRowList.add(routeParameters.get("k").getValue()); // K value
-            routeRowList.add(routeParameters.get("x").getValue()); // X value
-            routeRowList.add(routeParameters.get("steps").getValue()); // Number of Subreaches
+            String initialKey = findMatchingKey(routeParameters.keySet(), "initial", false);
+            String kKey = findMatchingKey(routeParameters.keySet(), "k", true);
+            String xKey = findMatchingKey(routeParameters.keySet(), "x", true);
+            String stepKey = findMatchingKey(routeParameters.keySet(), "step", false);
+
+            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get(initialKey).getValue())); // Initial Type
+            routeRowList.add(routeParameters.get(kKey).getValue()); // K value
+            routeRowList.add(routeParameters.get(xKey).getValue()); // X value
+            routeRowList.add(routeParameters.get(stepKey).getValue()); // Number of Subreaches
 
             tableRows.add(HtmlModifier.printTableDataRow(routeRowList, tdAttribute, tdAttribute));
         } // Loop: through each element
@@ -389,32 +436,32 @@ public class GlobalParametersWriter {
         Map<String, List<Element>> separatedElementMap = new HashMap<>();
 
         List<Element> subbasinElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().equals("SUBBASIN"))
+                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("SUBBASIN"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Subbasin", subbasinElements);
 
         List<Element> reachElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().equals("REACH"))
+                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("REACH"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Reach", reachElements);
 
         List<Element> junctionElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().equals("JUNCTION"))
+                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("JUNCTION"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Junction", junctionElements);
 
         List<Element> sinkElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().equals("SINK"))
+                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("SINK"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Sink", sinkElements);
 
         List<Element> sourceElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().equals("SOURCE"))
+                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("SOURCE"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Source", sourceElements);
 
         List<Element> reservoirElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().equals("RESERVOIR"))
+                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("RESERVOIR"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Reservoir", reservoirElements);
 
@@ -423,7 +470,9 @@ public class GlobalParametersWriter {
     private String getRouteMethod(Element element) {
         Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
                 .collect(Collectors.toMap(Process::getName, x -> x));
-        Map<String, Parameter> routeParameters = elementProcesses.get("route").getParameters().stream()
+
+        String routeKey = findMatchingKey(elementProcesses.keySet(), "route", false);
+        Map<String, Parameter> routeParameters = elementProcesses.get(routeKey).getParameters().stream()
                 .collect(Collectors.toMap(Parameter::getName, x -> x));
 
         return routeParameters.get("method").getValue();
@@ -439,4 +488,11 @@ public class GlobalParametersWriter {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{})); // Table Row type
     } // printTableDataRow()
+    private String findMatchingKey(Set<String> keySet, String matchKey, boolean endsWith) {
+        for(String key : keySet) {
+            if(endsWith) { if(key.toUpperCase().endsWith(matchKey.toUpperCase())) return key; }
+            else { if(key.toUpperCase().contains(matchKey.toUpperCase())) return key; }
+        } // Loop: to find key
+        return "";
+    } // findMatchingKey()
 } // GlobalParametersWriter()

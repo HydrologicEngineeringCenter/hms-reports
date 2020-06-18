@@ -5,7 +5,6 @@ import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.enums.ParameterSummary;
 import mil.army.usace.hec.hms.reports.io.parser.BasinInputParser;
 import mil.army.usace.hec.hms.reports.io.parser.XmlBasinResultsParser;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -105,8 +104,8 @@ public class Utilities {
         return availableBasinType;
     } // getAvailableBasinType()
     public static int getNumberOfElements(String pathToBasinInput) {
-        JSONObject jsonFile = getJsonObject(pathToBasinInput); // Get Json Object
-        JSONArray elementArray = jsonFile.getJSONObject("elementList").getJSONArray("elements");
-        return elementArray.length();
+        BasinInputParser basinInputParser = BasinInputParser.builder().pathToBasinInputFile(pathToBasinInput).build();
+        List<ElementInput> elementList = basinInputParser.getElementInput();
+        return elementList.size();
     } // getNumberOfElements()
 } // Utilities class

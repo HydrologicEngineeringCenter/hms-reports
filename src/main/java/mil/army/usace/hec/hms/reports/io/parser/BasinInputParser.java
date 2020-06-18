@@ -24,7 +24,11 @@ public abstract class BasinInputParser {
         public BasinInputParser build(){
             if (pathToBasinInputFile.toString().matches(".*basin.json")){
                 return new JsonBasinInputParser(this);
-            } else {
+            }
+            else if (pathToBasinInputFile.toString().matches(".*basin")){
+                return new AsciiBasinInputParser(this);
+            }
+            else {
                 throw new IllegalArgumentException("Not a valid file type.");
             }
 
