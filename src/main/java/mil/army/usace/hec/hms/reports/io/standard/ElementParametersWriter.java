@@ -383,8 +383,8 @@ public class ElementParametersWriter {
 
         // Setting Plot's configurations
         String xAxisTitle = "Time";
-        String y1AxisTitle = bottomPlots.get(0).getUnitType() + " (" + topPlots.get(0).getUnit() + ")";
-        String y2AxisTitle = topPlots.get(0).getUnitType() + " (" +  bottomPlots.get(0).getUnit() + ")";
+        String y1AxisTitle = bottomPlots.get(0).getUnitType() + " (" + bottomPlots.get(0).getUnit() + ")";
+        String y2AxisTitle = topPlots.get(0).getUnitType() + " (" +  topPlots.get(0).getUnit() + ")";
         String divName = StringBeautifier.getPlotDivName(elementName, plotName);
 
         // Create Plot
