@@ -244,14 +244,18 @@ public class GlobalParametersWriter {
                     String fractionKey = findMatchingKey(layerInfoKeySet, "fraction", false);
                     String coefficientKey = findMatchingKey(layerInfoKeySet, "coefficient", false);
                     String numberKey = findMatchingKey(layerInfoKeySet, "number", false);
+                    List<String> layerKeys = Arrays.asList(initialKey, fractionKey, coefficientKey, numberKey);
 
-                    layerRowList.add(layerInfoMap.get(initialKey).getValue());     // Initial (CFS)
-                    layerRowList.add(layerInfoMap.get(fractionKey).getValue());    // Fraction
-                    layerRowList.add(layerInfoMap.get(coefficientKey).getValue()); // Coefficient (HR)
-                    layerRowList.add(layerInfoMap.get(numberKey).getValue());      // Steps
-                    baseflowRowDomList.add(HtmlModifier.printTableDataRow(layerRowList, tdAttribute, tdAttribute)); // To DomContent
+                    for(String key : layerKeys) {
+                        if(key != null && !key.isEmpty()) { layerRowList.add(layerInfoMap.get(key).getValue()); }
+                        else { layerRowList.add("Not Specified"); }
+                    } // Loop: to get values
+
+                    if(layerRowList.stream().filter(e -> e.equals("Not Specified")).count() < layerKeys.size() - 1) {
+                        baseflowRowDomList.add(HtmlModifier.printTableDataRow(layerRowList, tdAttribute, tdAttribute));
+                    } // If: Not too many "Not Specified" values, add row
                 } // Loop: through each layer
-            }
+            } // If: Process Choice is Baseflow
 
         } // Loop: through all subbasin-type elements
 
