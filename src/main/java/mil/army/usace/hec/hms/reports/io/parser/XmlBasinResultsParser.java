@@ -32,7 +32,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     public Map<String,ElementResults> getElementResults() {
         Map<String, ElementResults> elementResultsList = new HashMap<>();
         JSONObject resultFile  = getJsonObject(this.pathToBasinResultsFile.toString());
-        JSONObject runResults  = resultFile.getJSONObject("RunResults");
+        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
         String startTimeString = runResults.optString("StartTime") + " GMT";
         String endTimeString   = runResults.optString("EndTime") + " GMT";
 
@@ -40,12 +40,20 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
         this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
 
-        JSONArray elemenentArray = runResults.getJSONArray("BasinElement");
+        JSONArray elementArray = runResults.optJSONArray("BasinElement");
+        JSONObject elementObject = runResults.optJSONObject("BasinElement");
+        if(elementArray == null && elementObject == null) { throw new IllegalArgumentException("No Elements Found"); }
 
-        for(int i = 0; i < elemenentArray.length(); i++) {
-            ElementResults elementResults = populateElement(elemenentArray.getJSONObject(i));
+        if(elementArray != null) {
+            for(int i = 0; i < elementArray.length(); i++) {
+                ElementResults elementResults = populateElement(elementArray.getJSONObject(i));
+                elementResultsList.put(elementResults.getName(), elementResults);
+            } // Loop through all element's results, and populate
+        } // If: has more than one element (is an ElementArray)
+        else {
+            ElementResults elementResults = populateElement(elementObject);
             elementResultsList.put(elementResults.getName(), elementResults);
-        } // Loop through all element's results, and populate
+        } // Else: has only one element (is an ElementObject)
 
         return elementResultsList;
     } // getElementResults()
@@ -59,7 +67,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         return object;
     } // getJsonObject()
     private ElementResults populateElement(JSONObject elementObject) {
-        String name = elementObject.getString("name");
+        String name = elementObject.opt("name").toString();
         JSONObject hydrologyObject = elementObject.getJSONObject("Hydrology");
         List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
         JSONObject statisticsArray = elementObject.getJSONObject("Statistics");

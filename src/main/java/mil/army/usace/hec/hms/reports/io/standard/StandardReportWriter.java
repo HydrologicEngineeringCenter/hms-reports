@@ -21,6 +21,7 @@ public class StandardReportWriter extends ReportWriter {
                 .pathToBasinInputFile(this.pathToInput.toAbsolutePath().toString())
                 .pathToBasinResultsFile(this.pathToResult.toAbsolutePath().toString())
                 .pathToProjectDirectory(this.projectDirectory.toAbsolutePath().toString())
+                .simulationType(simulationType)
                 .build();
 
         List<Element> elementList = parser.getElements();

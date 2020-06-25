@@ -3,6 +3,7 @@ package mil.army.usace.hec.hms.reports.io;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.ElementResults;
+import mil.army.usace.hec.hms.reports.enums.SimulationType;
 import mil.army.usace.hec.hms.reports.io.parser.BasinInputParser;
 import mil.army.usace.hec.hms.reports.io.parser.BasinResultsParser;
 
@@ -16,17 +17,20 @@ public class BasinParser {
     private final Path pathToBasinInputFile;
     private final Path pathToBasinResultsFile;
     private final Path pathToProjectDirectory;
+    private final SimulationType simulationType;
 
     private BasinParser(Builder builder){
         this.pathToBasinInputFile = builder.pathToBasinInputFile;
         this.pathToBasinResultsFile = builder.pathToBasinResultsFile;
         this.pathToProjectDirectory = builder.pathToProjectDirectory;
+        this.simulationType = builder.simulationType;
     }
 
     public static class Builder {
         Path pathToBasinInputFile;
         Path pathToBasinResultsFile;
         Path pathToProjectDirectory;
+        SimulationType simulationType;
 
         public Builder pathToBasinInputFile(final String pathToBasinFile){
             this.pathToBasinInputFile = Paths.get(pathToBasinFile);
@@ -40,6 +44,11 @@ public class BasinParser {
 
         public Builder pathToProjectDirectory(final String pathToProjectDirectory){
             this.pathToProjectDirectory = Paths.get(pathToProjectDirectory);
+            return this;
+        }
+
+        public Builder simulationType(final SimulationType simulationType) {
+            this.simulationType = simulationType;
             return this;
         }
 
@@ -61,14 +70,14 @@ public class BasinParser {
         BasinResultsParser resultsParser = BasinResultsParser.builder()
                 .pathToBasinResultsFile(this.pathToBasinResultsFile.toAbsolutePath().toString())
                 .pathToProjectDirectory(this.pathToProjectDirectory.toAbsolutePath().toString())
+                .simulationType(this.simulationType)
                 .build();
 
         List<ElementInput> inputs = inputParser.getElementInput();
         Map<String, ElementResults> results = resultsParser.getElementResults();
 
-        if(inputs.size() != results.size()) {
-            System.out.println("Error: Number of inputs and results do not match!");
-            return null;
+        if(inputs.size() > results.size()) {
+            throw new IllegalArgumentException("Missing Some Elements' Results");
         } // Check if # of inputs and results matches
 
         for(ElementInput input : inputs) {

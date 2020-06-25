@@ -3,6 +3,7 @@ package mil.army.usace.hec.hms.reports.io;
 import mil.army.usace.hec.hms.reports.DisplayRange;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.enums.ReportWriterType;
+import mil.army.usace.hec.hms.reports.enums.SimulationType;
 import mil.army.usace.hec.hms.reports.enums.StatisticsType;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.io.standard.StandardReportWriter;
@@ -23,6 +24,7 @@ public abstract class ReportWriter {
     protected List<String> chosenPlots;
     protected Map<String, List<String>> elementParameterizationChoice;
     protected Map<StatisticsType, List<DisplayRange>> displayRangeMap;
+    protected SimulationType simulationType;
 
     protected ReportWriter(Builder builder){
         this.pathToInput = builder.pathToInput;
@@ -34,6 +36,7 @@ public abstract class ReportWriter {
         this.globalParameterChoices = builder.globalParameterChoices;
         this.elementParameterizationChoice = builder.elementParameterizationChoice;
         this.displayRangeMap = builder.displayRangeMap;
+        this.simulationType = builder.simulationType;
     }
 
     public static class Builder{
@@ -47,6 +50,7 @@ public abstract class ReportWriter {
         private Map<String, List<String>> elementParameterizationChoice;
         private ReportWriterType reportWriterType;
         private Map<StatisticsType, List<DisplayRange>> displayRangeMap;
+        private SimulationType simulationType;
 
         public Builder pathToInput(final String pathToInput) {
             this.pathToInput = Paths.get(pathToInput);
@@ -97,6 +101,11 @@ public abstract class ReportWriter {
             this.displayRangeMap = displayRangeMap;
             return this;
         } // displayRangeMap()
+
+        public Builder simulationType(final SimulationType simulationType) {
+            this.simulationType = simulationType;
+            return this;
+        } // simulationType()
 
         public ReportWriter build(){
             if(reportWriterType == ReportWriterType.STANDARD_REPORT) {
