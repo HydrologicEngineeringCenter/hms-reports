@@ -1,19 +1,64 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
-group 'org.example'
-version '1.0-SNAPSHOT'
+group 'mil.army.usace.hec'
+version '1.0'
 
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven { url "https://www.hec.usace.army.mil/nexus/repository/maven-public/" }
 }
 
 dependencies {
+    implementation 'org.json:json:20190722'
+    implementation 'com.j2html:j2html:1.4.0'
+    implementation 'tech.tablesaw:tablesaw-core:0.37.3'
+    implementation 'tech.tablesaw:tablesaw-jsplot:0.37.3'
+    implementation 'org.jsoup:jsoup:1.12.2'
+
+    implementation 'com.rmanet:rma:6.0.0.51'
+    implementation 'com.rmanet:rmadev:6.0.0.51'
+    implementation 'mil.army.usace.hec:hec:6.0.0.51'
+    implementation 'mil.army.usace.hec:hecData:6.0.0.51'
+    implementation 'mil.army.usace.hec:heclib:6.0.0.51'
+    implementation 'mil.army.usace.hec:hecnf:6.0.0.51'
+    implementation 'mil.army.usace.hec:environment:6.0.0.51'
+    implementation 'mil.army.usace.hec:S00hfp:6.0.0.51'
+    implementation 'mil.army.usace.hec:hec-dssvue-dev:6.0.0.51'
+    implementation 'mil.army.usace.hec:hecnfPluginAPI:6.0.0.51'
+
     testImplementation 'org.junit.jupiter:junit-jupiter:5.4.0'
     testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.4.0"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.4.0"
 }
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'hms-reports'
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            credentials {
+                username = "$mavenUser"
+                password = "$mavenPassword"
+            }
+            def releasesRepoUrl = "https://www.hec.usace.army.mil/nexus/repository/maven-releases/"
+            def snapshotsRepoUrl = "https://www.hec.usace.army.mil/nexus/repository/maven-snapshots/"
+            url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
+
+publish.dependsOn jar
