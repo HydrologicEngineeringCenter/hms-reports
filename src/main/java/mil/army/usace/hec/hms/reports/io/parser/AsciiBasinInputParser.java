@@ -16,8 +16,6 @@ public class AsciiBasinInputParser extends BasinInputParser {
     private List<String> basinTypes = Arrays.asList("Subbasin:","Sink:","Source:","Junction:","Reach:","Reservoir:");
     private List<String> basinFileLines = new ArrayList<>();
     private List<Integer> endLineList = new ArrayList<>();
-    private String endElement = "End:";
-    private boolean basinFound = false;
 
     @Override
     public List<ElementInput> getElementInput() {

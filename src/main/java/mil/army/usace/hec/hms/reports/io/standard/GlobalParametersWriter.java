@@ -66,7 +66,8 @@ public class GlobalParametersWriter {
                 case "Subbasin": {
                     if(globalParameterChoices.containsKey("Subbasin")) {
                         List<String> availableList = globalParameterChoices.get("Subbasin");
-                        DomContent parameterTable = printSubbasinParameterList(separatedElements.get("Subbasin"), availableList);
+                        DomContent sectionTitle = h2(attrs(".global-header"), "Global Parameter Summary - Subbasin");
+                        DomContent parameterTable = getProcessTables(sectionTitle, separatedElements.get("Subbasin"), availableList, ".global-parameter");
                         if(parameterTable != null) { globalParameterDomList.add(parameterTable); }
                     } // If the user chooses to print out Subbasin parameters
 
@@ -74,7 +75,9 @@ public class GlobalParametersWriter {
                 }
                 case "Reach": {
                     if(globalParameterChoices.containsKey("Reach")) {
-                        DomContent parameterTable = printReachParameterList(separatedElements.get("Reach"), globalParameterChoices.get("Reach"));
+                        List<String> availableList = globalParameterChoices.get("Reach");
+                        DomContent sectionTitle = h2(attrs(".global-header"), "Global Parameter Summary - Reach");
+                        DomContent parameterTable = getProcessTables(sectionTitle, separatedElements.get("Reach"), availableList, ".global-parameter");
                         if(parameterTable != null) { globalParameterDomList.add(parameterTable); }
                     } // If the user chooses to print out Reach parameters
 
@@ -82,7 +85,9 @@ public class GlobalParametersWriter {
                 }
                 case "Junction": {
                     if(globalParameterChoices.containsKey("Junction")) {
-                        DomContent parameterTable = printJunctionParameterList(separatedElements.get("Junction"), globalParameterChoices.get("Junction"));
+                        List<String> availableList = globalParameterChoices.get("Junction");
+                        DomContent sectionTitle = h2(attrs(".global-header"), "Global Parameter Summary - Junction");
+                        DomContent parameterTable = getProcessTables(sectionTitle, separatedElements.get("Junction"), availableList, ".global-parameter");
                         if(parameterTable != null) { globalParameterDomList.add(parameterTable); }
                     } // If the user chooses to print out Junction parameters
 
@@ -90,7 +95,9 @@ public class GlobalParametersWriter {
                 }
                 case "Sink": {
                     if(globalParameterChoices.containsKey("Sink")) {
-                        DomContent parameterTable = printSinkParameterList(separatedElements.get("Sink"), globalParameterChoices.get("Sink"));
+                        List<String> availableList = globalParameterChoices.get("Sink");
+                        DomContent sectionTitle = h2(attrs(".global-header"), "Global Parameter Summary - Sink");
+                        DomContent parameterTable = getProcessTables(sectionTitle, separatedElements.get("Sink"), availableList, ".global-parameter");
                         if(parameterTable != null) { globalParameterDomList.add(parameterTable); }
                     } // If the user chooses to print out Sink parameters
 
@@ -98,7 +105,9 @@ public class GlobalParametersWriter {
                 }
                 case "Source": {
                     if(globalParameterChoices.containsKey("Source")) {
-                        DomContent parameterTable = printSourceParameterList(separatedElements.get("Source"), globalParameterChoices.get("Source"));
+                        List<String> availableList = globalParameterChoices.get("Source");
+                        DomContent sectionTitle = h2(attrs(".global-header"), "Global Parameter Summary - Source");
+                        DomContent parameterTable = getProcessTables(sectionTitle, separatedElements.get("Source"), availableList, ".global-parameter");
                         if(parameterTable != null) { globalParameterDomList.add(parameterTable); }
                     } // If the user chooses to print out Source parameters
 
@@ -106,7 +115,9 @@ public class GlobalParametersWriter {
                 }
                 case "Reservoir": {
                     if(globalParameterChoices.containsKey("Reservoir")) {
-                        DomContent parameterTable = printReservoirParameterList(separatedElements.get("Reservoir"), globalParameterChoices.get("Reservoir"));
+                        List<String> availableList = globalParameterChoices.get("Reservoir");
+                        DomContent sectionTitle = h2(attrs(".global-header"), "Global Parameter Summary - Reservoir");
+                        DomContent parameterTable = getProcessTables(sectionTitle, separatedElements.get("Reservoir"), availableList, ".global-parameter");
                         if(parameterTable != null) { globalParameterDomList.add(parameterTable); }
                     } // If the user chooses to print out Reservoir parameters
 
@@ -120,74 +131,6 @@ public class GlobalParametersWriter {
 
         return div(attrs(".global-parameter"), globalParameterDomList.toArray(new DomContent[]{}));
     } // printListGlobalParameter
-
-    /* Printing Parameter Tables (Subbasin/Reach/etc...) */
-    private DomContent printSubbasinParameterList(List<Element> subbasinElements, List<String> processChoices) {
-        String domAttribute = ".global-parameter";
-        List<DomContent> tableDomList = getProcessTables(subbasinElements, processChoices, domAttribute);
-
-        /* Add headings for Global Parameter Summary - Subbasin */
-        if(!tableDomList.isEmpty()) {
-            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Subbasin"));
-        } // Add section title if there is Subbasin global parameter
-
-        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
-    } // printSubbasinParameterList()
-    private DomContent printReachParameterList(List<Element> reachElements, List<String> processChoices) {
-        String domAttribute = ".global-parameter";
-        List<DomContent> tableDomList = getProcessTables(reachElements, processChoices, domAttribute);
-
-        /* Add headings for Global Parameter Summary - Reach */
-        if(!tableDomList.isEmpty()) {
-            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Reach"));
-        } // Add section title if there is Reach global parameter
-
-        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
-    } // printReachParameterList()
-    private DomContent printJunctionParameterList(List<Element> junctionElements, List<String> processChoices) {
-        String domAttribute = ".global-parameter";
-        List<DomContent> tableDomList = getProcessTables(junctionElements, processChoices, domAttribute);
-
-        /* Add headings for Global Parameter Summary - Junction */
-        if(!tableDomList.isEmpty()) {
-            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Junction"));
-        } // Add section title if there is Junction global parameter
-
-        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
-    } // printJunctionParameterList()
-    private DomContent printSinkParameterList(List<Element> sinkElements, List<String> processChoices) {
-        String domAttribute = ".global-parameter";
-        List<DomContent> tableDomList = getProcessTables(sinkElements, processChoices, domAttribute);
-
-        /* Add headings for Global Parameter Summary - Sink */
-        if(!tableDomList.isEmpty()) {
-            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Sink"));
-        } // Add section title if there is Sink global parameter
-
-        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
-    } // printSinkParameterList()
-    private DomContent printSourceParameterList(List<Element> sourceElements, List<String> processChoices) {
-        String domAttribute = ".global-parameter";
-        List<DomContent> tableDomList = getProcessTables(sourceElements, processChoices, domAttribute);
-
-        /* Add headings for Global Parameter Summary - Source */
-        if(!tableDomList.isEmpty()) {
-            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Source"));
-        } // Add section title if there is Source global parameter
-
-        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
-    } // printSourceParameterList()
-    private DomContent printReservoirParameterList(List<Element> reservoirElements, List<String> processChoices) {
-        String domAttribute = ".global-parameter";
-        List<DomContent> tableDomList = getProcessTables(reservoirElements, processChoices, domAttribute);
-
-        /* Add headings for Global Parameter Summary - Reservoir */
-        if(!tableDomList.isEmpty()) {
-            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Reservoir"));
-        } // Add section title if there is Reservoir global parameter
-
-        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
-    } // printReservoirParameterList()
 
     /* Helper functions */
     private Map<String, List<Element>> separateElementsByType(List<Element> listElement) {
@@ -225,6 +168,121 @@ public class GlobalParametersWriter {
 
         return separatedElementMap;
     } // separateElementsByType()
+    private Map<String, List<String>> availableProcessAndParameters(List<Element> elementList) {
+        Map<String, List<String>> availableMap = new LinkedHashMap<>();
+
+        for(Element element : elementList) {
+            List<Process> processList = element.getElementInput().getProcesses();
+
+            for(Process process : processList) {
+                List<Parameter> parameterList = process.getParameters();
+                List<String> paramNames = parameterList.stream().map(Parameter::getName).collect(Collectors.toList());
+
+                String processName = process.getName().toUpperCase();
+                String tableName = process.getName();
+
+                /* For Processes with Method, add Method to tableName */
+                if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + process.getValue(); }
+
+                /* For Special Case: Baseflow */
+                if(processName.equals("BASEFLOW")) {
+                    paramNames.clear();
+                    List<Parameter> baseflowLayerList = process.getParameters().get(0).getSubParameters();
+                    for(Parameter layer : baseflowLayerList) {
+                        List<String> layerParams = layer.getSubParameters().stream()
+                                .map(e -> e.getName().substring(e.getName().indexOf(" ") + 1))
+                                .collect(Collectors.toList());
+                        if(layerParams.size() >= paramNames.size()) { paramNames = layerParams; }
+                    } // Loop: through each layer in baseflowLayerList
+                } // If: Process is Baseflow
+
+                /* Put if the key is not present, or has less parameters */
+                if(!availableMap.containsKey(tableName) || availableMap.get(tableName).size() < paramNames.size()) {
+                    availableMap.put(tableName, paramNames);
+                } // If: the key is not present, or has less parameters
+            } // Loop: through each Process
+        } // Loop: through each Element
+
+        return availableMap;
+    } // availableProcessAndParameters()
+    private List<String> processesWithMethod() {
+        List<String> processWithMethodList = new ArrayList<>();
+        processWithMethodList.add("TRANSFORM");
+        processWithMethodList.add("CANOPY");
+        processWithMethodList.add("ROUTE");
+        processWithMethodList.add("BASEFLOW");
+        processWithMethodList.add("LOSSRATE");
+        return processWithMethodList;
+    } // processesWithMethod()
+    private DomContent getProcessTables(DomContent sectionTitle, List<Element> elementList, List<String> processChoices, String domAttrs) {
+        List<DomContent> tableDomList = new ArrayList<>();
+        Map<String, List<DomContent>> processTablesMap = new LinkedHashMap<>(); // 'Table Name' x 'List of Rows'
+        Map<String, List<String>> availableMap = availableProcessAndParameters(elementList);
+
+        for(Element element : elementList) {
+            List<Process> processList = element.getElementInput().getProcesses();
+            /* Filter Out Processes that weren't chosen by the user */
+            List<Process> chosenProcesses = processList.stream()
+                    .filter(p -> processChoices.contains(StringBeautifier.beautifyString(p.getName())))
+                    .collect(Collectors.toList());
+
+            for(Process process : chosenProcesses) {
+                if(process.getValue().equals("None")) { continue; }
+                String processName = process.getName().toUpperCase();
+                String tableName = process.getName();
+                /* For Processes with Method, add Method to tableName */
+                if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + process.getValue(); }
+
+                List<String> availableParameters = new ArrayList<>(availableMap.get(tableName));
+                List<String> parameterValues = new ArrayList<>();
+                Map<String, Parameter> parameterMap = process.getParameters().stream()
+                        .collect(Collectors.toMap(Parameter::getName, e -> e));
+
+                for(String availParam : availableParameters) {
+                    String paramKey = parameterMap.keySet().stream().filter(e -> e.contains(availParam)).findAny().orElse("");
+                    Parameter parameter = parameterMap.getOrDefault(paramKey, Parameter.builder().value("Not Specified").build());
+                    String value = parameter.getValue();
+                    parameterValues.add(value);
+                } // Loop: through all availableParameters
+
+                if(parameterValues.isEmpty()) { parameterValues.add(process.getValue()); } // For Single Processes
+                parameterValues.add(0, element.getName());
+                List<DomContent> dataRowDom = Collections.singletonList(HtmlModifier.printTableDataRow(parameterValues, domAttrs, domAttrs));
+
+                /* Place Data to processTablesMap. If key not there, new key */
+                List<String> parametersNames = new ArrayList<>(availableParameters);
+                if(parametersNames.isEmpty()) { parametersNames.add(process.getName()); }
+                parametersNames.add(0, "Element Name");
+                DomContent processTableHeader = HtmlModifier.printTableHeadRow(parametersNames, domAttrs, domAttrs);
+
+                if(!processTablesMap.containsKey(tableName)) {
+                    processTablesMap.put(tableName, Arrays.asList(processTableHeader, caption(tableName)));
+                } // If: Table didn't exist, new key with table's header and caption
+
+                // Adding in this Element's Row Data
+                List<DomContent> tableDataRows = new ArrayList<>(processTablesMap.get(tableName));
+                if(processName.equals("BASEFLOW")) { dataRowDom = new ArrayList<>(getBaseflowDataRows(element, process, availableParameters, domAttrs)); }
+                tableDataRows.addAll(dataRowDom);
+                processTablesMap.put(tableName, tableDataRows);
+            } // Loop: through all Processes
+        } // Loop: through all Elements
+
+        /* Generating Tables for each Process saved in the processTablesMap */
+        for(String tableName : processTablesMap.keySet()) {
+            List<DomContent> tableData = processTablesMap.get(tableName);
+            /* Skip Tables without any Data (2 = Caption + Header) */
+            if(tableData.size() <= 2) { continue; }
+            DomContent tableDom = table(attrs(domAttrs), tableData.toArray(new DomContent[]{}));
+            tableDomList.add(tableDom);
+        } // Loop: through all tables in processTablesMap
+
+        /* Add headings for Global Parameter Summary - Subbasin */
+        if(!tableDomList.isEmpty()) {
+            tableDomList.add(0, sectionTitle);
+        } // Add section title if there is Subbasin global parameter
+
+        return div(attrs(domAttrs), tableDomList.toArray(new DomContent[]{}));
+    } // getProcessTables()
     private DomContent printBaseflowTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
         List<DomContent> domList = new ArrayList<>();
 
@@ -236,70 +294,36 @@ public class GlobalParametersWriter {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{})); // Table Row type
     } // printTableDataRow()
-    private List<DomContent> getProcessTables(List<Element> elementList, List<String> processChoices, String domAttrs) {
-        List<DomContent> tableDomList = new ArrayList<>();
-        Map<String, List<DomContent>> processTablesMap = new LinkedHashMap<>(); // 'Table Name' x 'List of Rows'
+    private List<DomContent> getBaseflowDataRows(Element element, Process process, List<String> availableParameters, String domAttrs) {
+        List<DomContent> baseflowDataRows = new ArrayList<>();
+        List<Parameter> baseflowLayerList = process.getParameters().get(0).getSubParameters();
 
-        /* Loop through each Element to add Data to tables */
-        for(Element element : elementList) {
-            List<Process> elementProcesses = element.getElementInput().getProcesses();
-            /* Filter Out Processes that weren't chosen by the user */
-            List<Process> chosenProcesses = elementProcesses.stream()
-                    .filter(p -> processChoices.contains(StringBeautifier.beautifyString(p.getName())))
-                    .collect(Collectors.toList());
-            /* Go through each Process to get Data */
-            for(Process process : chosenProcesses) {
-                String processName = process.getName().toUpperCase();
-                String tableName = StringBeautifier.beautifyString(process.getName());
+        /* Element Name's Row */
+        List<String> nameRow  = new ArrayList<>();
+        nameRow.add(element.getName());
+        for(int i = 0; i < availableParameters.size(); i++) { nameRow.add(""); }
+        DomContent nameRowDom = printBaseflowTableDataRow(nameRow, domAttrs, domAttrs);
+        baseflowDataRows.add(nameRowDom);
 
-                /* If is Process with Method, also saves the Method. */
-                if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + process.getValue(); }
+        /* Subsequent Layer Rows */
+        int count = 1;
+        for(Parameter layer : baseflowLayerList) {
+            List<String> subParametersValues = new ArrayList<>();
+            List<Parameter> layerSubParameters = layer.getSubParameters();
+            Map<String, Parameter> subParametersMap = layerSubParameters.stream().collect(Collectors.toMap(Parameter::getName, e->e));
+            for(String availParam : availableParameters) {
+                String paramKey = subParametersMap.keySet().stream().filter(e -> e.contains(availParam)).findAny().orElse("");
+                Parameter parameter = subParametersMap.getOrDefault(paramKey, Parameter.builder().value("Not Specified").build());
+                String value = parameter.getValue();
+                subParametersValues.add(value);
+            } // Loop: through all subParameters
 
-                /* Getting 'this' Element's Row Data */
-                List<String> parametersValues = process.getParameters().stream().map(Parameter::getValue).collect(Collectors.toList());
-                // If Process has no Parameters, add Process's value instead
-                if(parametersValues.isEmpty()) { parametersValues.add(process.getValue()); }
-                parametersValues.add(0, element.getName());
-                List<DomContent> elementDataRow = Collections.singletonList(HtmlModifier.printTableDataRow(parametersValues, domAttrs, domAttrs));
+            subParametersValues.add(0, "Layer " + count);
+            DomContent layerRow = HtmlModifier.printTableDataRow(subParametersValues, domAttrs, domAttrs);
+            baseflowDataRows.add(layerRow);
+        } // Loop: through all Layers of Baseflow
 
-                /* Place Data to processTablesMap. If key not there, new key */
-                List<String> parametersNames = process.getParameters().stream().map(Parameter::getName).collect(Collectors.toList());
-                if(parametersNames.isEmpty()) { parametersNames.add(process.getName()); }
-                parametersNames.add(0, "Element Name");
-                DomContent processTableHeader = HtmlModifier.printTableHeadRow(parametersNames, domAttrs, domAttrs);
-
-                if(!processTablesMap.containsKey(tableName)) {
-                    processTablesMap.put(tableName, Arrays.asList(processTableHeader, caption(tableName)));
-                } // If: Table didn't exist, new key with table's header and caption
-
-                // Adding in this Element's Row Data
-                List<DomContent> tableDataRows = new ArrayList<>(processTablesMap.get(tableName));
-                if(processName.equals("BASEFLOW")) { elementDataRow = new ArrayList<>(getBaseflowDataRows(element, process, domAttrs)); }
-                tableDataRows.addAll(elementDataRow);
-                processTablesMap.put(tableName, tableDataRows);
-            } // Loop: through each chosen Processes
-        } // Loop: through each Subbasin Element
-
-        /* Generating Tables for each Process saved in the processTablesMap */
-        for(String tableName : processTablesMap.keySet()) {
-            List<DomContent> tableData = processTablesMap.get(tableName);
-            /* Skip Tables without any Data (2 = Caption + Header) */
-            if(tableData.size() <= 2) { continue; }
-            DomContent tableDom = table(attrs(domAttrs), tableData.toArray(new DomContent[]{}));
-            tableDomList.add(tableDom);
-        } // Loop: through all tables in processTablesMap
-
-        return tableDomList;
-    } // getProcessTablesMap()
-    private List<DomContent> getBaseflowDataRows(Element element, Process process, String domAttrs) {
-        return new ArrayList<>();
+        return baseflowDataRows;
     } // getBaseflowDataRows()
-    private List<String> processesWithMethod() {
-        List<String> processWithMethodList = new ArrayList<>();
-        processWithMethodList.add("TRANSFORM");
-        processWithMethodList.add("CANOPY");
-        processWithMethodList.add("ROUTE");
-        processWithMethodList.add("BASEFLOW");
-        return processWithMethodList;
-    } // processesWithMethod()
+
 } // GlobalParametersWriter()
