@@ -123,317 +123,71 @@ public class GlobalParametersWriter {
 
     /* Printing Parameter Tables (Subbasin/Reach/etc...) */
     private DomContent printSubbasinParameterList(List<Element> subbasinElements, List<String> processChoices) {
-        /* Subbasin's parameters (Area, Loss Rate, Canopy, Transform, Baseflow) */
-        List<DomContent> subbasinParameterDomList = new ArrayList<>(); // Contains (Area table, Loss Rate table, etc...)
-        String tdAttribute = ".global-parameter";
-        /* For each table: Loop through subbasinElements List, get necessary data to get a DomContent table */
-        List<DomContent> areaRowDomList = new ArrayList<>();      // Contains all rows needed for an Area Table
-        List<DomContent> lossRowDomList = new ArrayList<>();      // Contains all rows needed for an Loss Table
-        List<DomContent> canopyRowDomList = new ArrayList<>();    // Contains all rows needed for an Canopy Table
-        List<DomContent> transformRowDomList = new ArrayList<>(); // Contains all rows needed for a Transform Table
-        List<DomContent> baseflowRowDomList = new ArrayList<>();  // Contains all rows needed for an Baseflow Table
+        String domAttribute = ".global-parameter";
+        List<DomContent> tableDomList = getProcessTables(subbasinElements, processChoices, domAttribute);
 
-        for(Element element : subbasinElements) {
-            /* Map of the element's list of processes */
-            Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
-                    .collect(Collectors.toMap(Process::getName, x -> x));
+        /* Add headings for Global Parameter Summary - Subbasin */
+        if(!tableDomList.isEmpty()) {
+            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Subbasin"));
+        } // Add section title if there is Subbasin global parameter
 
-            /* Parameter Table: Area */
-            if(processChoices.contains(StringBeautifier.beautifyString("area"))) {
-                List<String> areaRowList = new ArrayList<>();
-                areaRowList.add(element.getName()); // Element Name
-                Set<String> keySet = elementProcesses.keySet();
-                String matchedKey = findMatchingKey(keySet, "area", false);
-                areaRowList.add(elementProcesses.get(matchedKey).getValue()); // Area
-                areaRowDomList.add(HtmlModifier.printTableDataRow(areaRowList, tdAttribute, tdAttribute)); // To DomContent
-            }
-
-            /* Parameter Table: Loss Rate */
-            if(processChoices.contains(StringBeautifier.beautifyString("lossRate"))) {
-                Set<String> keySet = elementProcesses.keySet();
-                String matchedKey = findMatchingKey(keySet, "loss", false);
-
-                Map<String, Parameter> lossParameters = elementProcesses.get(matchedKey).getParameters().stream()
-                        .collect(Collectors.toMap(Parameter::getName, x -> x));
-                List<String> lossRowList = new ArrayList<>();
-
-                lossRowList.add(element.getName()); // Element Name
-
-                Set<String> lossKeySet = lossParameters.keySet();
-                String initialKey = findMatchingKey(lossKeySet, "initial", false);
-                String maximumKey = findMatchingKey(lossKeySet, "maximum", false);
-                String percolationKey = findMatchingKey(lossKeySet, "percolation", false);
-                String imperviousKey = findMatchingKey(lossKeySet, "impervious", false);
-
-                lossRowList.add(lossParameters.get(initialKey).getValue());  // Initial Deficit (IN)
-                lossRowList.add(lossParameters.get(maximumKey).getValue());  // Maximum Storage (IN)
-                lossRowList.add(lossParameters.get(percolationKey).getValue()); // Constant Rate (IN/HR)
-                lossRowList.add(lossParameters.get(imperviousKey).getValue()); // Impervious (%)
-                lossRowDomList.add(HtmlModifier.printTableDataRow(lossRowList, tdAttribute, tdAttribute)); // To DomContent
-            }
-
-            /* Parameter Table: Canopy */
-            if(processChoices.contains(StringBeautifier.beautifyString("canopy"))) {
-                Set<String> keySet = elementProcesses.keySet();
-                String matchedKey = findMatchingKey(keySet, "canopy", false);
-
-                Map<String, Parameter> canopyParameters = elementProcesses.get(matchedKey).getParameters().stream()
-                        .collect(Collectors.toMap(Parameter::getName, x -> x));
-                List<String> canopyRowList = new ArrayList<>();
-
-                canopyRowList.add(element.getName()); // Element Name
-                Set<String> canopyKeySet = canopyParameters.keySet();
-                String initialKey = findMatchingKey(canopyKeySet, "initial", false);
-                String capacityKey = findMatchingKey(canopyKeySet, "capacity", false);
-                String cropKey = findMatchingKey(canopyKeySet, "crop", false);
-                String evaKey = findMatchingKey(canopyKeySet, "allow", false);
-                String uptakeKey = findMatchingKey(canopyKeySet, "uptake", false);
-
-                canopyRowList.add(StringBeautifier.beautifyString(canopyParameters.get(initialKey).getValue()));  // Initial Storage (%)
-                canopyRowList.add(canopyParameters.get(capacityKey).getValue()); // Max Storage (IN)
-                canopyRowList.add(canopyParameters.get(cropKey).getValue()); // Crop Coefficient
-                String evapotranspiration = canopyParameters.get(evaKey).getValue();
-                if(evapotranspiration.equals("false") || evapotranspiration.equals("No")) { canopyRowList.add("Only Dry Periods"); }
-                else { canopyRowList.add("Wet and Dry Periods"); } // Evapotranspiration
-                canopyRowList.add(StringBeautifier.beautifyString(canopyParameters.get(uptakeKey).getValue())); // Uptake Method
-                canopyRowDomList.add(HtmlModifier.printTableDataRow(canopyRowList, tdAttribute, tdAttribute)); // To DomContent
-            }
-
-            /* Parameter Table: Transform */
-            if(processChoices.contains(StringBeautifier.beautifyString("transform"))) {
-                Set<String> keySet = elementProcesses.keySet();
-                String matchedKey = findMatchingKey(keySet, "transform", false);
-
-                Map<String, Parameter> transformParameters = elementProcesses.get(matchedKey).getParameters().stream()
-                        .collect(Collectors.toMap(Parameter::getName, x -> x));
-                List<String> transformRowList = new ArrayList<>();
-
-                transformRowList.add(element.getName()); // Element Name
-                Set<String> transformKeySet = transformParameters.keySet();
-                String timeKey = findMatchingKey(transformKeySet, "time", false);
-                String storageKey = findMatchingKey(transformKeySet, "storage", false);
-
-                transformRowList.add(transformParameters.get(timeKey).getValue()); // Time of Concentration (HR)
-                transformRowList.add(transformParameters.get(storageKey).getValue());  // Storage Coefficient (HR)
-                transformRowDomList.add(HtmlModifier.printTableDataRow(transformRowList, tdAttribute, tdAttribute)); // To DomContent
-            }
-
-            /* Parameter Table: Baseflow --- this will contain 'n + 1' number of rows, where n = # layers */
-            if(processChoices.contains(StringBeautifier.beautifyString("baseflow"))) {
-                Set<String> keySet = elementProcesses.keySet();
-                String matchedKey = findMatchingKey(keySet, "baseflow", false);
-
-                Map<String, Parameter> baseflowParameters = elementProcesses.get(matchedKey).getParameters().stream()
-                        .collect(Collectors.toMap(Parameter::getName, x -> x));
-                List<String> firstRow = Arrays.asList(element.getName(), "", "", "", "");
-                baseflowRowDomList.add(printBaseflowTableDataRow(firstRow, tdAttribute, tdAttribute)); // To DomContent
-
-                Set<String> baseflowKeySet = baseflowParameters.keySet();
-                String layerKey = findMatchingKey(baseflowKeySet, "list", false);
-                List<Parameter> baseflowLayerList = baseflowParameters.get(layerKey).getSubParameters();
-
-                // Rows: of each layer for this element
-                for(Parameter baseflowLayer : baseflowLayerList) {
-                    List<String> layerRowList = new ArrayList<>();
-                    layerRowList.add("Layer " + baseflowLayer.getName()); // Ex. Name: "Layer 1"
-                    Map<String, Parameter> layerInfoMap = baseflowLayer.getSubParameters().stream()
-                            .collect(Collectors.toMap(Parameter::getName, x -> x));
-
-                    Set<String> layerInfoKeySet = layerInfoMap.keySet();
-                    String initialKey = findMatchingKey(layerInfoKeySet, "initial", false);
-                    String fractionKey = findMatchingKey(layerInfoKeySet, "fraction", false);
-                    String coefficientKey = findMatchingKey(layerInfoKeySet, "coefficient", false);
-                    String numberKey = findMatchingKey(layerInfoKeySet, "number", false);
-                    List<String> layerKeys = Arrays.asList(initialKey, fractionKey, coefficientKey, numberKey);
-
-                    for(String key : layerKeys) {
-                        if(key != null && !key.isEmpty()) { layerRowList.add(layerInfoMap.get(key).getValue()); }
-                        else { layerRowList.add("Not Specified"); }
-                    } // Loop: to get values
-
-                    if(layerRowList.stream().filter(e -> e.equals("Not Specified")).count() < layerKeys.size() - 1) {
-                        baseflowRowDomList.add(HtmlModifier.printTableDataRow(layerRowList, tdAttribute, tdAttribute));
-                    } // If: Not too many "Not Specified" values, add row
-                } // Loop: through each layer
-            } // If: Process Choice is Baseflow
-
-        } // Loop: through all subbasin-type elements
-
-        /* Adding headers to each Table, and create a table */
-        if(!areaRowDomList.isEmpty()) {
-            List<String> headerData = Arrays.asList("Element Name", "Area");
-            DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
-            areaRowDomList.add(0, headerDom);
-            areaRowDomList.add(0, caption("Area"));
-            DomContent parameterTable = table(attrs(tdAttribute), areaRowDomList.toArray(new DomContent[]{}));
-            subbasinParameterDomList.add(parameterTable);
-        } // Add Header for table if it's not empty
-
-        if(!lossRowDomList.isEmpty()) {
-            List<String> headerData = Arrays.asList("Element Name", "Initial Deficit (IN)", "Maximum Storage (IN)", "Constant Rate (IN/HR)", "Impervious (%)");
-            DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
-            lossRowDomList.add(0, headerDom);
-            lossRowDomList.add(0, caption("Loss Rate"));
-            DomContent parameterTable = table(attrs(tdAttribute), lossRowDomList.toArray(new DomContent[]{}));
-            subbasinParameterDomList.add(parameterTable);
-        } // Add Header for table if it's not empty
-
-        if(!canopyRowDomList.isEmpty()) {
-            List<String> headerData = Arrays.asList("Element Name", "Initial Storage (%)", "Max Storage (IN)", "Crop Coefficient", "Evapotranspiration", "Uptake Method");
-            DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
-            canopyRowDomList.add(0, headerDom);
-            canopyRowDomList.add(0, caption("Canopy"));
-            DomContent parameterTable = table(attrs(tdAttribute), canopyRowDomList.toArray(new DomContent[]{}));
-            subbasinParameterDomList.add(parameterTable);
-        } // Add Header for table if it's not empty
-
-        if(!transformRowDomList.isEmpty()) {
-            List<String> headerData = Arrays.asList("Element Name", "Time of Concentration (HR)", "Storage Coefficient (HR)");
-            DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
-            transformRowDomList.add(0, headerDom);
-            transformRowDomList.add(0, caption("Transform"));
-            DomContent parameterTable = table(attrs(tdAttribute), transformRowDomList.toArray(new DomContent[]{}));
-            subbasinParameterDomList.add(parameterTable);
-        } // Add Header for table if it's not empty
-
-        if(!baseflowRowDomList.isEmpty()) {
-            List<String> headerData = Arrays.asList("Element Name", "Initial (CFS)", "Fraction", "Coefficient (HR)", "Steps");
-            DomContent headerDom = HtmlModifier.printTableHeadRow(headerData, tdAttribute, tdAttribute);
-            baseflowRowDomList.add(0, headerDom);
-            baseflowRowDomList.add(0, caption("Baseflow"));
-            DomContent parameterTable = table(attrs(tdAttribute), baseflowRowDomList.toArray(new DomContent[]{}));
-            subbasinParameterDomList.add(parameterTable);
-        } // Add Header for table if it's not empty
-
-        if(!subbasinParameterDomList.isEmpty()) {
-            subbasinParameterDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Subbasin"));
-        } // Add section title if there is subbasin global parameter
-
-        /* Return a 'div' that contains all Subbasin's parameter tables */
-        return div(attrs(tdAttribute), subbasinParameterDomList.toArray(new DomContent[]{}));
+        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
     } // printSubbasinParameterList()
     private DomContent printReachParameterList(List<Element> reachElements, List<String> processChoices) {
-        /* Return 'null' if processChoices does not contain 'route' */
-        if(!processChoices.contains(StringBeautifier.beautifyString("route"))) { return null; }
-
-        /* Reach's Parameter (Route). DomList contains all tables */
-        List<DomContent> reachParameterDomList = new ArrayList<>();
-
-        /* Split the Reach-type Elements by their respective method type (Muskingnum, etc...) */
-        List<Element> muskingumMethod = reachElements.stream()
-                .filter(element -> getRouteMethod(element).toUpperCase().equals("MUSKINGUM"))
-                .collect(Collectors.toList());
-        List<Element> muskingumCungeMethod = reachElements.stream()
-                .filter(element -> getRouteMethod(element).toUpperCase().equals("MUSKINGUM_CUNGE"))
-                .collect(Collectors.toList());
-
-        /* For each method, call their respective function to get a Table DOM */
-        if(!muskingumMethod.isEmpty()) {
-            DomContent muskingumTableDom = printMuskingumTable(muskingumMethod);
-            reachParameterDomList.add(muskingumTableDom);
-        } // If: There are Reach Elements with Muskingum Method
-        if(!muskingumCungeMethod.isEmpty()) {
-            DomContent muskingumCungeTableDom = printMuskingumCungeTable(muskingumCungeMethod);
-            reachParameterDomList.add(muskingumCungeTableDom);
-        } // If: There are Reach Elements with Muskingum-Cunge Method
+        String domAttribute = ".global-parameter";
+        List<DomContent> tableDomList = getProcessTables(reachElements, processChoices, domAttribute);
 
         /* Add headings for Global Parameter Summary - Reach */
-        if(!reachParameterDomList.isEmpty()) {
-            reachParameterDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Reach"));
-        } // Add section title if there is subbasin global parameter
+        if(!tableDomList.isEmpty()) {
+            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Reach"));
+        } // Add section title if there is Reach global parameter
 
-        return div(attrs(".global-parameter"), reachParameterDomList.toArray(new DomContent[]{}));
+        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
     } // printReachParameterList()
     private DomContent printJunctionParameterList(List<Element> junctionElements, List<String> processChoices) {
-        /* Junction-type Basins don't have Parameter Tables */
+        String domAttribute = ".global-parameter";
+        List<DomContent> tableDomList = getProcessTables(junctionElements, processChoices, domAttribute);
 
-        return null;
+        /* Add headings for Global Parameter Summary - Junction */
+        if(!tableDomList.isEmpty()) {
+            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Junction"));
+        } // Add section title if there is Junction global parameter
+
+        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
     } // printJunctionParameterList()
     private DomContent printSinkParameterList(List<Element> sinkElements, List<String> processChoices) {
-        /* Sink-type Basins don't have Parameter Tables */
-        return null;
+        String domAttribute = ".global-parameter";
+        List<DomContent> tableDomList = getProcessTables(sinkElements, processChoices, domAttribute);
+
+        /* Add headings for Global Parameter Summary - Sink */
+        if(!tableDomList.isEmpty()) {
+            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Sink"));
+        } // Add section title if there is Sink global parameter
+
+        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
     } // printSinkParameterList()
     private DomContent printSourceParameterList(List<Element> sourceElements, List<String> processChoices) {
-        /* Source-type Basins don't have Parameter Tables */
+        String domAttribute = ".global-parameter";
+        List<DomContent> tableDomList = getProcessTables(sourceElements, processChoices, domAttribute);
 
-        return null;
+        /* Add headings for Global Parameter Summary - Source */
+        if(!tableDomList.isEmpty()) {
+            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Source"));
+        } // Add section title if there is Source global parameter
+
+        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
     } // printSourceParameterList()
     private DomContent printReservoirParameterList(List<Element> reservoirElements, List<String> processChoices) {
-        /* Reservoir-type Basins don't have Parameter Tables */
-        return null;
+        String domAttribute = ".global-parameter";
+        List<DomContent> tableDomList = getProcessTables(reservoirElements, processChoices, domAttribute);
+
+        /* Add headings for Global Parameter Summary - Reservoir */
+        if(!tableDomList.isEmpty()) {
+            tableDomList.add(0, h2(attrs(".global-header"), "Global Parameter Summary - Reservoir"));
+        } // Add section title if there is Reservoir global parameter
+
+        return div(attrs(domAttribute), tableDomList.toArray(new DomContent[]{}));
     } // printReservoirParameterList()
-    private DomContent printMuskingumTable(List<Element> muskingumMethod) {
-        List<DomContent> tableRows = new ArrayList<>();
-        String tdAttribute = ".global-parameter";
-
-        /* Loop through all Elements with Muskingum route method */
-        for(Element element : muskingumMethod) {
-            /* Get all information necessary for this element's row */
-            Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
-                    .collect(Collectors.toMap(Process::getName, x -> x));
-            String routeKey = findMatchingKey(elementProcesses.keySet(), "route", false);
-            Map<String, Parameter> routeParameters = elementProcesses.get(routeKey).getParameters().stream()
-                    .collect(Collectors.toMap(Parameter::getName, x -> x));
-
-            List<String> routeRowList = new ArrayList<>();
-            routeRowList.add(element.getName()); // Element Name
-            String initialKey = findMatchingKey(routeParameters.keySet(), "initial", false);
-            String kKey = findMatchingKey(routeParameters.keySet(), "k", true);
-            String xKey = findMatchingKey(routeParameters.keySet(), "x", true);
-            String stepKey = findMatchingKey(routeParameters.keySet(), "step", false);
-
-            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get(initialKey).getValue())); // Initial Type
-            routeRowList.add(routeParameters.get(kKey).getValue()); // K value
-            routeRowList.add(routeParameters.get(xKey).getValue()); // X value
-            routeRowList.add(routeParameters.get(stepKey).getValue()); // Number of Subreaches
-
-            tableRows.add(HtmlModifier.printTableDataRow(routeRowList, tdAttribute, tdAttribute));
-        } // Loop: through each element
-
-        /* Creating the table's header */
-        String methodName  = StringBeautifier.beautifyString(getRouteMethod(muskingumMethod.get(0)));
-        List<String> headerList = Arrays.asList("Reach", "Initial Type", methodName + " K (HR)", methodName + " X", "Number of Subreaches");
-        tableRows.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
-        tableRows.add(0, caption("Route - " + methodName + " Method"));
-
-        return table(attrs(tdAttribute), tableRows.toArray(new DomContent[]{}));
-    } // printMuskingumTable()
-    private DomContent printMuskingumCungeTable(List<Element> muskingumCungeMethod) {
-        List<DomContent> tableRows = new ArrayList<>();
-        String tdAttribute = ".global-parameter";
-
-        /* Loop through all Elements with Muskingum-Cunge route method */
-        for(Element element : muskingumCungeMethod) {
-            /* Get all information necessary for this element's row */
-            Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
-                    .collect(Collectors.toMap(Process::getName, x -> x));
-            Map<String, Parameter> routeParameters = elementProcesses.get("route").getParameters().stream()
-                    .collect(Collectors.toMap(Parameter::getName, x -> x));
-            Map<String, Parameter> channelParameters = routeParameters.get("channel").getSubParameters().stream()
-                    .collect(Collectors.toMap(Parameter::getName, x -> x));
-
-            List<String> routeRowList = new ArrayList<>();
-            routeRowList.add(element.getName()); // Element Name
-            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("initialVariable").getValue())); // Initial Type
-            routeRowList.add(channelParameters.get("length").getValue()); // Length (FT)
-            routeRowList.add(channelParameters.get("energySlope").getValue()); // Slope (FT/FT)
-            routeRowList.add(channelParameters.get("manningsN").getValue()); // Manning's n
-            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("spaceTimeMethod").getValue())); // Space-Time Method
-            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("indexParameterType").getValue())); // Index Method
-            routeRowList.add(routeParameters.get("indexFlow").getValue()); // Index Flow (CFS)
-            routeRowList.add(StringBeautifier.beautifyString(routeParameters.get("channelType").getValue())); // Shape
-
-            tableRows.add(HtmlModifier.printTableDataRow(routeRowList, tdAttribute, tdAttribute));
-        } // Loop: through each element
-
-        /* Creating the table's header */
-        String methodName  = StringBeautifier.beautifyString(getRouteMethod(muskingumCungeMethod.get(0)));
-        List<String> headerList = Arrays.asList("Reach", "Initial Type", "Length (FT)", "Slope (FT/FT)", "Manning's n", "Space-Time Method", "Index Method", "Index Flow", "Shape");
-        tableRows.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
-        tableRows.add(0, caption("Route - " + methodName + " Method"));
-
-        return table(attrs(tdAttribute), tableRows.toArray(new DomContent[]{}));
-    } // printMuskingumCungeTable()
 
     /* Helper functions */
     private Map<String, List<Element>> separateElementsByType(List<Element> listElement) {
@@ -471,16 +225,6 @@ public class GlobalParametersWriter {
 
         return separatedElementMap;
     } // separateElementsByType()
-    private String getRouteMethod(Element element) {
-        Map<String, Process> elementProcesses = element.getElementInput().getProcesses().stream()
-                .collect(Collectors.toMap(Process::getName, x -> x));
-
-        String routeKey = findMatchingKey(elementProcesses.keySet(), "route", false);
-        Map<String, Parameter> routeParameters = elementProcesses.get(routeKey).getParameters().stream()
-                .collect(Collectors.toMap(Parameter::getName, x -> x));
-
-        return routeParameters.get("method").getValue();
-    } // getRouteMethod()
     private DomContent printBaseflowTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
         List<DomContent> domList = new ArrayList<>();
 
@@ -492,11 +236,70 @@ public class GlobalParametersWriter {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{})); // Table Row type
     } // printTableDataRow()
-    private String findMatchingKey(Set<String> keySet, String matchKey, boolean endsWith) {
-        for(String key : keySet) {
-            if(endsWith) { if(key.toUpperCase().endsWith(matchKey.toUpperCase())) return key; }
-            else { if(key.toUpperCase().contains(matchKey.toUpperCase())) return key; }
-        } // Loop: to find key
-        return "";
-    } // findMatchingKey()
+    private List<DomContent> getProcessTables(List<Element> elementList, List<String> processChoices, String domAttrs) {
+        List<DomContent> tableDomList = new ArrayList<>();
+        Map<String, List<DomContent>> processTablesMap = new LinkedHashMap<>(); // 'Table Name' x 'List of Rows'
+
+        /* Loop through each Element to add Data to tables */
+        for(Element element : elementList) {
+            List<Process> elementProcesses = element.getElementInput().getProcesses();
+            /* Filter Out Processes that weren't chosen by the user */
+            List<Process> chosenProcesses = elementProcesses.stream()
+                    .filter(p -> processChoices.contains(StringBeautifier.beautifyString(p.getName())))
+                    .collect(Collectors.toList());
+            /* Go through each Process to get Data */
+            for(Process process : chosenProcesses) {
+                String processName = process.getName().toUpperCase();
+                String tableName = StringBeautifier.beautifyString(process.getName());
+
+                /* If is Process with Method, also saves the Method. */
+                if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + process.getValue(); }
+
+                /* Getting 'this' Element's Row Data */
+                List<String> parametersValues = process.getParameters().stream().map(Parameter::getValue).collect(Collectors.toList());
+                // If Process has no Parameters, add Process's value instead
+                if(parametersValues.isEmpty()) { parametersValues.add(process.getValue()); }
+                parametersValues.add(0, element.getName());
+                List<DomContent> elementDataRow = Collections.singletonList(HtmlModifier.printTableDataRow(parametersValues, domAttrs, domAttrs));
+
+                /* Place Data to processTablesMap. If key not there, new key */
+                List<String> parametersNames = process.getParameters().stream().map(Parameter::getName).collect(Collectors.toList());
+                if(parametersNames.isEmpty()) { parametersNames.add(process.getName()); }
+                parametersNames.add(0, "Element Name");
+                DomContent processTableHeader = HtmlModifier.printTableHeadRow(parametersNames, domAttrs, domAttrs);
+
+                if(!processTablesMap.containsKey(tableName)) {
+                    processTablesMap.put(tableName, Arrays.asList(processTableHeader, caption(tableName)));
+                } // If: Table didn't exist, new key with table's header and caption
+
+                // Adding in this Element's Row Data
+                List<DomContent> tableDataRows = new ArrayList<>(processTablesMap.get(tableName));
+                if(processName.equals("BASEFLOW")) { elementDataRow = new ArrayList<>(getBaseflowDataRows(element, process, domAttrs)); }
+                tableDataRows.addAll(elementDataRow);
+                processTablesMap.put(tableName, tableDataRows);
+            } // Loop: through each chosen Processes
+        } // Loop: through each Subbasin Element
+
+        /* Generating Tables for each Process saved in the processTablesMap */
+        for(String tableName : processTablesMap.keySet()) {
+            List<DomContent> tableData = processTablesMap.get(tableName);
+            /* Skip Tables without any Data (2 = Caption + Header) */
+            if(tableData.size() <= 2) { continue; }
+            DomContent tableDom = table(attrs(domAttrs), tableData.toArray(new DomContent[]{}));
+            tableDomList.add(tableDom);
+        } // Loop: through all tables in processTablesMap
+
+        return tableDomList;
+    } // getProcessTablesMap()
+    private List<DomContent> getBaseflowDataRows(Element element, Process process, String domAttrs) {
+        return new ArrayList<>();
+    } // getBaseflowDataRows()
+    private List<String> processesWithMethod() {
+        List<String> processWithMethodList = new ArrayList<>();
+        processWithMethodList.add("TRANSFORM");
+        processWithMethodList.add("CANOPY");
+        processWithMethodList.add("ROUTE");
+        processWithMethodList.add("BASEFLOW");
+        return processWithMethodList;
+    } // processesWithMethod()
 } // GlobalParametersWriter()

@@ -76,7 +76,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
             String matchedLine =  matchedMap.keySet().stream().findFirst().map(Object::toString).orElse("");
             if(matchedLine.isEmpty()) {continue;}
             String processName = matchedLine.substring(0, matchedLine.indexOf(":")).trim();
-            String processValue = "";
+            String processValue = matchedLine.substring(matchedLine.indexOf(":") + 1).trim();
             int processStartIndex = matchedMap.get(matchedLine);
             List<Parameter> parameters;
             if(processName.equals("Baseflow")) { parameters = getBaseflowParameter(processStartIndex + 1, endIndex); }
@@ -109,15 +109,18 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
     private List<Parameter> getBaseflowParameter(int processStartIndex, int basinEndIndex) {
         List<Parameter> parameterList = new ArrayList<>();
+        boolean hasLayers = false;
 
         for(int i = processStartIndex; i < basinEndIndex; i++) {
             String line = basinFileLines.get(i).trim();
             if(line.isEmpty()) { break; }
             String parameterName = line.substring(0, line.indexOf(":")).trim();
-            String parameterValue = "";
+            String parameterValue = line.substring(line.indexOf(":") + 1).trim();
             List<Parameter> subParameterList = new ArrayList<>();
             if(parameterName.equals("Groundwater Layer")) {
+                hasLayers = true;
                 parameterName = line.substring(line.indexOf(":") + 1).trim();
+                parameterValue = "";
                 for(int j = i + 1; j < basinEndIndex + 1; j++) {
                     String subParamLine = basinFileLines.get(j).trim();
                     if(subParamLine.startsWith("Groundwater Layer") || j == basinEndIndex) {
@@ -134,6 +137,11 @@ public class AsciiBasinInputParser extends BasinInputParser {
             Parameter parameter = Parameter.builder().name(parameterName).value(parameterValue).subParameters(subParameterList).build();
             parameterList.add(parameter);
         } // Loop: from processStartIndex until finished with process
+
+        if(!hasLayers) {
+            Parameter layerParameter = Parameter.builder().name("1").value("").subParameters(parameterList).build();
+            parameterList = Collections.singletonList(layerParameter);
+        } // If: No Layers, turn into 1 Layer
 
         String name = "baseflowLayerList";
         String value = "";
