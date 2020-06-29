@@ -75,6 +75,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
             if(matchedLine.isEmpty()) {continue;}
             String processName = matchedLine.substring(0, matchedLine.indexOf(":")).trim();
             String processValue = matchedLine.substring(matchedLine.indexOf(":") + 1).trim();
+            if(processValue.equals("None")) { continue; } // Skip Processes that have None Method
             int processStartIndex = matchedMap.get(matchedLine);
             List<Parameter> parameters;
             if(processName.equals("Baseflow")) { parameters = getBaseflowParameter(processStartIndex + 1, endIndex); }
@@ -162,6 +163,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
             String paramLine = basinFileLines.get(i).trim();
             String name = paramLine.substring(0, paramLine.indexOf(":")).trim();
             String value = paramLine.substring(paramLine.indexOf(":") + 1).trim();
+            if(value.equals("None")) { continue; } // Skip Parameters with 'None' Value
             Parameter parameter = Parameter.builder().name(name).value(value).subParameters(new ArrayList<>()).build();
             parameterList.add(parameter);
         } // Loop: until the end of Basin
