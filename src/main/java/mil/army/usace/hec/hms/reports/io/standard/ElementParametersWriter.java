@@ -147,9 +147,10 @@ public class ElementParametersWriter {
         List<DomContent> tableProcessesDomList = new ArrayList<>();
 
         for(Process process : tableProcesses) {
-            String reformatName = StringBeautifier.beautifyString(process.getName());
+            String tableName = StringBeautifier.beautifyString(process.getName());
+            tableName = tableName + ": " + StringBeautifier.beautifyString(process.getValue());
             List<Parameter> parameterList = process.getParameters();
-            DomContent tableDom  = printParameterTable(parameterList, reformatName); // The Table of Parameters
+            DomContent tableDom  = printParameterTable(parameterList, tableName); // The Table of Parameters
             tableProcessesDomList.add(tableDom);
         } // Loop: through each table process
 
@@ -204,6 +205,7 @@ public class ElementParametersWriter {
     /* Element Results */
     private DomContent printElementResults(ElementResults elementResults, DomContent summaryResults) {
         List<DomContent> elementResultsDomList = new ArrayList<>();
+        if(elementResults == null) { return null; }
 
         /* Get Summary Results Dom */
         elementResultsDomList.add(summaryResults);

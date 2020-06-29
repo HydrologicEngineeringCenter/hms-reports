@@ -76,10 +76,6 @@ public class BasinParser {
         List<ElementInput> inputs = inputParser.getElementInput();
         Map<String, ElementResults> results = resultsParser.getElementResults();
 
-        if(inputs.size() > results.size()) {
-            throw new IllegalArgumentException("Missing Some Elements' Results");
-        } // Check if # of inputs and results matches
-
         for(ElementInput input : inputs) {
             String elementName = input.getName();
             Element element = Element.builder()
