@@ -41,10 +41,10 @@ public abstract class BasinResultsParser {
         public BasinResultsParser build(){
             if (pathToBasinResultsFile.toString().matches(".*.results")){
                 if(simulationType == SimulationType.MONTE_CARLO) {
-                    return null;
+                    return new MonteCarloResultsParser(this);
                 } // If: MonteCarlo Type
                 else if(simulationType == SimulationType.DEPTH_AREA) {
-                    return null;
+                    return new DepthAreaResultsParser(this);
                 } // Else if: DepthArea Type
                 else {
                     return new XmlBasinResultsParser(this);
@@ -61,6 +61,8 @@ public abstract class BasinResultsParser {
     }
 
     public abstract Map<String, ElementResults> getElementResults();
+
+    public abstract String getSimulationName();
 }
 
 

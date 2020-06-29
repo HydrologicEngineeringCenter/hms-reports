@@ -1,10 +1,15 @@
 package mil.army.usace.hec.hms.reports.io.standard;
 
+import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.io.BasinParser;
 import mil.army.usace.hec.hms.reports.io.ReportWriter;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
+import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.Utilities;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static j2html.TagCreator.*;
@@ -49,7 +54,8 @@ public class StandardReportWriter extends ReportWriter {
                 head(   title("Standard Report"),
                         link().withRel("stylesheet").withHref("styleStandard.css"),
                         script().withSrc("https://cdn.plot.ly/plotly-latest.min.js")),
-                body(   globalParametersWriter.printListGlobalParameter(),
+                body(   printReportTitle(parser),
+                        globalParametersWriter.printListGlobalParameter(),
                         globalResultsWriter.printGlobalSummary(),
                         elementParametersWriter.printElementList())
         ).renderFormatted();
@@ -58,5 +64,47 @@ public class StandardReportWriter extends ReportWriter {
 
         return elementList;
     } // write()
+
+    private DomContent printReportTitle(BasinParser basinParser) {
+        List<DomContent> reportTitleDom = new ArrayList<>();
+
+        String projectName = Utilities.getFilePath(projectDirectory.toAbsolutePath().toString(), ".hms");
+        projectName = projectName.substring(projectName.lastIndexOf(File.separator) + 1, projectName.indexOf(".hms"));
+        DomContent projectTitle = h3(join(b("Project: "), StringBeautifier.beautifyString(projectName.trim())));
+        reportTitleDom.add(projectTitle);
+
+        String simulation = getSimulationTitle();
+        String simulationName = basinParser.getSimulationName();
+        DomContent simulationTitle = h3(join(b(simulation), simulationName.trim()));
+        reportTitleDom.add(simulationTitle);
+
+        return div(attrs(".report-title"), reportTitleDom.toArray(new DomContent[]{}));
+    } // printReportTitle()
+
+    private String getSimulationTitle() {
+        String simulationName;
+        switch(simulationType) {
+            case RUN:
+                simulationName = "Simulation Run: ";
+                break;
+            case FORECAST:
+                simulationName = "Forecast Trial: ";
+                break;
+            case OPTIMIZATION:
+                simulationName = "Optimization Trial: ";
+                break;
+            case DEPTH_AREA:
+                simulationName = "Depth Area Trial: ";
+                break;
+            case MONTE_CARLO:
+                simulationName = "Monte Carlo Trial: ";
+                break;
+            default:
+                simulationName = "<Unknown Simulation Type>: ";
+                break;
+        } // Switch Case
+
+        return simulationName;
+    } // getSimulationTitle()
 
 } // StandardReportWriter class

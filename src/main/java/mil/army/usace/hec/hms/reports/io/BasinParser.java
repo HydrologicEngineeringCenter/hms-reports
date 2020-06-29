@@ -89,6 +89,16 @@ public class BasinParser {
         return elementList;
     } // getElements()
 
+    public String getSimulationName() {
+        BasinResultsParser resultsParser = BasinResultsParser.builder()
+                .pathToBasinResultsFile(this.pathToBasinResultsFile.toAbsolutePath().toString())
+                .pathToProjectDirectory(this.pathToProjectDirectory.toAbsolutePath().toString())
+                .simulationType(this.simulationType)
+                .build();
+
+        return resultsParser.getSimulationName();
+    } // getSimulationName()
+
 } // BasinParser class
 
 

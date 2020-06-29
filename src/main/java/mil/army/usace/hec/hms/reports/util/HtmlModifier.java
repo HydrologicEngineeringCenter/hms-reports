@@ -77,9 +77,22 @@ public class HtmlModifier {
                 "    height: 11in;\n" +
                 "}\n" +
                 "\n" +
+                "/* CSS for Report Title's div */\n" +
+                "div.report-title{\n" +
+                "\tbackground-color: #eee;\n" +
+                "\tpadding: 22px;\n" +
+                "\t-webkit-print-color-adjust: exact;\n" +
+                "}\n" +
+                "\n" +
+                "/* CSS for Report Title's H3 */\n" +
+                "div.report-title h3 {\n" +
+                "\tfont-weight: normal;\n" +
+                "\tmargin: 0px;\n" +
+                "}\n" +
+                "\n" +
                 "/* CSS for Global tables's div */\n" +
                 "div.global-parameter{\n" +
-                "    page-break-before: always;\n" +
+                "    /* page-break-before: always; */\n" +
                 "}\n" +
                 "\n" +
                 "/* CSS for each Element */\n" +

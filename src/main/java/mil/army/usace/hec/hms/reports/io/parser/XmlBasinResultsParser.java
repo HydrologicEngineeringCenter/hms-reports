@@ -7,6 +7,7 @@ import hec.io.TimeSeriesContainer;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
+import mil.army.usace.hec.hms.reports.enums.SimulationType;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 import mil.army.usace.hec.hms.reports.util.TimeConverter;
 import mil.army.usace.hec.hms.reports.util.Utilities;
@@ -57,6 +58,20 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return elementResultsList;
     } // getElementResults()
+
+    @Override
+    public String getSimulationName() {
+        JSONObject resultFile  = getJsonObject(this.pathToBasinResultsFile.toString());
+        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
+        String simulationName = "";
+
+        if(simulationType == SimulationType.FORECAST) { simulationName = runResults.opt("ForecastName").toString(); }
+        else if(simulationType == SimulationType.RUN) { simulationName = runResults.opt("RunName").toString(); }
+        else if(simulationType == SimulationType.OPTIMIZATION) { simulationName = runResults.opt("AnalysisName").toString(); }
+
+        return simulationName;
+    } // getSimulationName()
+
     public static JSONObject getJsonObject(String pathToJson) {
         /* Read in XML File */
         File file = new File(pathToJson);
