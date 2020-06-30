@@ -67,8 +67,7 @@ public class Utilities {
                     typeProcess.add(StringBeautifier.beautifyString(process.getName()));
                 } // Get: all types for each process
 
-                if(!typeProcess.isEmpty())
-                    parameterMap.put(StringBeautifier.beautifyString(elementType), typeProcess);
+                parameterMap.put(StringBeautifier.beautifyString(elementType), typeProcess);
             } // If: parameterMap doesn't already have this element type
         } // Loop: through all elements
 
