@@ -4,13 +4,18 @@ import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.*;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
-import mil.army.usace.hec.hms.reports.util.*;
+import mil.army.usace.hec.hms.reports.util.FigureCreator;
+import mil.army.usace.hec.hms.reports.util.HtmlModifier;
+import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.ValidCheck;
+import tech.tablesaw.api.DateTimeColumn;
+import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.Table;
+import tech.tablesaw.columns.Column;
 import tech.tablesaw.plotly.components.Figure;
 import tech.tablesaw.plotly.components.Page;
 
-import java.io.File;
-import java.io.IOException;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -248,13 +253,24 @@ public class ElementParametersWriter {
         List<DomContent> timeSeriesPlotDomList = new ArrayList<>();
         List<DomContent> maxPlotDom = new ArrayList<>();
         int maxPlotsPerPage = 2;
+        Map<String, List<TimeSeriesResult>> sameTypeMap = new LinkedHashMap<>();
 
         Map<String, TimeSeriesResult> timeSeriesResultMap = timeSeriesResultList.stream()
                 .filter(individual -> ValidCheck.validTimeSeriesPlot(individual.getType(), this.chosenPlots))
-                .collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getTimeSeriesResult));
+                .collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getTimeSeriesResult,
+                        (value1, value2) -> {
+                            sameTypeMap.computeIfAbsent(value1.getType(), k -> new ArrayList<>());
+                            sameTypeMap.get(value1.getType()).add(value1);
+                            sameTypeMap.get(value1.getType()).add(value2);
+                            return value2;
+                        }));
+
+        /* Remove Duplicate Types in timeSeriesResultMap */
+        sameTypeMap.keySet().forEach(timeSeriesResultMap::remove);
+        /* Remove Duplicate Unit Types in sameTypeMap */
+        sameTypeMap.keySet().forEach(e -> sameTypeMap.replace(e, sameTypeMap.get(e).stream().distinct().collect(Collectors.toList())));
 
         Map<String, Map<String, TimeSeriesResult>> combinedPlotMap = getCombinedPlotName(timeSeriesResultMap);
-
         // Case: Combined Plot (Outflow and Precipitation, or others)
         if(!combinedPlotMap.isEmpty()) {
             for(String combinedPlotName : combinedPlotMap.keySet()) {
@@ -277,8 +293,10 @@ public class ElementParametersWriter {
             } // Loop: To plot each Combined Plot
         } // If: There is a combined plot
 
+        // Case: Single Plots (one dataset for each plot)
         for(String key : timeSeriesResultMap.keySet()) {
-            DomContent tsrDom = printTimeSeriesPlot(timeSeriesResultMap.get(key), elementName);
+            List<TimeSeriesResult> timeSeriesResults = Collections.singletonList(timeSeriesResultMap.get(key));
+            DomContent tsrDom = printTimeSeriesPlot(timeSeriesResults, elementName);
             if(maxPlotDom.size() < maxPlotsPerPage) {
                 maxPlotDom.add(tsrDom);
             } // If: we haven't reached 2 plots per page
@@ -289,22 +307,29 @@ public class ElementParametersWriter {
             } // Else: we have reached 2 plots per page
         } // Loop: to print each single plot
 
+        // Case: Single Plots with Multiple Datasets for each plot
+        for(String key : sameTypeMap.keySet()) {
+            DomContent tsrDom = printTimeSeriesPlot(sameTypeMap.get(key), elementName);
+            if(maxPlotDom.size() < maxPlotsPerPage) { maxPlotDom.add(tsrDom); }
+        } // Loop: to print each single plot with multiple datasets
+
         if(!maxPlotDom.isEmpty()) {
             timeSeriesPlotDomList.add(div(attrs(".non-max-plot"), maxPlotDom.toArray(new DomContent[]{})));
         } // If: We haven't maxed out number of plots in a page yet
 
         return div(attrs(".group-plot"), timeSeriesPlotDomList.toArray(new DomContent[]{}));
     } // printTimeSeriesResult
-    private DomContent printTimeSeriesPlot(TimeSeriesResult timeSeriesResult, String elementName) {
-        // Configure Plot settings
-        String[] columnNames = {"Time", "Value"};
-        Table timeSeriesTable = getTimeSeriesTable(timeSeriesResult, columnNames);
-        String plotName = timeSeriesResult.getType();
-        String xAxisTitle = "Time";
-        String yAxisTitle = timeSeriesResult.getUnitType() + " (" + timeSeriesResult.getUnit() + ")";
+    private DomContent printTimeSeriesPlot(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
+        // Configure Plot Settings
+        TimeSeriesResult baseResult = timeSeriesResultList.get(0);
+        String plotName = baseResult.getType();
+        Table plotTable = getTimeSeriesTable(timeSeriesResultList, plotName);
+
+        String xAxisTit = "Time";
+        String yAxisTit = baseResult.getUnitType() + " (" + baseResult.getUnit() + ")";
 
         // Create Plot
-        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, timeSeriesTable, xAxisTitle, yAxisTitle);
+        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, plotTable, xAxisTit, yAxisTit);
         String plotDivName = StringBeautifier.getPlotDivName(elementName, plotName);
         Page page = Page.pageBuilder(timeSeriesFigure, plotDivName).build();
 
@@ -314,44 +339,29 @@ public class ElementParametersWriter {
 
         return div(attrs(".single-plot"), domContent);
     } // printTimeSeriesPlot()
-    private Table getTimeSeriesTable(TimeSeriesResult timeSeriesResult, String[] columnNames) {
-        Table timeSeriesPlot = null;
+    private Table getTimeSeriesTable(List<TimeSeriesResult> timeSeriesResultList, String tableName) {
+        List<Column<?>> columnList = new ArrayList<>();
 
-        /* Get readable date format */
-        List<ZonedDateTime> zonedDateTimeList = timeSeriesResult.getTimes();
-        List<String> reformattedTimeList = new ArrayList<>();
-        String dateFormat = "yyyy-MM-dd kk:mm:ss";
-        for(ZonedDateTime zonedDateTime : zonedDateTimeList) {
-            String reformattedDate = TimeConverter.toString(zonedDateTime, dateFormat);
-            reformattedTimeList.add(reformattedDate);
-        } // Loop: to convert ZonedDateTime to acceptable format
+        /* Get TimeSeries Column */
+        List<ZonedDateTime> zonedDateTimeList = timeSeriesResultList.get(0).getTimes();
+        List<LocalDateTime> localDateTimeList = zonedDateTimeList.stream().map(ZonedDateTime::toLocalDateTime).collect(Collectors.toList());
 
-        /* Get readable value */
-        double[] valueArray = timeSeriesResult.getValues();
-        List<String> reformattedValueList = new ArrayList<>();
-        for(double value : valueArray) {
-            String reformattedValue = Double.toString(value);
-            reformattedValueList.add(reformattedValue);
-        } // Loop: to convert valueArray to String
+        DateTimeColumn dateTimeColumn = DateTimeColumn.create("Time", localDateTimeList);
+        columnList.add(dateTimeColumn);
 
-        /* Writing time and value out to a csv file */
-        List<String> csvRowList = new ArrayList<>();
-        String headRow = columnNames[0] + "," + columnNames[1];
-        csvRowList.add(headRow);
-        for(int i = 0; i < reformattedTimeList.size(); i++) {
-            String row = reformattedTimeList.get(i) + "," + reformattedValueList.get(i);
-            csvRowList.add(row);
-        } // Loop: to get a csv-style list of string (rows)
-        String csvFileString = String.join("\n", csvRowList);
+        /* Get Value Array Columns */
+        for(TimeSeriesResult timeSeriesResult : timeSeriesResultList) {
+            double[] valueArray = timeSeriesResult.getValues();
 
-        File outputFile = new File("timeSeriesResult.csv");
-        StringBeautifier.writeStringToFile(outputFile, csvFileString);
-        try { timeSeriesPlot = Table.read().csv(outputFile); } catch (IOException e) { e.printStackTrace(); }
-        assert timeSeriesPlot != null;
-        timeSeriesPlot.setName(timeSeriesResult.getType());
-        outputFile.deleteOnExit();
+            String columnName = timeSeriesResult.getUnitType();
+            DoubleColumn valueColumn = DoubleColumn.create(columnName, valueArray);
+            if(!columnList.contains(valueColumn)) { columnList.add(valueColumn); }
+        } // Loop: through all timeSeriesResult
 
-        return timeSeriesPlot;
+        /* Create a TimeSeriesTable with Columns from columnList */
+        Table timeSeriesTable = Table.create(tableName, columnList);
+
+        return timeSeriesTable;
     } // timeSeriesToCsv
     /* TimeSeries Custom Plots */
     private DomContent printTimeSeriesCombinedPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
@@ -373,12 +383,14 @@ public class ElementParametersWriter {
         List<Table> topPlotTables = new ArrayList<>(), bottomPlotTables = new ArrayList<>();
         int count = 0;
         for(TimeSeriesResult tsr : topPlots) {
-            Table plotTable = getTimeSeriesTable(tsr, new String[] {"Time" + count, "Value" + count});
+            List<TimeSeriesResult> tsrList = Collections.singletonList(tsr);
+            Table plotTable = getTimeSeriesTable(tsrList, tsr.getType());
             topPlotTables.add(plotTable);
             count++;
         } // Loop: to create Tables for Top Plots
         for(TimeSeriesResult tsr : bottomPlots) {
-            Table plotTable = getTimeSeriesTable(tsr, new String[] {"Time" + count, "Value" + count});
+            List<TimeSeriesResult> tsrList = Collections.singletonList(tsr);
+            Table plotTable = getTimeSeriesTable(tsrList, tsr.getType());
             bottomPlotTables.add(plotTable);
             count++;
         } // Loop: to create Tables for Bottom Plots
@@ -401,8 +413,8 @@ public class ElementParametersWriter {
     } // getPrecipOutflowPlot()
     private DomContent getOutflowObservedFlowPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
         TimeSeriesResult outflowPlot = tsrMap.get("Outflow"), observedFlowPlot = tsrMap.get("Observed Flow");
-        Table outflowTable = getTimeSeriesTable(outflowPlot, new String[] {"Time", "Value"});
-        Table observedFlowTable = getTimeSeriesTable(observedFlowPlot, new String[] {"Time", "Value"});
+        Table outflowTable = getTimeSeriesTable(Collections.singletonList(outflowPlot), "Outflow");
+        Table observedFlowTable = getTimeSeriesTable(Collections.singletonList(observedFlowPlot), "Observed Flow");
         List<Table> plotList = Arrays.asList(outflowTable, observedFlowTable);
 
         // Setting Plot's configurations
