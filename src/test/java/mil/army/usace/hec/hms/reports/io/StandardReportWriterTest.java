@@ -15,25 +15,7 @@ import java.util.Map;
 class StandardReportWriterTest {
 
     @Test
-    void writeShort() {
-        List<String> availablePlots = Utilities.getAvailablePlot("src/resources/Punx/RUN_Sep_2018.results");
-        for(String plotName : availablePlots) {
-            System.out.println(plotName);
-        }
-
-        ReportWriter reportWriter = ReportWriter.builder()
-                .pathToInput("src/resources/MiddleColumbia/MiddleColumbia_WY2017(mod).basin.json")
-                .pathToResult("src/resources/MiddleColumbia/RUN_WY2017(mod).results")
-                .pathToDestination("src/resources/output-short.html")
-                .projectDirectory("C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia")
-                .reportWriterType(ReportWriterType.STANDARD_REPORT)
-                .build();
-
-        reportWriter.write();
-    }
-
-    @Test
-    void writeLong() {
+    void writeMiddleColumbia() {
         String pathToInput  = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbia_forNick\\MiddleColumbia\\MiddleColumbia_WY1997.basin";
         String pathToResult = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbia_forNick\\MiddleColumbia\\results\\RUN_WY1997.results";
         String pathToOutput = "C:\\Temp\\reportTest.html";
@@ -43,7 +25,7 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
         int numElements = Utilities.getNumberOfElements(pathToInput);
 
-        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult);
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.RUN);
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
@@ -55,7 +37,7 @@ class StandardReportWriterTest {
                 .elementParameterizationChoice(availableElementParameter)
                 .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .simulationType(SimulationType.RUN)
-                .chosenPlots(Utilities.getAvailablePlot(pathToResult))
+                .chosenPlots(availablePlots)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -72,6 +54,8 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.RUN);
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)
@@ -82,6 +66,7 @@ class StandardReportWriterTest {
                 .globalParameterChoices(availableGlobalParameter)
                 .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .simulationType(SimulationType.RUN)
+                .chosenPlots(availablePlots)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -98,6 +83,8 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.FORECAST);
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)
@@ -108,6 +95,7 @@ class StandardReportWriterTest {
                 .globalParameterChoices(availableGlobalParameter)
                 .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .simulationType(SimulationType.FORECAST)
+                .chosenPlots(availablePlots)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -125,6 +113,8 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.OPTIMIZATION);
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)
@@ -135,6 +125,7 @@ class StandardReportWriterTest {
                 .globalParameterChoices(availableGlobalParameter)
                 .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .simulationType(SimulationType.OPTIMIZATION)
+                .chosenPlots(availablePlots)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -152,6 +143,8 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.RUN);
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)
@@ -162,6 +155,7 @@ class StandardReportWriterTest {
                 .globalParameterChoices(availableGlobalParameter)
                 .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .simulationType(SimulationType.RUN)
+                .chosenPlots(availablePlots)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -179,6 +173,8 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.MONTE_CARLO);
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)
@@ -189,6 +185,7 @@ class StandardReportWriterTest {
                 .globalParameterChoices(availableGlobalParameter)
                 .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .simulationType(SimulationType.MONTE_CARLO)
+                .chosenPlots(availablePlots)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -206,6 +203,8 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.DEPTH_AREA);
+
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
                 .pathToResult(pathToResult)
@@ -216,6 +215,7 @@ class StandardReportWriterTest {
                 .globalParameterChoices(availableGlobalParameter)
                 .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .simulationType(SimulationType.DEPTH_AREA)
+                .chosenPlots(availablePlots)
                 .build();
 
         List<Element> elementList = reportWriter.write();

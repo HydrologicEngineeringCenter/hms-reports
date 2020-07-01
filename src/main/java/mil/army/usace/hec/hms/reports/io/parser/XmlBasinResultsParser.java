@@ -72,6 +72,61 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         return simulationName;
     } // getSimulationName()
 
+    @Override
+    public List<String> getAvailablePlots() {
+        List<String> availablePlots = new ArrayList<>();
+        JSONObject resultFile = getJsonObject(this.pathToBasinResultsFile.toString());
+        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
+
+        JSONArray elementArray = runResults.optJSONArray("BasinElement");
+        JSONObject elementObject = runResults.optJSONObject("BasinElement");
+        if(elementArray == null && elementObject == null) { throw new IllegalArgumentException("No Elements Found"); }
+
+        if(elementArray != null) {
+            for(int i = 0; i < elementArray.length(); i++) {
+                JSONObject elementObj = elementArray.optJSONObject(i);
+                availablePlots = new ArrayList<>(getElementAvailablePlots(elementObj, availablePlots));
+            } // Loop through all element's results, and populate
+        } // If: has more than one element (is an ElementArray)
+        else {
+            availablePlots = new ArrayList<>(getElementAvailablePlots(elementObject, availablePlots));
+        } // Else: has only one element (is an ElementObject)
+
+        // Sort the list Alphabetically
+        Collections.sort(availablePlots);
+
+        return availablePlots;
+    } // getAvailablePlots()
+
+    private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
+        List<String> elementPlots = new ArrayList<>(availablePlots);
+        if(elementObject == null) return elementPlots;
+
+        JSONObject hydrologyObject = elementObject.optJSONObject("Hydrology");
+        JSONArray timeSeriesArray = hydrologyObject.optJSONArray("TimeSeries");
+        if(timeSeriesArray == null) {
+            JSONObject timeSeriesObject = hydrologyObject.optJSONObject("TimeSeries");
+            JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
+            String timeSeriesType = timeSeriesTypeObject.optString("displayString");
+
+            if(!elementPlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
+                elementPlots.add(timeSeriesType);
+            } // If: plot hasn't been added and plot is not a default plot; then add plot
+        } // If: Only one type of TimeSeries Plot
+        else {
+            for(int j = 0; j < timeSeriesArray.length(); j++) {
+                JSONObject timeSeriesObject = timeSeriesArray.optJSONObject(j);
+                JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
+                String timeSeriesType = timeSeriesTypeObject.optString("displayString");
+
+                if(!elementPlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
+                    elementPlots.add(timeSeriesType);
+                } // If: plot hasn't been added and plot is not a default plot; then add plot
+            } // Loop through all the timeSeriesArray
+        } // Else: More than one type of TimeSeries Plots
+        return elementPlots;
+    } // getElementAvailablePlots()
+
     public static JSONObject getJsonObject(String pathToJson) {
         /* Read in XML File */
         File file = new File(pathToJson);
@@ -218,40 +273,4 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return statisticResultList;
     } // populateStatisticsResult()
-
-    public static List<String> getAvailablePlots(String pathToResultFile) {
-        List<String> availablePlots = new ArrayList<>();
-        JSONObject resultFile = getJsonObject(pathToResultFile);
-        JSONArray elemenentArray = resultFile.getJSONObject("RunResults").getJSONArray("BasinElement");
-
-        for(int i = 0; i < elemenentArray.length(); i++) {
-            JSONObject elementObject = elemenentArray.optJSONObject(i);
-            JSONObject hydrologyObject = elementObject.optJSONObject("Hydrology");
-            JSONArray timeSeriesArray = hydrologyObject.optJSONArray("TimeSeries");
-            if(timeSeriesArray == null) {
-                JSONObject timeSeriesObject = hydrologyObject.optJSONObject("TimeSeries");
-                JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
-                String timeSeriesType = timeSeriesTypeObject.optString("displayString");
-
-                if(!availablePlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
-                    availablePlots.add(timeSeriesType);
-                } // If: plot hasn't been added and plot is not a default plot; then add plot
-            } // If: Only one type of TimeSeries Plot
-            else {
-                for(int j = 0; j < timeSeriesArray.length(); j++) {
-                    JSONObject timeSeriesObject = timeSeriesArray.optJSONObject(j);
-                    JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
-                    String timeSeriesType = timeSeriesTypeObject.optString("displayString");
-
-                    if(!availablePlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
-                        availablePlots.add(timeSeriesType);
-                    } // If: plot hasn't been added and plot is not a default plot; then add plot
-                } // Loop through all the timeSeriesArray
-            } // Else: More than one type of TimeSeries Plots
-        } // Loop through all element's results, and populate
-
-        Collections.sort(availablePlots); // Sort the list Alphabetically
-
-        return availablePlots;
-    } // getAvailablePlots()
 } // XmlBasinResultsParser class

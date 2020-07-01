@@ -3,8 +3,9 @@ package mil.army.usace.hec.hms.reports.util;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.enums.ParameterSummary;
+import mil.army.usace.hec.hms.reports.enums.SimulationType;
 import mil.army.usace.hec.hms.reports.io.parser.BasinInputParser;
-import mil.army.usace.hec.hms.reports.io.parser.XmlBasinResultsParser;
+import mil.army.usace.hec.hms.reports.io.parser.BasinResultsParser;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -19,8 +20,16 @@ import java.util.Map;
 public class Utilities {
     private Utilities() {}
 
+    /* FIXME: getAvailablePlot() is deprecated */
     public static List<String> getAvailablePlot(String pathToResult) {
-        return XmlBasinResultsParser.getAvailablePlots(pathToResult);
+        return new ArrayList<>();
+    }
+    public static List<String> getAvailablePlots(String pathToResult, SimulationType simulationType) {
+        BasinResultsParser resultsParser = BasinResultsParser.builder()
+                .pathToBasinResultsFile(pathToResult)
+                .simulationType(simulationType)
+                .build();
+        return resultsParser.getAvailablePlots();
     }
     public static String getFilePath(String directoryToSearch, String fileName) {
         final String[] x = new String[1];

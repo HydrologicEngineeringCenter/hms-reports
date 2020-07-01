@@ -5,6 +5,7 @@ import mil.army.usace.hec.hms.reports.enums.SimulationType;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 public abstract class BasinResultsParser {
@@ -63,6 +64,8 @@ public abstract class BasinResultsParser {
     public abstract Map<String, ElementResults> getElementResults();
 
     public abstract String getSimulationName();
+
+    public abstract List<String> getAvailablePlots();
 }
 
 
