@@ -20,7 +20,11 @@ import java.util.Map;
 public class Utilities {
     private Utilities() {}
 
-    public static List<String> getAvailablePlot(String pathToResult, SimulationType simulationType) {
+    /* FIXME: getAvailablePlot() is deprecated */
+    public static List<String> getAvailablePlot(String pathToResult) {
+        return new ArrayList<>();
+    }
+    public static List<String> getAvailablePlots(String pathToResult, SimulationType simulationType) {
         BasinResultsParser resultsParser = BasinResultsParser.builder()
                 .pathToBasinResultsFile(pathToResult)
                 .simulationType(simulationType)

@@ -25,7 +25,7 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
         int numElements = Utilities.getNumberOfElements(pathToInput);
 
-        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult, SimulationType.RUN);
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.RUN);
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
@@ -54,7 +54,7 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
-        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult, SimulationType.RUN);
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.RUN);
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
@@ -83,7 +83,7 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
-        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult, SimulationType.FORECAST);
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.FORECAST);
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
@@ -113,7 +113,7 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
-        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult, SimulationType.OPTIMIZATION);
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.OPTIMIZATION);
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
@@ -143,7 +143,7 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
-        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult, SimulationType.RUN);
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.RUN);
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
@@ -173,7 +173,7 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
-        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult, SimulationType.MONTE_CARLO);
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.MONTE_CARLO);
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
@@ -203,7 +203,7 @@ class StandardReportWriterTest {
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
 
-        List<String> availablePlots = Utilities.getAvailablePlot(pathToResult, SimulationType.DEPTH_AREA);
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.DEPTH_AREA);
 
         ReportWriter reportWriter = ReportWriter.builder()
                 .pathToInput(pathToInput)
