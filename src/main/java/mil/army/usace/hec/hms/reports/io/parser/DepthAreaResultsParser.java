@@ -9,15 +9,13 @@ import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
 import mil.army.usace.hec.hms.reports.util.TimeConverter;
 import mil.army.usace.hec.hms.reports.util.Utilities;
+import mil.army.usace.hec.hms.reports.util.ValidCheck;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DepthAreaResultsParser extends BasinResultsParser {
     private HecTime startTime;
@@ -65,27 +63,72 @@ public class DepthAreaResultsParser extends BasinResultsParser {
         return simulationName;
     } // getSimulationName()
 
+    @Override
+    public List<String> getAvailablePlots() {
+        JSONObject resultFile  = XmlBasinResultsParser.getJsonObject(this.pathToBasinResultsFile.toString());
+        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
+
+        JSONArray analysisPointArray = runResults.optJSONArray("AnalysisPoint");
+        JSONObject analysisPointObj  = runResults.optJSONObject("AnalysisPoint");
+        if(analysisPointArray == null && analysisPointObj == null) { throw new IllegalArgumentException("Analysis Point(s) Not Found"); }
+
+        List<String> availablePlots = new ArrayList<>();
+        if(analysisPointArray != null) {
+            for(int i = 0; i < analysisPointArray.length(); i++) {
+                JSONObject elementObj = analysisPointArray.optJSONObject(i);
+                availablePlots = new ArrayList<>(getElementAvailablePlots(elementObj, availablePlots));
+            } // Loop: through all Analysis Points
+        } // If: Has more than one Analysis Point(s)
+        else {
+            availablePlots = new ArrayList<>(getElementAvailablePlots(analysisPointObj, availablePlots));
+        } // Else: Has only one Analysis Point
+
+        // Sort the list Alphabetically
+        Collections.sort(availablePlots);
+
+        return availablePlots;
+    } // getAvailablePlots()
+
+    private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
+        List<String> elementPlots = new ArrayList<>(availablePlots);
+        if(elementObject == null) return elementPlots;
+
+        Map<String, JSONObject> elementObjectMap = getElementObjects(elementObject);
+        JSONObject hydrologyObject = elementObjectMap.get("Hydrology");
+
+        JSONArray timeSeriesArray = hydrologyObject.optJSONArray("TimeSeries");
+        if(timeSeriesArray == null) {
+            JSONObject timeSeriesObject = hydrologyObject.optJSONObject("TimeSeries");
+            JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
+            String timeSeriesType = timeSeriesTypeObject.optString("displayString");
+
+            if(!elementPlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
+                elementPlots.add(timeSeriesType);
+            } // If: plot hasn't been added and plot is not a default plot; then add plot
+        } // If: Only one type of TimeSeries Plot
+        else {
+            for(int j = 0; j < timeSeriesArray.length(); j++) {
+                JSONObject timeSeriesObject = timeSeriesArray.optJSONObject(j);
+                JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
+                String timeSeriesType = timeSeriesTypeObject.optString("displayString");
+
+                if(!elementPlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
+                    elementPlots.add(timeSeriesType);
+                } // If: plot hasn't been added and plot is not a default plot; then add plot
+            } // Loop through all the timeSeriesArray
+        } // Else: More than one type of TimeSeries Plots
+        return elementPlots;
+    } // getElementAvailablePlots()
+
     private ElementResults populateElement(JSONObject elementObject) {
         /* ElementResults' Name */
         String name = elementObject.opt("name").toString();
 
         /* Element's Basin Results */
-        JSONArray basinElementArray   = elementObject.optJSONArray("BasinElement");
-        JSONObject basinElementObject = elementObject.optJSONObject("BasinElement");
-        if(basinElementArray == null && basinElementObject == null) { throw new IllegalArgumentException("DepthAreaResults: No Basin Elements Found"); }
-
-        JSONObject analysisPointElement;
-        // If: More than one Basin Elements
-        if(basinElementArray != null) { analysisPointElement = findMatchingElement(basinElementArray, name); }
-        // Else: Only one Basin Element
-        else { analysisPointElement = findMatchingElement(new JSONArray(basinElementObject), name); }
-        if(analysisPointElement == null) { throw new IllegalArgumentException("Analysis Point Element's Results Not Found"); }
-
-        /* Get TimeSeriesResults, StatisticsResults, and OtherResults */
-        JSONObject hydrologyObject = analysisPointElement.optJSONObject("Hydrology");
-        if(hydrologyObject == null) { throw new IllegalArgumentException("Hydrology Object Not Found"); }
-        JSONObject statisticObject = analysisPointElement.optJSONObject("Statistics");
-        if(statisticObject == null) { throw new IllegalArgumentException("Statistics Object Not Found"); }
+        Map<String, JSONObject> elementObjectMap = getElementObjects(elementObject);
+        JSONObject analysisPointElement = elementObjectMap.get("AnalysisPoint");
+        JSONObject hydrologyObject = elementObjectMap.get("Hydrology");
+        JSONObject statisticObject = elementObjectMap.get("Statistics");
 
         List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
         List<StatisticResult> statisticResult = populateStatisticsResult(statisticObject);
@@ -204,6 +247,36 @@ public class DepthAreaResultsParser extends BasinResultsParser {
     } // populateStatisticsResult()
 
     /* Helper Functions */
+    private Map<String, JSONObject> getElementObjects(JSONObject elementObject) {
+        /* ElementResults' Name */
+        String name = elementObject.opt("name").toString();
+
+        /* Element's Basin Results */
+        JSONArray basinElementArray   = elementObject.optJSONArray("BasinElement");
+        JSONObject basinElementObject = elementObject.optJSONObject("BasinElement");
+        if(basinElementArray == null && basinElementObject == null) { throw new IllegalArgumentException("DepthAreaResults: No Basin Elements Found"); }
+
+        JSONObject analysisPointElement;
+        // If: More than one Basin Elements
+        if(basinElementArray != null) { analysisPointElement = findMatchingElement(basinElementArray, name); }
+        // Else: Only one Basin Element
+        else { analysisPointElement = findMatchingElement(new JSONArray(basinElementObject), name); }
+        if(analysisPointElement == null) { throw new IllegalArgumentException("Analysis Point Element's Results Not Found"); }
+
+        /* Get TimeSeriesResults, StatisticsResults, and OtherResults */
+        JSONObject hydrologyObject = analysisPointElement.optJSONObject("Hydrology");
+        if(hydrologyObject == null) { throw new IllegalArgumentException("Hydrology Object Not Found"); }
+        JSONObject statisticObject = analysisPointElement.optJSONObject("Statistics");
+        if(statisticObject == null) { throw new IllegalArgumentException("Statistics Object Not Found"); }
+
+        Map<String, JSONObject> elementObjectMap = new LinkedHashMap<>();
+        elementObjectMap.put("AnalysisPoint", analysisPointElement);
+        elementObjectMap.put("Hydrology", hydrologyObject);
+        elementObjectMap.put("Statistics", statisticObject);
+
+        return elementObjectMap;
+    } // getElementObjects
+
     private JSONObject findMatchingElement(JSONArray elementArray, String matchName) {
         for(int i = 0; i < elementArray.length(); i++) {
             JSONObject elementObject = elementArray.optJSONObject(i);

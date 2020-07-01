@@ -8,6 +8,7 @@ import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
 import mil.army.usace.hec.hms.reports.util.TimeConverter;
 import mil.army.usace.hec.hms.reports.util.Utilities;
+import mil.army.usace.hec.hms.reports.util.ValidCheck;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -66,6 +67,61 @@ public class MonteCarloResultsParser extends BasinResultsParser {
         JSONObject analysisObject = runResults.getJSONObject("Analysis");
         return analysisObject.opt("BasinModel").toString();
     } // getSimulationName()
+
+    @Override
+    public List<String> getAvailablePlots() {
+        JSONObject resultFile  = XmlBasinResultsParser.getJsonObject(this.pathToBasinResultsFile.toString());
+        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
+
+        JSONArray analysisPointArray = runResults.optJSONArray("AnalysisPoint");
+        JSONObject analysisPointObject = runResults.optJSONObject("AnalysisPoint");
+        if(analysisPointArray == null && analysisPointObject == null) { throw new IllegalArgumentException("Analysis Point(s) Not Found"); }
+
+        List<String> availablePlots = new ArrayList<>();
+        if(analysisPointArray != null) {
+            for(int i = 0; i < analysisPointArray.length(); i++) {
+                JSONObject elementObject = analysisPointArray.optJSONObject(i);
+                if(elementObject == null) throw new IllegalArgumentException(i + ": Not an JSONObject");
+                availablePlots = new ArrayList<>(getElementAvailablePlots(elementObject, availablePlots));
+            } // Loop: through analysisPointArray
+        } // If: More than one Analysis Points
+        else {
+            availablePlots = new ArrayList<>(getElementAvailablePlots(analysisPointObject, availablePlots));
+        } // Else: Only one Analysis Point
+
+        return availablePlots;
+    } // getAvailablePlots()
+
+    private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
+        /* Name & Available Plots*/
+        String name = elementObject.opt("name").toString();
+        List<String> elementPlots = new ArrayList<>(availablePlots);
+
+        /* Time Series */
+        JSONArray timeSeriesArray = elementObject.optJSONArray("TimeSeries");
+        JSONObject timeSeriesObj  = elementObject.optJSONObject("TimeSeries");
+        if(timeSeriesArray == null && timeSeriesObj == null) throw new IllegalArgumentException("TimeSeries Not Found");
+
+        /* Get Available Plots */
+        if(timeSeriesArray != null) {
+            for(int i = 0; i < timeSeriesArray.length(); i++) {
+                JSONObject timeObject = timeSeriesArray.optJSONObject(i);
+                if(timeObject == null) throw new IllegalArgumentException(name + " (TimeSeries index: " + i + " - is not object");
+                String timeSeriesType = timeObject.getJSONObject("TimeSeriesType").getString("displayString");
+                if(!elementPlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
+                    elementPlots.add(timeSeriesType);
+                } // If: plot hasn't been added and plot is not a default plot; then add plot
+            } // Loop: through timeSeriesArray
+        } // If: More than one TimeSeries
+        else {
+            String timeSeriesType = timeSeriesObj.getJSONObject("TimeSeriesType").getString("displayString");
+            if(!elementPlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
+                elementPlots.add(timeSeriesType);
+            } // If: plot hasn't been added and plot is not a default plot; then add plot
+        } // Else: Only one TimeSeries
+
+        return elementPlots;
+    } // getElementAvailablePlots()
 
     private ElementResults populateElement(JSONObject elementObject) {
         /* Name */
