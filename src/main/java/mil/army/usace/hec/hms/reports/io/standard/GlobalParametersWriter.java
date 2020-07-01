@@ -256,6 +256,7 @@ public class GlobalParametersWriter {
                 DomContent processTableHeader = HtmlModifier.printTableHeadRow(parametersNames, domAttrs, domAttrs);
 
                 if(!processTablesMap.containsKey(tableName)) {
+                    tableName = StringBeautifier.beautifyString(process.getName()) + ": " + StringBeautifier.beautifyString(process.getValue());
                     processTablesMap.put(tableName, Arrays.asList(processTableHeader, caption(tableName)));
                 } // If: Table didn't exist, new key with table's header and caption
 
@@ -318,9 +319,16 @@ public class GlobalParametersWriter {
                 subParametersValues.add(value);
             } // Loop: through all subParameters
 
+            /* Skip if too many null values */
+            long numNullData = subParametersValues.stream().filter(e -> e.equals("Not Specified")).count();
+            long maxNullData = subParametersValues.size() - 2;
+            if(numNullData > maxNullData) { continue; }
+
+            /* Add Layer's data to baseflowDataRows */
             subParametersValues.add(0, "Layer " + count);
             DomContent layerRow = HtmlModifier.printTableDataRow(subParametersValues, domAttrs, domAttrs);
             baseflowDataRows.add(layerRow);
+            count++;
         } // Loop: through all Layers of Baseflow
 
         return baseflowDataRows;
