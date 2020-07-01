@@ -7,108 +7,100 @@ import hec.io.TimeSeriesContainer;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
-import mil.army.usace.hec.hms.reports.enums.SimulationType;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 import mil.army.usace.hec.hms.reports.util.TimeConverter;
 import mil.army.usace.hec.hms.reports.util.Utilities;
-import mil.army.usace.hec.hms.reports.util.ValidCheck;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.XML;
 
-import java.io.File;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class XmlBasinResultsParser extends BasinResultsParser {
+public class DepthAreaResultsParser extends BasinResultsParser {
     private HecTime startTime;
     private HecTime endTime;
 
-    XmlBasinResultsParser(Builder builder) {
+    DepthAreaResultsParser(Builder builder) {
         super(builder);
     }
 
     @Override
     public Map<String,ElementResults> getElementResults() {
         Map<String, ElementResults> elementResultsList = new HashMap<>();
-        JSONObject resultFile  = getJsonObject(this.pathToBasinResultsFile.toString());
+        JSONObject resultFile  = XmlBasinResultsParser.getJsonObject(this.pathToBasinResultsFile.toString());
         JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
         String startTimeString = runResults.optString("StartTime") + " GMT";
         String endTimeString   = runResults.optString("EndTime") + " GMT";
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dMMMyyyy, HH:mm z");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm z");
         this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
         this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
 
-        JSONArray elementArray = runResults.optJSONArray("BasinElement");
-        JSONObject elementObject = runResults.optJSONObject("BasinElement");
-        if(elementArray == null && elementObject == null) { throw new IllegalArgumentException("No Elements Found"); }
+        JSONArray analysisPointArray = runResults.optJSONArray("AnalysisPoint");
+        JSONObject analysisPointObj  = runResults.optJSONObject("AnalysisPoint");
+        if(analysisPointArray == null && analysisPointObj == null) { throw new IllegalArgumentException("Analysis Point(s) Not Found"); }
 
-        if(elementArray != null) {
-            for(int i = 0; i < elementArray.length(); i++) {
-                ElementResults elementResults = populateElement(elementArray.getJSONObject(i));
+        if(analysisPointArray != null) {
+            for(int i = 0; i < analysisPointArray.length(); i++) {
+                ElementResults elementResults = populateElement(analysisPointArray.getJSONObject(i));
                 elementResultsList.put(elementResults.getName(), elementResults);
-            } // Loop through all element's results, and populate
-        } // If: has more than one element (is an ElementArray)
+            } // Loop: through all Analysis Points
+        } // If: Has more than one Analysis Point(s)
         else {
-            ElementResults elementResults = populateElement(elementObject);
+            ElementResults elementResults = populateElement(analysisPointObj);
             elementResultsList.put(elementResults.getName(), elementResults);
-        } // Else: has only one element (is an ElementObject)
+        } // Else: Has only one Analysis Point
 
         return elementResultsList;
     } // getElementResults()
 
     @Override
     public String getSimulationName() {
-        JSONObject resultFile  = getJsonObject(this.pathToBasinResultsFile.toString());
+        JSONObject resultFile  = XmlBasinResultsParser.getJsonObject(this.pathToBasinResultsFile.toString());
         JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
-        String simulationName = "";
-
-        if(simulationType == SimulationType.FORECAST) { simulationName = runResults.opt("ForecastName").toString(); }
-        else if(simulationType == SimulationType.RUN) { simulationName = runResults.opt("RunName").toString(); }
-        else if(simulationType == SimulationType.OPTIMIZATION) { simulationName = runResults.opt("AnalysisName").toString(); }
-
+        String simulationName = runResults.opt("AnalysisName").toString();
         return simulationName;
     } // getSimulationName()
 
-    public static JSONObject getJsonObject(String pathToJson) {
-        /* Read in XML File */
-        File file = new File(pathToJson);
-        /* Read XML's content to 'content' */
-        String content = StringBeautifier.readFileToString(file);
-        JSONObject object = XML.toJSONObject(content);
-
-        return object;
-    } // getJsonObject()
     private ElementResults populateElement(JSONObject elementObject) {
+        /* ElementResults' Name */
         String name = elementObject.opt("name").toString();
-        JSONObject hydrologyObject = elementObject.getJSONObject("Hydrology");
+
+        /* Element's Basin Results */
+        JSONArray basinElementArray   = elementObject.optJSONArray("BasinElement");
+        JSONObject basinElementObject = elementObject.optJSONObject("BasinElement");
+        if(basinElementArray == null && basinElementObject == null) { throw new IllegalArgumentException("DepthAreaResults: No Basin Elements Found"); }
+
+        JSONObject analysisPointElement;
+        // If: More than one Basin Elements
+        if(basinElementArray != null) { analysisPointElement = findMatchingElement(basinElementArray, name); }
+        // Else: Only one Basin Element
+        else { analysisPointElement = findMatchingElement(new JSONArray(basinElementObject), name); }
+        if(analysisPointElement == null) { throw new IllegalArgumentException("Analysis Point Element's Results Not Found"); }
+
+        /* Get TimeSeriesResults, StatisticsResults, and OtherResults */
+        JSONObject hydrologyObject = analysisPointElement.optJSONObject("Hydrology");
+        if(hydrologyObject == null) { throw new IllegalArgumentException("Hydrology Object Not Found"); }
+        JSONObject statisticObject = analysisPointElement.optJSONObject("Statistics");
+        if(statisticObject == null) { throw new IllegalArgumentException("Statistics Object Not Found"); }
+
         List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
-        JSONObject statisticsArray = elementObject.getJSONObject("Statistics");
-        List<StatisticResult> statisticResults = populateStatisticsResult(statisticsArray);
-        JSONObject drainageArea = elementObject.getJSONObject("DrainageArea");
-        Map<String, String> otherMap = new HashMap<>();
-        otherMap.put("DrainageArea", drainageArea.opt("area").toString());
-        JSONObject observedFlowGage = elementObject.optJSONObject("ObservedFlowGage");
-        if(observedFlowGage != null) {
-            otherMap.put("ObservedFlowGage", observedFlowGage.opt("name").toString());
-        } // If: observedFlowGage exists
-        JSONArray observedPoolGage = elementObject.optJSONArray("ObservedPoolElevationGage");
-        if(observedPoolGage != null) {
-            String observedPoolGageName = observedPoolGage.optJSONObject(0).optString("name");
-            otherMap.put("ObservedPoolElevationGage", observedPoolGageName);
-        } // If: observedFlowGage exists
+        List<StatisticResult> statisticResult = populateStatisticsResult(statisticObject);
+        Map<String, String> otherResultsMap = getOtherResultsMap(analysisPointElement);
 
         ElementResults elementResults = ElementResults.builder()
                 .name(name)
                 .timeSeriesResults(timeSeriesResult)
-                .statisticResults(statisticResults)
-                .otherResults(otherMap)
+                .statisticResults(statisticResult)
+                .otherResults(otherResultsMap)
                 .build();
 
         return elementResults;
     } // populateElement()
+
     private List<TimeSeriesResult> populateTimeSeriesResult(JSONObject hydrologyObject) {
         List<TimeSeriesResult> timeSeriesResultList = new ArrayList<>();
         String keyName = "TimeSeries";
@@ -132,6 +124,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return timeSeriesResultList;
     } // populateTimeSeriesResult()
+
     private TimeSeriesResult populateSingleTimeSeriesResult (JSONObject timeObject) {
         String DssFileName = timeObject.getString("DssFileName");
         String pathToDss = Utilities.getFilePath(this.pathToProjectDirectory.toAbsolutePath().toString(), DssFileName);
@@ -167,16 +160,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return timeSeriesResult;
     } // populateSingleTimeSeriesResult()
-    private List<ZonedDateTime> getZonedDateTimeArray (HecTimeArray timeArray) {
-        List<ZonedDateTime> zonedDateTimeArray = new ArrayList<>();
-        for(int i = 0; i < timeArray.numberElements(); i++) {
-            HecTime singleTime = timeArray.element(i);
-            ZonedDateTime zonedTime = TimeConverter.toZonedDateTime(singleTime);
-            zonedDateTimeArray.add(zonedTime);
-        } // Loop: through HecTimeArray
 
-        return zonedDateTimeArray;
-    } // getZonedDateTimeArray()
     private List<StatisticResult> populateStatisticsResult(JSONObject statisticsObject) {
         List<StatisticResult> statisticResultList = new ArrayList<>();
         String keyName = "StatisticMeasure";
@@ -219,39 +203,45 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         return statisticResultList;
     } // populateStatisticsResult()
 
-    public static List<String> getAvailablePlots(String pathToResultFile) {
-        List<String> availablePlots = new ArrayList<>();
-        JSONObject resultFile = getJsonObject(pathToResultFile);
-        JSONArray elemenentArray = resultFile.getJSONObject("RunResults").getJSONArray("BasinElement");
+    /* Helper Functions */
+    private JSONObject findMatchingElement(JSONArray elementArray, String matchName) {
+        for(int i = 0; i < elementArray.length(); i++) {
+            JSONObject elementObject = elementArray.optJSONObject(i);
+            if(elementObject == null) { throw new IllegalArgumentException("Element Object Not Found"); }
+            String elementName = elementObject.opt("name").toString().trim();
+            // Return 'elementObject' if Element's Name matches with 'matchName'
+            if(elementName.equals(matchName.trim())) { return elementObject; }
+        } // Loop: through elementArray
 
-        for(int i = 0; i < elemenentArray.length(); i++) {
-            JSONObject elementObject = elemenentArray.optJSONObject(i);
-            JSONObject hydrologyObject = elementObject.optJSONObject("Hydrology");
-            JSONArray timeSeriesArray = hydrologyObject.optJSONArray("TimeSeries");
-            if(timeSeriesArray == null) {
-                JSONObject timeSeriesObject = hydrologyObject.optJSONObject("TimeSeries");
-                JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
-                String timeSeriesType = timeSeriesTypeObject.optString("displayString");
+        return null;
+    } // findMatchingElement()
 
-                if(!availablePlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
-                    availablePlots.add(timeSeriesType);
-                } // If: plot hasn't been added and plot is not a default plot; then add plot
-            } // If: Only one type of TimeSeries Plot
-            else {
-                for(int j = 0; j < timeSeriesArray.length(); j++) {
-                    JSONObject timeSeriesObject = timeSeriesArray.optJSONObject(j);
-                    JSONObject timeSeriesTypeObject = timeSeriesObject.optJSONObject("TimeSeriesType");
-                    String timeSeriesType = timeSeriesTypeObject.optString("displayString");
+    private Map<String, String> getOtherResultsMap(JSONObject elementObject) {
+        JSONObject drainageArea = elementObject.getJSONObject("DrainageArea");
+        Map<String, String> otherMap = new HashMap<>();
+        otherMap.put("DrainageArea", drainageArea.opt("area").toString());
+        JSONObject observedFlowGage = elementObject.optJSONObject("ObservedFlowGage");
+        if(observedFlowGage != null) {
+            otherMap.put("ObservedFlowGage", observedFlowGage.opt("name").toString());
+        } // If: observedFlowGage exists
+        JSONArray observedPoolGage = elementObject.optJSONArray("ObservedPoolElevationGage");
+        if(observedPoolGage != null) {
+            String observedPoolGageName = observedPoolGage.optJSONObject(0).optString("name");
+            otherMap.put("ObservedPoolElevationGage", observedPoolGageName);
+        } // If: observedFlowGage exists
 
-                    if(!availablePlots.contains(timeSeriesType) && !ValidCheck.validTimeSeriesPlot(timeSeriesType, null)) {
-                        availablePlots.add(timeSeriesType);
-                    } // If: plot hasn't been added and plot is not a default plot; then add plot
-                } // Loop through all the timeSeriesArray
-            } // Else: More than one type of TimeSeries Plots
-        } // Loop through all element's results, and populate
+        return otherMap;
+    } // getOtherResultsMap()
 
-        Collections.sort(availablePlots); // Sort the list Alphabetically
+    private List<ZonedDateTime> getZonedDateTimeArray (HecTimeArray timeArray) {
+        List<ZonedDateTime> zonedDateTimeArray = new ArrayList<>();
+        for(int i = 0; i < timeArray.numberElements(); i++) {
+            HecTime singleTime = timeArray.element(i);
+            ZonedDateTime zonedTime = TimeConverter.toZonedDateTime(singleTime);
+            zonedDateTimeArray.add(zonedTime);
+        } // Loop: through HecTimeArray
 
-        return availablePlots;
-    } // getAvailablePlots()
-} // XmlBasinResultsParser class
+        return zonedDateTimeArray;
+    } // getZonedDateTimeArray()
+
+} // MonteCarloResultsParser Class

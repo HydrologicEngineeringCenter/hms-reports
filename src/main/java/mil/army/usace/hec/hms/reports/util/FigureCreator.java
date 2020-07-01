@@ -1,6 +1,9 @@
 package mil.army.usace.hec.hms.reports.util;
 
+import tech.tablesaw.api.DateTimeColumn;
+import tech.tablesaw.api.DoubleColumn;
 import tech.tablesaw.api.Table;
+import tech.tablesaw.columns.Column;
 import tech.tablesaw.plotly.components.*;
 import tech.tablesaw.plotly.traces.ScatterTrace;
 import tech.tablesaw.plotly.traces.Trace;
@@ -8,13 +11,13 @@ import tech.tablesaw.plotly.traces.Trace;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FigureCreator {
     private FigureCreator() {}
 
     public static Figure createTimeSeriesPlot(String plotTitle, Table plotData, String xAxisTitle, String yAxisTitle) {
-        List<String> columnNames = plotData.columnNames(); // (x | y) or (x | y1 | y2 | ... | y__)
-
+        /* Create Layout for Plot */
         Layout plotLayout = Layout.builder()
                 .title(plotTitle)
                 .height(500)
@@ -23,11 +26,24 @@ public class FigureCreator {
                 .yAxis(Axis.builder().title(yAxisTitle).build())
                 .build();
 
-        ScatterTrace plotTrace = ScatterTrace.builder(plotData.column(columnNames.get(0)), plotData.column(columnNames.get(1)))
-                .mode(ScatterTrace.Mode.LINE)
-                .build();
+        /* Filter Columns */
+        Column<?> dateTimeColumn = Arrays.stream(plotData.columnArray()).filter(e->e instanceof DateTimeColumn).findFirst().orElse(null);
+        List<Column<?>> doubleColumnList = Arrays.stream(plotData.columnArray()).filter(e->e instanceof DoubleColumn).collect(Collectors.toList());
+        if(dateTimeColumn == null) throw new IllegalArgumentException("Time Column Not Found");
+        if(doubleColumnList.isEmpty()) throw new IllegalArgumentException("Value Column(s) Not Found");
 
-        return new Figure(plotLayout, plotTrace);
+        /* Create a List of Traces */
+        List<Trace> traceList = new ArrayList<>();
+
+        for(Column valueColumn : doubleColumnList) {
+            ScatterTrace plotTrace = ScatterTrace.builder(dateTimeColumn, valueColumn)
+                    .mode(ScatterTrace.Mode.LINE)
+                    .name(valueColumn.name())
+                    .build();
+            traceList.add(plotTrace);
+        } // Loop: through all valueColumnList
+
+        return new Figure(plotLayout, traceList.toArray(new Trace[]{}));
     } // createTimeSeriesPlot() -- Single
 
     public static Figure createPrecipOutflowPlot(String plotTitle, List<Table> topPlots, List<Table> bottomPlots, String xAxisTitle, String y1AxisTitle, String y2AxisTitle) {

@@ -26,6 +26,9 @@ public class StringBeautifier {
         if(isNumeric(name)) {
             result =  beautifyNumber(name);
         } // If: Numeric
+        else if(hasMathSigns(name)) {
+            result = beautifyMathStrings(name);
+        } // Else if: Has Math Signs [ +, - , * , = ]
         else if(name.matches(camelCasePattern) || name.toLowerCase().equals(name)) {
             result = beautifyCamelCase(name);
         } // If: camelCase or lowerall
@@ -97,12 +100,24 @@ public class StringBeautifier {
 
         return roundedNumber;
     } // beautifyNumber()
+    private static String beautifyMathStrings(String name) {
+        String result = name.trim();
+        result = result.replaceAll("\\+", " + ");
+        result = result.replaceAll("-", " - ");
+        result = result.replaceAll("\\*", " * ");
+        result = result.replaceAll("=", " = ");
+
+        return result;
+    } // beautifyMathStrings()
     private static boolean isNumeric(String name) {
         boolean isNumeric = true;
         try { Double num = Double.parseDouble(name); }
         catch (NumberFormatException e) { isNumeric = false; }
         return isNumeric;
     } // isDouble()
+    private static boolean hasMathSigns(String name) {
+        return name.contains("+") || name.contains("-") || name.contains("*") || name.contains("=");
+    } // hasMathSigns()
     public static String getPlotDivName(String elementName, String plotName) {
 
         String plotDivName = elementName.toLowerCase() + "_";

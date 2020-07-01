@@ -2,6 +2,7 @@ package mil.army.usace.hec.hms.reports.io.standard;
 
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 
@@ -55,6 +56,9 @@ public class GlobalResultsWriter {
         for(Element element : this.elementList) {
             List<String> rowData = new ArrayList<>();
             rowData.add(element.getName()); // Element Name
+
+            ElementResults elementResults = element.getElementResults();
+            if(elementResults == null) { continue; } // Skip Elements without ElementResults
             rowData.add(element.getElementResults().getOtherResults().get("DrainageArea")); // Drainage Area
             rowData.add(element.getElementResults().getStatisticResultsMap().get("Maximum Outflow")); // Peak Discharge
             rowData.add(element.getElementResults().getStatisticResultsMap().get("Time of Maximum Outflow")); // Time of Peak

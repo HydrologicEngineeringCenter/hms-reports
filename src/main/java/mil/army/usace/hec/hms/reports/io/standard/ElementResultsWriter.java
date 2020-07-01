@@ -54,6 +54,11 @@ public class ElementResultsWriter {
             String elementType = element.getElementInput().getElementType().toUpperCase();
             DomContent tableDom = null;
 
+            if(element.getElementResults() == null) {
+                elementResultsMap.put(element.getName(), null);
+                continue;
+            } // If: No ElementResults, Skip Element
+
             switch(elementType) {
                 case "SUBBASIN":
                     tableDom = printSubbasinResultsTable(element);
