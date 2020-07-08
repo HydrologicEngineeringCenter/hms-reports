@@ -20,14 +20,11 @@ import java.util.*;
 public class DepthAreaResultsParser extends BasinResultsParser {
     private HecTime startTime;
     private HecTime endTime;
+    private JSONObject simulationResults;
 
     DepthAreaResultsParser(Builder builder) {
         super(builder);
-    }
 
-    @Override
-    public Map<String,ElementResults> getElementResults() {
-        Map<String, ElementResults> elementResultsList = new HashMap<>();
         JSONObject resultFile  = XmlBasinResultsParser.getJsonObject(this.pathToBasinResultsFile.toString());
         JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
         String startTimeString = runResults.optString("StartTime") + " GMT";
@@ -36,9 +33,15 @@ public class DepthAreaResultsParser extends BasinResultsParser {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm z");
         this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
         this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
+        this.simulationResults = runResults;
+    } // DepthAreaResultsParser Constructor
 
-        JSONArray analysisPointArray = runResults.optJSONArray("AnalysisPoint");
-        JSONObject analysisPointObj  = runResults.optJSONObject("AnalysisPoint");
+    @Override
+    public Map<String,ElementResults> getElementResults() {
+        Map<String, ElementResults> elementResultsList = new HashMap<>();
+
+        JSONArray analysisPointArray = simulationResults.optJSONArray("AnalysisPoint");
+        JSONObject analysisPointObj  = simulationResults.optJSONObject("AnalysisPoint");
         if(analysisPointArray == null && analysisPointObj == null) { throw new IllegalArgumentException("Analysis Point(s) Not Found"); }
 
         if(analysisPointArray != null) {
@@ -57,9 +60,7 @@ public class DepthAreaResultsParser extends BasinResultsParser {
 
     @Override
     public String getSimulationName() {
-        JSONObject resultFile  = XmlBasinResultsParser.getJsonObject(this.pathToBasinResultsFile.toString());
-        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
-        String simulationName = runResults.opt("AnalysisName").toString();
+        String simulationName = simulationResults.opt("AnalysisName").toString();
         return simulationName;
     } // getSimulationName()
 
@@ -88,6 +89,16 @@ public class DepthAreaResultsParser extends BasinResultsParser {
 
         return availablePlots;
     } // getAvailablePlots()
+
+    @Override
+    public HecTime getStartTime() {
+        return this.startTime;
+    } // getStartTime()
+
+    @Override
+    public HecTime getEndTime() {
+        return this.endTime;
+    } // getEndTime()
 
     private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
         List<String> elementPlots = new ArrayList<>(availablePlots);

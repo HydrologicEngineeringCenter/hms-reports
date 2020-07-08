@@ -11,6 +11,7 @@ import mil.army.usace.hec.hms.reports.util.Utilities;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static j2html.TagCreator.*;
 
@@ -68,15 +69,23 @@ public class StandardReportWriter extends ReportWriter {
     private DomContent printReportTitle(BasinParser basinParser) {
         List<DomContent> reportTitleDom = new ArrayList<>();
 
+        /* Project Name */
         String projectName = Utilities.getFilePath(projectDirectory.toAbsolutePath().toString(), ".hms");
         projectName = projectName.substring(projectName.lastIndexOf(File.separator) + 1, projectName.indexOf(".hms"));
-        DomContent projectTitle = h3(join(b("Project: "), StringBeautifier.beautifyString(projectName.trim())));
+        DomContent projectTitle = h2(join(b("Project: "), StringBeautifier.beautifyString(projectName.trim())));
         reportTitleDom.add(projectTitle);
 
+        /* Simulation Name */
         String simulation = getSimulationTitle();
-        String simulationName = basinParser.getSimulationName();
-        DomContent simulationTitle = h3(join(b(simulation), simulationName.trim()));
+        Map<String, String> simulationData = basinParser.getSimulationData();
+        DomContent simulationTitle = h2(join(b(simulation), simulationData.get("name").trim()));
         reportTitleDom.add(simulationTitle);
+
+        /* Start and End Times */
+        DomContent startTime = h2(join(b("Start Time: "), simulationData.get("start").trim()));
+        DomContent endTime   = h2(join(b("End Time: "), simulationData.get("end").trim()));
+        reportTitleDom.add(startTime);
+        reportTitleDom.add(endTime);
 
         return div(attrs(".report-title"), reportTitleDom.toArray(new DomContent[]{}));
     } // printReportTitle()

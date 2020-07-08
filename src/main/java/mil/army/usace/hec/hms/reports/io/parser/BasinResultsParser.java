@@ -1,5 +1,6 @@
 package mil.army.usace.hec.hms.reports.io.parser;
 
+import hec.heclib.util.HecTime;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.enums.SimulationType;
 
@@ -66,6 +67,10 @@ public abstract class BasinResultsParser {
     public abstract String getSimulationName();
 
     public abstract List<String> getAvailablePlots();
+
+    public abstract HecTime getStartTime();
+
+    public abstract HecTime getEndTime();
 }
 
 

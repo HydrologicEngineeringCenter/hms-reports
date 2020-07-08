@@ -256,7 +256,8 @@ public class GlobalParametersWriter {
                 DomContent processTableHeader = HtmlModifier.printTableHeadRow(parametersNames, domAttrs, domAttrs);
 
                 if(!processTablesMap.containsKey(tableName)) {
-                    tableName = StringBeautifier.beautifyString(process.getName()) + ": " + StringBeautifier.beautifyString(process.getValue());
+                    tableName = StringBeautifier.beautifyString(process.getName());
+                    if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + StringBeautifier.beautifyString(process.getValue()); }
                     processTablesMap.put(tableName, Arrays.asList(processTableHeader, caption(tableName)));
                 } // If: Table didn't exist, new key with table's header and caption
 
