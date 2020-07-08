@@ -2,6 +2,7 @@ package mil.army.usace.hec.hms.reports.io;
 
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.enums.ReportWriterType;
+import mil.army.usace.hec.hms.reports.enums.SimulationType;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -40,6 +41,26 @@ class SummaryStatisticsReportWriterTest {
                 .pathToDestination(pathToOutput)
                 .projectDirectory(projectDir)
                 .reportWriterType(ReportWriterType.SUMMARY_STATISTICS_REPORT)
+                .build();
+
+        List<Element> elementList = reportWriter.write();
+    } // writeLong()
+
+    @Test
+    void writeForecast() {
+        String pathToInput = "C:\\Projects\\hec-hms\\src\\test\\resources\\forecast\\Base.basin";
+        String pathToResult = "C:\\Projects\\hec-hms\\src\\test\\resources\\forecast\\results\\FOR_05_06_Forecast.results";
+        String pathToOutput = "C:\\HyperNick\\HmsReportOutput\\Statistics-Forecast.html";
+        String projectDir = "C:\\Projects\\hec-hms\\src\\test\\resources\\forecast";
+
+
+        ReportWriter reportWriter = ReportWriter.builder()
+                .pathToInput(pathToInput)
+                .pathToResult(pathToResult)
+                .pathToDestination(pathToOutput)
+                .projectDirectory(projectDir)
+                .reportWriterType(ReportWriterType.SUMMARY_STATISTICS_REPORT)
+                .simulationType(SimulationType.FORECAST)
                 .build();
 
         List<Element> elementList = reportWriter.write();
