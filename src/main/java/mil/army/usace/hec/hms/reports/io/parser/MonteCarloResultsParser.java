@@ -184,10 +184,6 @@ public class MonteCarloResultsParser extends BasinResultsParser {
                 .startTime(this.startTime)
                 .endTime(this.endTime)
                 .build();
-
-        /* Return null if TimeSeriesResult is empty (a.k.a: Failed to Read) */
-        if(timeSeriesResult.getTimes().isEmpty() || timeSeriesResult.getValues().length == 0) { return null; }
-
         return timeSeriesResult;
     } // populateTimeSeriesResult()
 } // MonteCarloResultsParser Class

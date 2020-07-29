@@ -29,10 +29,10 @@ class SummaryStatisticsReportWriterTest {
 
     @Test
     void writeLong() {
-        String pathToInput  = "src/resources/MiddleColumbia/MiddleColumbia_WY2017.basin.json";
-        String pathToResult = "src/resources/MiddleColumbia/RUN_WY2017.results";
-        String pathToOutput = "C:\\HyperNick\\HmsReportOutput\\statistic-report-long.html";
-        String projectDir   = "C:\\Users\\q0hecntv\\Desktop\\MiddleColumbiaForNick\\MiddleColumbia";
+        String pathToInput  = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbiaForNick\\MiddleColumbia\\MiddleColumbia_WY1997.basin";
+        String pathToResult = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbiaForNick\\MiddleColumbia\\results\\RUN_WY1997.results";
+        String pathToOutput = "C:\\Temp\\reportTest.html";
+        String projectDir   = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbiaForNick\\MiddleColumbia";
 
 
         ReportWriter reportWriter = ReportWriter.builder()
@@ -41,6 +41,7 @@ class SummaryStatisticsReportWriterTest {
                 .pathToDestination(pathToOutput)
                 .projectDirectory(projectDir)
                 .reportWriterType(ReportWriterType.SUMMARY_STATISTICS_REPORT)
+                .simulationType(SimulationType.RUN)
                 .build();
 
         List<Element> elementList = reportWriter.write();

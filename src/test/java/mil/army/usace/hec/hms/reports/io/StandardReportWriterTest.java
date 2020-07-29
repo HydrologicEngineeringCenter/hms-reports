@@ -16,10 +16,10 @@ class StandardReportWriterTest {
 
     @Test
     void writeMiddleColumbia() {
-        String pathToInput  = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbia_forNick\\MiddleColumbia\\MiddleColumbia_WY1997.basin";
-        String pathToResult = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbia_forNick\\MiddleColumbia\\results\\RUN_WY1997.results";
+        String pathToInput  = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbiaForNick\\MiddleColumbia\\MiddleColumbia_WY1997.basin";
+        String pathToResult = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbiaForNick\\MiddleColumbia\\results\\RUN_WY1997.results";
         String pathToOutput = "C:\\Temp\\reportTest.html";
-        String projectDir   = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbia_forNick\\MiddleColumbia";
+        String projectDir   = "C:\\Users\\q0hecntv\\Desktop\\HmsReports\\MiddleColumbiaForNick\\MiddleColumbia";
 
         Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
         Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
@@ -215,6 +215,36 @@ class StandardReportWriterTest {
                 .globalParameterChoices(availableGlobalParameter)
                 .reportWriterType(ReportWriterType.STANDARD_REPORT)
                 .simulationType(SimulationType.DEPTH_AREA)
+                .chosenPlots(availablePlots)
+                .build();
+
+        List<Element> elementList = reportWriter.write();
+        System.out.println("Done");
+    }
+
+    @Test
+    void writeUH() {
+        String pathToInput = "C:\\Users\\q0hecntv\\Desktop\\user_spec_UH\\user_spec_UH\\USBR_UH.basin";
+        String pathToResult = "C:\\Users\\q0hecntv\\Desktop\\user_spec_UH\\user_spec_UH\\results\\RUN_Center_Weighted_PMP_USBRUH.results";
+        String pathToDestination = "C:\\HyperNick\\HmsReportOutput\\Report-UH.html";
+        String projectDirectory = "C:\\Users\\q0hecntv\\Desktop\\user_spec_UH\\user_spec_UH";
+
+        /* The user choosing what global parameters to hide/not print out */
+        Map<String, List<String>> availableGlobalParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.GLOBAL_PARAMETER);
+        Map<String, List<String>> availableElementParameter = Utilities.getParameterMap(pathToInput, ParameterSummary.ELEMENT_PARAMETER);
+
+        List<String> availablePlots = Utilities.getAvailablePlots(pathToResult, SimulationType.RUN);
+
+        ReportWriter reportWriter = ReportWriter.builder()
+                .pathToInput(pathToInput)
+                .pathToResult(pathToResult)
+                .pathToDestination(pathToDestination)
+                .projectDirectory(projectDirectory)
+                .reportSummaryChoice(Arrays.asList(SummaryChoice.GLOBAL_RESULTS_SUMMARY, SummaryChoice.GLOBAL_PARAMETER_SUMMARY, SummaryChoice.ELEMENT_RESULTS_SUMMARY))
+                .elementParameterizationChoice(availableElementParameter)
+                .globalParameterChoices(availableGlobalParameter)
+                .reportWriterType(ReportWriterType.STANDARD_REPORT)
+                .simulationType(SimulationType.RUN)
                 .chosenPlots(availablePlots)
                 .build();
 
