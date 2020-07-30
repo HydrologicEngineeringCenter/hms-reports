@@ -1,9 +1,6 @@
 package mil.army.usace.hec.hms.reports.io.parser;
 
-import hec.heclib.dss.HecTimeSeries;
 import hec.heclib.util.HecTime;
-import hec.heclib.util.HecTimeArray;
-import hec.io.TimeSeriesContainer;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
@@ -164,7 +161,7 @@ public class DepthAreaResultsParser extends BasinResultsParser {
             for(int i = 0; i < timeArray.length(); i++) {
                 JSONObject timeObject = timeArray.getJSONObject(i);
                 TimeSeriesResult timeSeriesResult = populateSingleTimeSeriesResult(timeObject);
-                timeSeriesResultList.add(timeSeriesResult);
+                if(timeSeriesResult != null) { timeSeriesResultList.add(timeSeriesResult); }
             } // Loop: through timeArray to populate timeSeriesResultList
         } // If: is JSONArray
         else if(hydrologyObject.optJSONObject(keyName) != null) {
@@ -180,38 +177,20 @@ public class DepthAreaResultsParser extends BasinResultsParser {
     } // populateTimeSeriesResult()
 
     private TimeSeriesResult populateSingleTimeSeriesResult (JSONObject timeObject) {
+        /* Getting data necessary to read in data for TimeSeriesResult */
         String DssFileName = timeObject.getString("DssFileName");
         String pathToDss = Utilities.getFilePath(this.pathToProjectDirectory.toAbsolutePath().toString(), DssFileName);
-
-        /* Read in TimeSeriesType */
+        String variable = timeObject.getString("DssPathname");
         String type = timeObject.getJSONObject("TimeSeriesType").getString("displayString");
 
-        /* Using HEC DSS to read in Time Series Container */
-        TimeSeriesContainer container = new TimeSeriesContainer();
-        container.setFullName(timeObject.getString("DssPathname"));
-        container.setStartTime(this.startTime);
-        container.setEndTime(this.endTime);
-        HecTimeSeries dssTimeSeriesRead = new HecTimeSeries();
-        dssTimeSeriesRead.setDSSFileName(pathToDss);
-
-        int operationStatus = dssTimeSeriesRead.read(container, true);
-        if(operationStatus != 0) { System.out.println("Time Read not Successful"); }
-        dssTimeSeriesRead.done();
-
-        double[] values = container.getValues();
-        List<ZonedDateTime> times  = getZonedDateTimeArray(container.getTimes());
-        String unit = container.getUnits();
-        String fullName = container.getFullName();
-        String unitType = fullName.split("/")[3];
-
+        /* Building TimeSeriesResult */
         TimeSeriesResult timeSeriesResult = TimeSeriesResult.builder()
                 .type(type)
-                .unitType(unitType)
-                .unit(unit)
-                .times(times)
-                .values(values)
+                .pathToFile(pathToDss)
+                .variable(variable)
+                .startTime(this.startTime)
+                .endTime(this.endTime)
                 .build();
-
         return timeSeriesResult;
     } // populateSingleTimeSeriesResult()
 
@@ -316,16 +295,4 @@ public class DepthAreaResultsParser extends BasinResultsParser {
 
         return otherMap;
     } // getOtherResultsMap()
-
-    private List<ZonedDateTime> getZonedDateTimeArray (HecTimeArray timeArray) {
-        List<ZonedDateTime> zonedDateTimeArray = new ArrayList<>();
-        for(int i = 0; i < timeArray.numberElements(); i++) {
-            HecTime singleTime = timeArray.element(i);
-            ZonedDateTime zonedTime = TimeConverter.toZonedDateTime(singleTime);
-            zonedDateTimeArray.add(zonedTime);
-        } // Loop: through HecTimeArray
-
-        return zonedDateTimeArray;
-    } // getZonedDateTimeArray()
-
 } // MonteCarloResultsParser Class

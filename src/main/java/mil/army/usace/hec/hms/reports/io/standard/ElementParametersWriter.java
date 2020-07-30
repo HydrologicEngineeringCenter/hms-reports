@@ -279,12 +279,12 @@ public class ElementParametersWriter {
                 DomContent tsrDom = printTimeSeriesCombinedPlot(combinedTsrMap, combinedPlotName, elementName);
                 // Divide the plots by only having Max number of plots per page
                 if(maxPlotDom.size() < maxPlotsPerPage) {
-                    maxPlotDom.add(tsrDom);
+                    if(tsrDom != null) { maxPlotDom.add(tsrDom); }
                 } // If: we haven't reached 2 plots per page
                 else {
                     timeSeriesPlotDomList.add(div(attrs(".max-plot"), maxPlotDom.toArray(new DomContent[]{})));
                     maxPlotDom.clear();
-                    maxPlotDom.add(tsrDom);
+                    if(tsrDom != null) { maxPlotDom.add(tsrDom); }
                 } // Else: we have reached 2 plots per page
                 // Remove the used plots from the timeSeriesResultMap
                 for(String usedPlot : combinedTsrMap.keySet()) {
@@ -298,19 +298,19 @@ public class ElementParametersWriter {
             List<TimeSeriesResult> timeSeriesResults = Collections.singletonList(timeSeriesResultMap.get(key));
             DomContent tsrDom = printTimeSeriesPlot(timeSeriesResults, elementName);
             if(maxPlotDom.size() < maxPlotsPerPage) {
-                maxPlotDom.add(tsrDom);
+                if(tsrDom != null) { maxPlotDom.add(tsrDom); }
             } // If: we haven't reached 2 plots per page
             else {
                 timeSeriesPlotDomList.add(div(attrs(".max-plot"), maxPlotDom.toArray(new DomContent[]{})));
                 maxPlotDom.clear();
-                maxPlotDom.add(tsrDom);
+                if(tsrDom != null) { maxPlotDom.add(tsrDom); }
             } // Else: we have reached 2 plots per page
         } // Loop: to print each single plot
 
         // Case: Single Plots with Multiple Datasets for each plot
         for(String key : sameTypeMap.keySet()) {
             DomContent tsrDom = printTimeSeriesPlot(sameTypeMap.get(key), elementName);
-            if(maxPlotDom.size() < maxPlotsPerPage) { maxPlotDom.add(tsrDom); }
+            if(maxPlotDom.size() < maxPlotsPerPage) { if(tsrDom != null) { maxPlotDom.add(tsrDom); } }
         } // Loop: to print each single plot with multiple datasets
 
         if(!maxPlotDom.isEmpty()) {
@@ -324,6 +324,7 @@ public class ElementParametersWriter {
         TimeSeriesResult baseResult = timeSeriesResultList.get(0);
         String plotName = baseResult.getType();
         Table plotTable = getTimeSeriesTable(timeSeriesResultList, plotName);
+        if(plotTable == null) { return null; } // No PlotTable
 
         String xAxisTit = "Time";
         String yAxisTit = baseResult.getUnitType() + " (" + baseResult.getUnit() + ")";
@@ -352,6 +353,7 @@ public class ElementParametersWriter {
         /* Get Value Array Columns */
         for(TimeSeriesResult timeSeriesResult : timeSeriesResultList) {
             double[] valueArray = timeSeriesResult.getValues();
+            if(valueArray.length == 0) { return null; } // TimeSeries without values
 
             String columnName = timeSeriesResult.getUnitType();
             DoubleColumn valueColumn = DoubleColumn.create(columnName, valueArray);
@@ -373,6 +375,8 @@ public class ElementParametersWriter {
         else if(plotName.equals("Outflow and Observed Flow"))
             combinedPlotDom = getOutflowObservedFlowPlot(tsrMap, plotName, elementName);
 
+        if(combinedPlotDom == null) { return null; }
+
         return div(attrs(".single-plot"), combinedPlotDom);
     } // printTimeSeriesCombinedPlot()
     private DomContent getPrecipOutflowPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
@@ -381,18 +385,17 @@ public class ElementParametersWriter {
 
         // Creating Tables for both Top Plots and Bottom Plots
         List<Table> topPlotTables = new ArrayList<>(), bottomPlotTables = new ArrayList<>();
-        int count = 0;
         for(TimeSeriesResult tsr : topPlots) {
             List<TimeSeriesResult> tsrList = Collections.singletonList(tsr);
             Table plotTable = getTimeSeriesTable(tsrList, tsr.getType());
+            if(plotTable == null) { return null; }
             topPlotTables.add(plotTable);
-            count++;
         } // Loop: to create Tables for Top Plots
         for(TimeSeriesResult tsr : bottomPlots) {
             List<TimeSeriesResult> tsrList = Collections.singletonList(tsr);
             Table plotTable = getTimeSeriesTable(tsrList, tsr.getType());
+            if(plotTable == null) { return null; }
             bottomPlotTables.add(plotTable);
-            count++;
         } // Loop: to create Tables for Bottom Plots
 
         // Setting Plot's configurations
@@ -416,6 +419,8 @@ public class ElementParametersWriter {
         Table outflowTable = getTimeSeriesTable(Collections.singletonList(outflowPlot), "Outflow");
         Table observedFlowTable = getTimeSeriesTable(Collections.singletonList(observedFlowPlot), "Observed Flow");
         List<Table> plotList = Arrays.asList(outflowTable, observedFlowTable);
+
+        if(outflowTable == null || observedFlowTable == null) { return null; }
 
         // Setting Plot's configurations
         String xAxisTitle = "Time";
