@@ -5,6 +5,8 @@ import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
 
 import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -31,6 +33,31 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return elementInputList;
     } // getElementInput()
+
+    @Override
+    public ZonedDateTime getLastModifiedTime() {
+        List<String> fileLines = getBasinFileLines();
+
+        String lastModifiedDate = fileLines.stream().filter(line -> line.trim().startsWith("Last Modified Date:"))
+                .findFirst().orElse("").split(":", 2)[1].trim();
+        String lastModifiedTime = fileLines.stream().filter(line -> line.trim().startsWith("Last Modified Time:"))
+                .findFirst().orElse("").split(":", 2)[1].trim();
+        String combinedTime = lastModifiedDate + ", " + lastModifiedTime + " GMT";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm:ss z");
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(combinedTime, formatter);
+
+        return zonedDateTime;
+    } // getLastModifiedTime()
+
+    @Override
+    public String getHmsVersion() {
+        List<String> fileLines = getBasinFileLines();
+
+        String hmsVersion = fileLines.stream().filter(line -> line.trim().startsWith("Version:"))
+                .findFirst().orElse("").split(":", 2)[1].trim();
+
+        return hmsVersion;
+    } // getHmsVersion()
 
     private ElementInput populateElement(String elementLine) {
         /* ElementInput's name and type */

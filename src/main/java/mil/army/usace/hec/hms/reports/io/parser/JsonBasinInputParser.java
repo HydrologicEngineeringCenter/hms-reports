@@ -7,6 +7,7 @@ import mil.army.usace.hec.hms.reports.util.Utilities;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,6 +31,17 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return elementInputList;
     } // getElementInput()
+
+    @Override
+    public ZonedDateTime getLastModifiedTime() {
+        return null;
+    } // getLastModifiedTime()
+
+    @Override
+    public String getHmsVersion() {
+        return null;
+    } // getHmsVersion()
+
     private ElementInput populateElement(JSONObject object) {
         /* Parsing each ElementInput for its: name, elementType, and Processes */
         String name = object.getString("name");

@@ -22,6 +22,7 @@ class SummaryStatisticsReportWriterTest {
                 .pathToDestination(pathToDestination)
                 .projectDirectory(projectDirectory)
                 .reportWriterType(ReportWriterType.SUMMARY_STATISTICS_REPORT)
+                .simulationType(SimulationType.RUN)
                 .build();
 
         List<Element> elementList = reportWriter.write();
@@ -66,5 +67,24 @@ class SummaryStatisticsReportWriterTest {
 
         List<Element> elementList = reportWriter.write();
     } // writeLong()
+
+    @Test
+    void writeUH() {
+        String pathToInput = "C:\\Users\\q0hecntv\\Desktop\\user_spec_UH\\user_spec_UH\\USBR_UH.basin";
+        String pathToResult = "C:\\Users\\q0hecntv\\Desktop\\user_spec_UH\\user_spec_UH\\results\\RUN_Center_Weighted_PMP_USBRUH.results";
+        String pathToDestination = "C:\\HyperNick\\HmsReportOutput\\Statistics-UH.html";
+        String projectDirectory = "C:\\Users\\q0hecntv\\Desktop\\user_spec_UH\\user_spec_UH";
+
+        ReportWriter reportWriter = ReportWriter.builder()
+                .pathToInput(pathToInput)
+                .pathToResult(pathToResult)
+                .pathToDestination(pathToDestination)
+                .projectDirectory(projectDirectory)
+                .reportWriterType(ReportWriterType.SUMMARY_STATISTICS_REPORT)
+                .simulationType(SimulationType.RUN)
+                .build();
+
+        List<Element> elementList = reportWriter.write();
+    } // writeShort()
 
 } // SummaryStatisticsReportWriterTest

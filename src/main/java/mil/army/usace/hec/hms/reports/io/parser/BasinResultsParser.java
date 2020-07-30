@@ -6,6 +6,7 @@ import mil.army.usace.hec.hms.reports.enums.SimulationType;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -71,6 +72,8 @@ public abstract class BasinResultsParser {
     public abstract HecTime getStartTime();
 
     public abstract HecTime getEndTime();
+
+    public abstract ZonedDateTime getLastComputedTime();
 }
 
 

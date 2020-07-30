@@ -9,6 +9,8 @@ import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.io.standard.StandardReportWriter;
 import mil.army.usace.hec.hms.reports.io.statistics.SummaryStatisticsReportWriter;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -25,6 +27,8 @@ public abstract class ReportWriter {
     protected Map<String, List<String>> elementParameterizationChoice;
     protected Map<StatisticsType, List<DisplayRange>> displayRangeMap;
     protected SimulationType simulationType;
+
+    protected PropertyChangeSupport support;
 
     protected ReportWriter(Builder builder){
         this.pathToInput = builder.pathToInput;
@@ -124,5 +128,13 @@ public abstract class ReportWriter {
     public static Builder builder() { return new Builder(); }
 
     public abstract List<Element> write();
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl){
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl){
+        support.removePropertyChangeListener(pcl);
+    }
 
 } // Report Writer Class

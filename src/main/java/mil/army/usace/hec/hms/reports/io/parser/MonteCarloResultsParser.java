@@ -20,6 +20,7 @@ public class MonteCarloResultsParser extends BasinResultsParser {
     private HecTime startTime;
     private HecTime endTime;
     private JSONObject simulationResults;
+    private ZonedDateTime computedTime;
 
     MonteCarloResultsParser(Builder builder) {
         super(builder);
@@ -29,10 +30,13 @@ public class MonteCarloResultsParser extends BasinResultsParser {
         JSONObject analysisObject = runResults.getJSONObject("Analysis");
         String startTimeString = analysisObject.optString("StartTime") + " GMT";
         String endTimeString   = analysisObject.optString("EndTime") + " GMT";
+        String executionTime   = runResults.optString("ExecutionTime") + " GMT";
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm z");
+        DateTimeFormatter executionFormatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm:ss z");
         this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
         this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
+        this.computedTime = ZonedDateTime.parse(executionTime, executionFormatter);
         this.simulationResults = runResults;
     } // MonteCarloResultsParser Constructor
 
@@ -99,6 +103,11 @@ public class MonteCarloResultsParser extends BasinResultsParser {
     public HecTime getEndTime() {
         return this.endTime;
     } // getEndTime()
+
+    @Override
+    public ZonedDateTime getLastComputedTime() {
+        return this.computedTime;
+    } // getLastComputedTime()
 
     private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
         /* Name & Available Plots*/
