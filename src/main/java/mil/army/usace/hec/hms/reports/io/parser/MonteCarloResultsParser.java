@@ -22,14 +22,11 @@ import java.util.Map;
 public class MonteCarloResultsParser extends BasinResultsParser {
     private HecTime startTime;
     private HecTime endTime;
+    private JSONObject simulationResults;
 
     MonteCarloResultsParser(Builder builder) {
         super(builder);
-    }
 
-    @Override
-    public Map<String,ElementResults> getElementResults() {
-        Map<String, ElementResults> elementResultsList = new HashMap<>();
         JSONObject resultFile  = XmlBasinResultsParser.getJsonObject(this.pathToBasinResultsFile.toString());
         JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
         JSONObject analysisObject = runResults.getJSONObject("Analysis");
@@ -39,9 +36,15 @@ public class MonteCarloResultsParser extends BasinResultsParser {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm z");
         this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
         this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
+        this.simulationResults = runResults;
+    } // MonteCarloResultsParser Constructor
 
-        JSONArray analysisPointArray = runResults.optJSONArray("AnalysisPoint");
-        JSONObject analysisPointObject = runResults.optJSONObject("AnalysisPoint");
+    @Override
+    public Map<String,ElementResults> getElementResults() {
+        Map<String, ElementResults> elementResultsList = new HashMap<>();
+
+        JSONArray analysisPointArray = simulationResults.optJSONArray("AnalysisPoint");
+        JSONObject analysisPointObject = simulationResults.optJSONObject("AnalysisPoint");
         if(analysisPointArray == null && analysisPointObject == null) { throw new IllegalArgumentException("Analysis Point(s) Not Found"); }
 
         if(analysisPointArray != null) {
@@ -62,9 +65,7 @@ public class MonteCarloResultsParser extends BasinResultsParser {
 
     @Override
     public String getSimulationName() {
-        JSONObject resultFile  = XmlBasinResultsParser.getJsonObject(this.pathToBasinResultsFile.toString());
-        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
-        JSONObject analysisObject = runResults.getJSONObject("Analysis");
+        JSONObject analysisObject = simulationResults.getJSONObject("Analysis");
         return analysisObject.opt("BasinModel").toString();
     } // getSimulationName()
 
@@ -91,6 +92,16 @@ public class MonteCarloResultsParser extends BasinResultsParser {
 
         return availablePlots;
     } // getAvailablePlots()
+
+    @Override
+    public HecTime getStartTime() {
+        return this.startTime;
+    } // getStartTime()
+
+    @Override
+    public HecTime getEndTime() {
+        return this.endTime;
+    } // getEndTime()
 
     private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
         /* Name & Available Plots*/

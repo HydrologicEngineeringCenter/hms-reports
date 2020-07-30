@@ -10,6 +10,7 @@ import mil.army.usace.hec.hms.reports.io.parser.BasinResultsParser;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -89,14 +90,24 @@ public class BasinParser {
         return elementList;
     } // getElements()
 
-    public String getSimulationName() {
+    public Map<String, String> getSimulationData() {
+        Map<String, String> simulationDataMap = new LinkedHashMap<>();
+
         BasinResultsParser resultsParser = BasinResultsParser.builder()
                 .pathToBasinResultsFile(this.pathToBasinResultsFile.toAbsolutePath().toString())
                 .pathToProjectDirectory(this.pathToProjectDirectory.toAbsolutePath().toString())
                 .simulationType(this.simulationType)
                 .build();
 
-        return resultsParser.getSimulationName();
+        String simulationName = resultsParser.getSimulationName();
+        String startTime = resultsParser.getStartTime().toString();
+        String endTime = resultsParser.getEndTime().toString();
+
+        simulationDataMap.put("name", simulationName);
+        simulationDataMap.put("start", startTime);
+        simulationDataMap.put("end", endTime);
+
+        return simulationDataMap;
     } // getSimulationName()
 
 } // BasinParser class

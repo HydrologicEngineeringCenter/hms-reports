@@ -84,8 +84,8 @@ public class HtmlModifier {
                 "\t-webkit-print-color-adjust: exact;\n" +
                 "}\n" +
                 "\n" +
-                "/* CSS for Report Title's H3 */\n" +
-                "div.report-title h3 {\n" +
+                "/* CSS for Report Title's H2 */\n" +
+                "div.report-title h2 {\n" +
                 "\tfont-weight: normal;\n" +
                 "\tmargin: 0px;\n" +
                 "}\n" +

@@ -24,14 +24,11 @@ import java.util.*;
 public class XmlBasinResultsParser extends BasinResultsParser {
     private HecTime startTime;
     private HecTime endTime;
+    private JSONObject simulationResults;
 
     XmlBasinResultsParser(Builder builder) {
         super(builder);
-    }
 
-    @Override
-    public Map<String,ElementResults> getElementResults() {
-        Map<String, ElementResults> elementResultsList = new HashMap<>();
         JSONObject resultFile  = getJsonObject(this.pathToBasinResultsFile.toString());
         JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
         String startTimeString = runResults.optString("StartTime") + " GMT";
@@ -40,9 +37,15 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dMMMyyyy, HH:mm z");
         this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
         this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
+        this.simulationResults = runResults;
+    } // XMLBasinResultsParser Constructor
 
-        JSONArray elementArray = runResults.optJSONArray("BasinElement");
-        JSONObject elementObject = runResults.optJSONObject("BasinElement");
+    @Override
+    public Map<String,ElementResults> getElementResults() {
+        Map<String, ElementResults> elementResultsList = new HashMap<>();
+
+        JSONArray elementArray = simulationResults.optJSONArray("BasinElement");
+        JSONObject elementObject = simulationResults.optJSONObject("BasinElement");
         if(elementArray == null && elementObject == null) { throw new IllegalArgumentException("No Elements Found"); }
 
         if(elementArray != null) {
@@ -61,13 +64,11 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
     @Override
     public String getSimulationName() {
-        JSONObject resultFile  = getJsonObject(this.pathToBasinResultsFile.toString());
-        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
         String simulationName = "";
 
-        if(simulationType == SimulationType.FORECAST) { simulationName = runResults.opt("ForecastName").toString(); }
-        else if(simulationType == SimulationType.RUN) { simulationName = runResults.opt("RunName").toString(); }
-        else if(simulationType == SimulationType.OPTIMIZATION) { simulationName = runResults.opt("AnalysisName").toString(); }
+        if(simulationType == SimulationType.FORECAST) { simulationName = simulationResults.opt("ForecastName").toString(); }
+        else if(simulationType == SimulationType.RUN) { simulationName = simulationResults.opt("RunName").toString(); }
+        else if(simulationType == SimulationType.OPTIMIZATION) { simulationName = simulationResults.opt("AnalysisName").toString(); }
 
         return simulationName;
     } // getSimulationName()
@@ -97,6 +98,16 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return availablePlots;
     } // getAvailablePlots()
+
+    @Override
+    public HecTime getStartTime() {
+        return this.startTime;
+    } // getStartTime()
+
+    @Override
+    public HecTime getEndTime() {
+        return this.endTime;
+    } // getEndTime()
 
     private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
         List<String> elementPlots = new ArrayList<>(availablePlots);
