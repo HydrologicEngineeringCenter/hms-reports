@@ -18,6 +18,7 @@ public class DepthAreaResultsParser extends BasinResultsParser {
     private HecTime startTime;
     private HecTime endTime;
     private JSONObject simulationResults;
+    private ZonedDateTime computedTime;
 
     DepthAreaResultsParser(Builder builder) {
         super(builder);
@@ -26,10 +27,13 @@ public class DepthAreaResultsParser extends BasinResultsParser {
         JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
         String startTimeString = runResults.optString("StartTime") + " GMT";
         String endTimeString   = runResults.optString("EndTime") + " GMT";
+        String executionTime   = runResults.optString("ExecutionTime") + " GMT";
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm z");
+        DateTimeFormatter executionFormatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm:ss z");
         this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
         this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
+        this.computedTime = ZonedDateTime.parse(executionTime, executionFormatter);
         this.simulationResults = runResults;
     } // DepthAreaResultsParser Constructor
 
@@ -96,6 +100,11 @@ public class DepthAreaResultsParser extends BasinResultsParser {
     public HecTime getEndTime() {
         return this.endTime;
     } // getEndTime()
+
+    @Override
+    public ZonedDateTime getLastComputedTime() {
+        return this.computedTime;
+    } // getLastComputedTime()
 
     private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
         List<String> elementPlots = new ArrayList<>(availablePlots);

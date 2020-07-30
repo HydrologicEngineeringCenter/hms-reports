@@ -38,6 +38,12 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
                 .simulationType(this.simulationType)
                 .build();
 
+        /* Check whether the simulation results was computed after the basin file or not */
+        if(!parser.isCorrectTime()) {
+            support.firePropertyChange("Error", "", "Data Changed, Recompute");
+            return new ArrayList<>();
+        } // If: User need to recompute
+
         List<Element> elementList = parser.getElements();
         List<Element> statisticsElementList = elementList.stream().filter(this::isSummaryStatistics).collect(Collectors.toList());
         if(statisticsElementList.isEmpty()) {

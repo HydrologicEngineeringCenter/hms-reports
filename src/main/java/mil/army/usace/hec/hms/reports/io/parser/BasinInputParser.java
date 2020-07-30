@@ -4,6 +4,7 @@ import mil.army.usace.hec.hms.reports.ElementInput;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 public abstract class BasinInputParser {
@@ -40,4 +41,6 @@ public abstract class BasinInputParser {
     }
 
     public abstract List<ElementInput> getElementInput();
+    public abstract ZonedDateTime getLastModifiedTime();
+    public abstract String getHmsVersion();
 }

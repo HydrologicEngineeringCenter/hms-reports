@@ -32,6 +32,13 @@ public class StandardReportWriter extends ReportWriter {
                 .simulationType(simulationType)
                 .build();
 
+        /* Check whether the simulation results was computed after the basin file or not */
+        if(!parser.isCorrectTime()) {
+            support.firePropertyChange("Error", "", "Data Changed, Recompute");
+            return new ArrayList<>();
+        } // If: User need to recompute
+
+        /* Writing the Standard Report */
         List<Element> elementList = parser.getElements();
 
         GlobalResultsWriter globalResultsWriter = GlobalResultsWriter.builder()
@@ -86,11 +93,18 @@ public class StandardReportWriter extends ReportWriter {
         DomContent simulationTitle = h2(join(b(simulation), simulationData.get("name").trim()));
         reportTitleDom.add(simulationTitle);
 
-        /* Start and End Times */
+        /* HMS Version Computed With */
+        String hmsVersionNumber = basinParser.getHmsVersion();
+        DomContent hmsVersion = h2(join(b("HMS Version: "), hmsVersionNumber));
+        reportTitleDom.add(hmsVersion);
+
+        /* Start, End, and Execution Times */
         DomContent startTime = h2(join(b("Start Time: "), simulationData.get("start").trim()));
         DomContent endTime   = h2(join(b("End Time: "), simulationData.get("end").trim()));
+        DomContent executionTime = h2(join(b("Execution Time: "), simulationData.get("execution")));
         reportTitleDom.add(startTime);
         reportTitleDom.add(endTime);
+        reportTitleDom.add(executionTime);
 
         return div(attrs(".report-title"), reportTitleDom.toArray(new DomContent[]{}));
     } // printReportTitle()

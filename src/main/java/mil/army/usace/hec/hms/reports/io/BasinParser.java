@@ -9,6 +9,8 @@ import mil.army.usace.hec.hms.reports.io.parser.BasinResultsParser;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,6 +64,23 @@ public class BasinParser {
         return new Builder();
     }
 
+    public boolean isCorrectTime() {
+        BasinInputParser inputParser = BasinInputParser.builder()
+                .pathToBasinInputFile(this.pathToBasinInputFile.toString())
+                .build();
+        BasinResultsParser resultsParser = BasinResultsParser.builder()
+                .pathToBasinResultsFile(this.pathToBasinResultsFile.toAbsolutePath().toString())
+                .pathToProjectDirectory(this.pathToProjectDirectory.toAbsolutePath().toString())
+                .simulationType(this.simulationType)
+                .build();
+
+        ZonedDateTime basinModifiedTime = inputParser.getLastModifiedTime();
+        ZonedDateTime executionTime = resultsParser.getLastComputedTime();
+        int compareValue = basinModifiedTime.toInstant().compareTo(executionTime.toInstant());
+
+        return compareValue < 0;
+    } // isCorrectTime()
+
     public List<Element> getElements() {
         List<Element> elementList = new ArrayList<>();
 
@@ -102,13 +121,24 @@ public class BasinParser {
         String simulationName = resultsParser.getSimulationName();
         String startTime = resultsParser.getStartTime().toString();
         String endTime = resultsParser.getEndTime().toString();
+        DateTimeFormatter executionFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm");
+        String executionTime = resultsParser.getLastComputedTime().format(executionFormatter);
 
         simulationDataMap.put("name", simulationName);
         simulationDataMap.put("start", startTime);
         simulationDataMap.put("end", endTime);
+        simulationDataMap.put("execution", executionTime);
 
         return simulationDataMap;
     } // getSimulationName()
+
+    public String getHmsVersion() {
+        BasinInputParser inputParser = BasinInputParser.builder()
+                .pathToBasinInputFile(this.pathToBasinInputFile.toString())
+                .build();
+
+        return inputParser.getHmsVersion();
+    } // getHmsVersion()
 
 } // BasinParser class
 

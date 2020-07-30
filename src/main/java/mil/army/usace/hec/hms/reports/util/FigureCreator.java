@@ -68,7 +68,7 @@ public class FigureCreator {
                 .build();
 
         // Color order: Precipitation, Excess Precipitation, Outflow
-        List<String> colorWay = Arrays.asList("#5CB3FF", "#0492c2", "#1f77b4");
+        List<String> colorWay = Arrays.asList("#5CB3FF", "#ff2800", "#1f77b4");
         int count = 0;
 
         for(Table plot : topPlots) {
