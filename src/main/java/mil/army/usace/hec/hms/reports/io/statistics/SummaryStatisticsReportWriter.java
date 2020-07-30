@@ -11,6 +11,7 @@ import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,6 +25,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
     public SummaryStatisticsReportWriter(Builder builder) {
         super(builder);
+        support = new PropertyChangeSupport(this);
     }
 
     @Override
@@ -38,15 +40,22 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
         List<Element> elementList = parser.getElements();
         List<Element> statisticsElementList = elementList.stream().filter(this::isSummaryStatistics).collect(Collectors.toList());
-        if(statisticsElementList.isEmpty()) { return statisticsElementList; }
+        if(statisticsElementList.isEmpty()) {
+            support.firePropertyChange("Error", "", "No computation point with observed flow");
+            return statisticsElementList;
+        } // If: None Statistics Element
 
         /* HTML Layout */
         String htmlOutput = html(
                 head(title("Summary Statistics Report"), link().withRel("stylesheet").withHref("styleStatistics.css")),
                 body(printSummaryStatisticsTable(statisticsElementList))
         ).renderFormatted();
+
         /* Writing to HTML output file */
         HtmlModifier.writeStatisticsReportToFile(this.pathToDestination.toString(), htmlOutput);
+
+        /* Notify HMS that the report has been successfully generated */
+        support.firePropertyChange("Message", "", "Success");
 
         return statisticsElementList;
     } // write()

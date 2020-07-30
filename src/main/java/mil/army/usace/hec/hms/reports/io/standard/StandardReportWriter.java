@@ -8,6 +8,7 @@ import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 import mil.army.usace.hec.hms.reports.util.Utilities;
 
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import static j2html.TagCreator.*;
 public class StandardReportWriter extends ReportWriter {
     public StandardReportWriter(Builder builder) {
         super(builder);
+        support = new PropertyChangeSupport(this);
     }
 
     @Override
@@ -62,6 +64,9 @@ public class StandardReportWriter extends ReportWriter {
         ).renderFormatted();
         /* Writing to HTML output file */
         HtmlModifier.writeStandardReportToFile(this.pathToDestination.toString(), htmlOutput);
+
+        /* Notify HMS that the report has been successfully generated */
+        support.firePropertyChange("Message", "", "Success");
 
         return elementList;
     } // write()
