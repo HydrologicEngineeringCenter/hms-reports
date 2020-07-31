@@ -16,6 +16,8 @@ import tech.tablesaw.columns.Column;
 import tech.tablesaw.plotly.components.Figure;
 import tech.tablesaw.plotly.components.Page;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -27,12 +29,14 @@ public class ElementResultsWriter {
     private List<Element> elementList;
     private List<String> chosenPlots;
     private List<SummaryChoice> reportSummaryChoice;
+    private PropertyChangeSupport support;
 
     /* Constructors */
     private ElementResultsWriter(Builder builder){
         this.elementList = builder.elementList;
         this.reportSummaryChoice = builder.reportSummaryChoice;
         this.chosenPlots = builder.chosenPlots;
+        support = new PropertyChangeSupport(this);
     } // ElementResultsWriter Constructor
 
     public static class Builder{
@@ -70,11 +74,14 @@ public class ElementResultsWriter {
         Map<String, DomContent> summaryResultsMap = printListResultsWriter();
         if(summaryResultsMap == null) { summaryResultsMap = new HashMap<>(); }
 
-        for(Element element : elementList) {
+        for(int i = 0; i < elementList.size(); i++) {
+            Element element = elementList.get(i);
             String elementName = element.getName();
             ElementResults elementResults = element.getElementResults();
             DomContent elementResultsDom = printElementResults(elementResults, summaryResultsMap.get(elementName));
             elementResultsMap.put(elementName, elementResultsDom);
+            Double progressValue = (((double) i + 1) / elementList.size()) * 100;
+            support.firePropertyChange("Progress", "", progressValue);
         } // Loop: through each element
 
         return elementResultsMap;
@@ -602,4 +609,12 @@ public class ElementResultsWriter {
         DomContent rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
         return rowDom;
     } // printResultsTableRow()
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl){
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl){
+        support.removePropertyChangeListener(pcl);
+    }
 } // ElementResultsWriter Class

@@ -84,6 +84,12 @@ public class StandardReportWriter extends ReportWriter {
                 .chosenPlots(chosenPlots)
                 .build();
 
+        elementResultsWriter.addPropertyChangeListener(evt -> {
+            if((evt.getSource() instanceof ElementResultsWriter) && (evt.getPropertyName().equals("Progress"))) {
+                support.firePropertyChange("Progress", "", evt.getNewValue());
+            } // If: Progress from ElementResultsWriter
+        }); // For Progress Bar
+
         List<DomContent> elementListDom = new ArrayList<>();
         Map<String, DomContent> elementInputMap = elementParametersWriter.elementInputMap();
         Map<String, DomContent> elementResultsMap = elementResultsWriter.elementResultsMap();
