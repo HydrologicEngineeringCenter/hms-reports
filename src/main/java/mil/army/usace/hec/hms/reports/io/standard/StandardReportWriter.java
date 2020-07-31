@@ -33,7 +33,7 @@ public class StandardReportWriter extends ReportWriter {
                 .build();
 
         /* Check whether the simulation results was computed after the basin file or not */
-        if(!parser.isCorrectTime()) {
+        if(parser.outdatedSimulation()) {
             support.firePropertyChange("Error", "", "Data Changed, Recompute");
             return new ArrayList<>();
         } // If: User need to recompute

@@ -211,6 +211,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return fileLines;
     } // getBasinFileScanner()
+
     private List<Integer> getIndicesOfEndLines(List<String> fileLines) {
         List<Integer> indexList = new ArrayList<>();
         for(int i = 0; i < fileLines.size(); i++) {
@@ -219,10 +220,12 @@ public class AsciiBasinInputParser extends BasinInputParser {
         } // Loop: to get Indices of End Lines
         return indexList;
     } // getIndicesOfEndLines()
+
     private int getFirstAfterIndex(List<Integer> indexList, int index) {
         for(int i : indexList) { if(i > index) return i; }
         return -1;
     } // getFirstAfterIndex()
+
     private int[] getProcessRange(int startIndex, int endIndex) {
         int[] processRange = new int[2];
         int processStart = startIndex, processEnd = endIndex;
@@ -240,6 +243,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return processRange;
     } // getProcessRange()
+
     private Map<String, List<String>> basinTypeAndParameterProcesses() {
         Map<String, List<String>> typeProcessMap = new LinkedHashMap<>();
 
@@ -263,6 +267,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return typeProcessMap;
     } // basinTypeAndParameterProcesses()
+
     private Map<String, List<String>> basinTypeAndSingleProcesses() {
         Map<String, List<String>> typeProcessMap = new LinkedHashMap<>();
 
@@ -286,6 +291,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return typeProcessMap;
     } // basinTypeAndSingleProcesses()
+
     private Map<String, Integer> findMatchedString(String match, int startIndex, int endIndex) {
         Map<String, Integer> matchedMap = new HashMap<>();
         for(int i = startIndex; i < endIndex; i++) {

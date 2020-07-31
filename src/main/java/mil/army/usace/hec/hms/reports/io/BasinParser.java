@@ -64,7 +64,7 @@ public class BasinParser {
         return new Builder();
     }
 
-    public boolean isCorrectTime() {
+    public boolean outdatedSimulation() {
         BasinInputParser inputParser = BasinInputParser.builder()
                 .pathToBasinInputFile(this.pathToBasinInputFile.toString())
                 .build();
@@ -78,8 +78,8 @@ public class BasinParser {
         ZonedDateTime executionTime = resultsParser.getLastComputedTime();
         int compareValue = basinModifiedTime.toInstant().compareTo(executionTime.toInstant());
 
-        return compareValue < 0;
-    } // isCorrectTime()
+        return compareValue >= 0;
+    } // outdatedSimulation()
 
     public List<Element> getElements() {
         List<Element> elementList = new ArrayList<>();

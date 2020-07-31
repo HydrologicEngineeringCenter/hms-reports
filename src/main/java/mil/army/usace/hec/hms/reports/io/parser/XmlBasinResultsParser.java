@@ -153,6 +153,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return object;
     } // getJsonObject()
+
     private ElementResults populateElement(JSONObject elementObject) {
         String name = elementObject.opt("name").toString();
         JSONObject hydrologyObject = elementObject.getJSONObject("Hydrology");
@@ -181,6 +182,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return elementResults;
     } // populateElement()
+
     private List<TimeSeriesResult> populateTimeSeriesResult(JSONObject hydrologyObject) {
         List<TimeSeriesResult> timeSeriesResultList = new ArrayList<>();
         String keyName = "TimeSeries";
@@ -204,6 +206,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return timeSeriesResultList;
     } // populateTimeSeriesResult()
+
     private TimeSeriesResult populateSingleTimeSeriesResult (JSONObject timeObject) {
         /* Getting data necessary to read in data for TimeSeriesResult */
         String DssFileName = timeObject.getString("DssFileName");
@@ -221,6 +224,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
                 .build();
         return timeSeriesResult;
     } // populateSingleTimeSeriesResult()
+
     private List<StatisticResult> populateStatisticsResult(JSONObject statisticsObject) {
         List<StatisticResult> statisticResultList = new ArrayList<>();
         String keyName = "StatisticMeasure";
@@ -262,4 +266,5 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         return statisticResultList;
     } // populateStatisticsResult()
+
 } // XmlBasinResultsParser class

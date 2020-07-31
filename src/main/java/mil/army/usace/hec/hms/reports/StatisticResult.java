@@ -43,14 +43,8 @@ public class StatisticResult {
     }
 
     /* Methods */
-    public String getName(){
-        return this.name;
-    }
-    public String getValue(){
-        return this.value;
-    }
-    public String getUnits(){
-        return this.units;
-    }
+    public String getName(){ return this.name; }
+    public String getValue(){ return this.value; }
+    public String getUnits(){ return this.units; }
 
 } // StatisticResult Class

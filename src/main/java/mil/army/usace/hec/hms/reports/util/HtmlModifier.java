@@ -26,6 +26,7 @@ public class HtmlModifier {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{}));
     } // printTableHeadRow()
+
     public static DomContent printTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
         List<DomContent> domList = new ArrayList<>();
 
@@ -37,6 +38,7 @@ public class HtmlModifier {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{})); // Table Row type
     } // printTableDataRow()
+
     public static DomContent extractPlotlyJavascript(String plotHtml) {
         Document doc = Jsoup.parse(plotHtml);
         Elements elements = doc.select("body").first().children();
@@ -44,6 +46,7 @@ public class HtmlModifier {
         DomContent domContent = join(content);
         return domContent;
     } // extractPlotlyJavascript()
+
     public static void writeStandardReportToFile(String pathToHtml, String content) {
         /* Writing to HTML file */
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
@@ -53,6 +56,7 @@ public class HtmlModifier {
         StringBeautifier.writeStringToFile(new File(fullPathToCss), getStandardReportCSS());
         setPlotlyFont(fullPathToHtml, "Vollkorn, serif", "12");
     } // writeStandardReportToFile()
+
     public static void writeStatisticsReportToFile(String pathToHtml, String content) {
         /* Writing to HTML file */
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
@@ -60,6 +64,7 @@ public class HtmlModifier {
         StringBeautifier.writeStringToFile(new File(fullPathToHtml), content);
         StringBeautifier.writeStringToFile(new File(fullPathToCss), getStatisticsCSS());
     } // writeStatisticsReportToFile()
+
     private static void setPlotlyFont(String pathToHtml, String fontFamily, String fontSize) {
         String htmlContent = StringBeautifier.readFileToString(new File(pathToHtml));
         htmlContent = htmlContent.replace("var layout = {",
@@ -67,6 +72,7 @@ public class HtmlModifier {
         File staticPlotHtml = new File(pathToHtml);
         StringBeautifier.writeStringToFile(staticPlotHtml, htmlContent);
     } // setPlotlyFont()
+
     private static String getStandardReportCSS() {
         String content = "@import url('https://fonts.googleapis.com/css?family=Vollkorn:400,700&display=swap');\n" +
                 "\n" +
@@ -230,6 +236,7 @@ public class HtmlModifier {
 
         return content;
     } // getStandardReportCSS()
+
     private static String getStatisticsCSS() {
         String content = "@import url('https://fonts.googleapis.com/css?family=Vollkorn:400,700&display=swap');\n" +
                 "\n" +

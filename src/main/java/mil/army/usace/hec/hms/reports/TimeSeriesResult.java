@@ -35,6 +35,7 @@ public class TimeSeriesResult {
         this.startTime = builder.startTime;
         this.endTime = builder.endTime;
     } // TimesSeriesResult Constructor
+
     public static class Builder {
         String type;
         String pathToFile;
@@ -73,6 +74,7 @@ public class TimeSeriesResult {
 
         public TimeSeriesResult build(){ return new TimeSeriesResult(this); }
     } // Builder class: as TimeSeriesResult's Constructor
+
     public static Builder builder() {return new Builder();}
 
     /* Helper Functions */
@@ -105,6 +107,7 @@ public class TimeSeriesResult {
         // Done with DSS TimeSeriesRead
         dssTimeSeriesRead.done();
     } // readData()
+
     private List<ZonedDateTime> getZonedDateTimeArray (HecTimeArray timeArray) {
         List<ZonedDateTime> zonedDateTimeArray = new ArrayList<>();
         for(int i = 0; i < timeArray.numberElements(); i++) {
@@ -118,6 +121,7 @@ public class TimeSeriesResult {
 
     /* Public Methods */
     public String getType() { return type; }
+
     public List<ZonedDateTime> getTimes() {
         List<ZonedDateTime> result = times;
 
@@ -130,6 +134,7 @@ public class TimeSeriesResult {
         } // Synchronize to lock access while reading in data
 
     } // getTimes()
+
     public double[] getValues() {
         double[] result = values;
 
@@ -142,8 +147,11 @@ public class TimeSeriesResult {
         } // Synchronize to lock access while reading in data
 
     } // getValues()
+
     public String getUnitType() { return unitType; }
+
     public String getUnit() { return unit; }
+
     public TimeSeriesResult getTimeSeriesResult() { return this; }
 
 } // TimeSeriesResult Class

@@ -74,6 +74,7 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return elementInput;
     } // populateElement()
+
     private List<String> unnecessaryContent() {
         List<String> stringList = new ArrayList<>();
         stringList.add("schematicProperties");
@@ -81,6 +82,7 @@ public class JsonBasinInputParser extends BasinInputParser {
         /* Add more if necessary */
         return stringList;
     } // unnecessaryContent()
+
     private Process populateProcess(JSONObject elementObject, String keyName) {
         String name = keyName;
         String value = "";
@@ -111,6 +113,7 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return process;
     } // populateProcess()
+
     private Parameter populateParameter(JSONObject processObject, String keyName, String paramName) {
         String name = paramName;
         String value = "";
@@ -145,6 +148,7 @@ public class JsonBasinInputParser extends BasinInputParser {
 
         return parameter;
     } // populateParameter()
+
     private Parameter populateArrayParameter(JSONArray processArray, int index) {
         JSONObject paramObject = processArray.getJSONObject(index);
         String name = Integer.toString(index + 1);
