@@ -39,7 +39,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
                 .build();
 
         /* Check whether the simulation results was computed after the basin file or not */
-        if(!parser.isCorrectTime()) {
+        if(parser.outdatedSimulation()) {
             support.firePropertyChange("Error", "", "Data Changed, Recompute");
             return new ArrayList<>();
         } // If: User need to recompute
@@ -75,7 +75,8 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
         List<DomContent> rowDomList = new ArrayList<>();
         String tdAttribute = ".summary-statistics";
 
-        for(Element element : statisticsElementList) {
+        for(int i = 0; i < statisticsElementList.size(); i++) {
+            Element element = statisticsElementList.get(i);
             Map<String, String> statisticsMap = summaryStatisticsMap(element);
             Map<String, String> colorMap = classifyStatisticsColor(element);
             List<DomContent> dataDomList = new ArrayList<>();
@@ -90,6 +91,9 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
             } // Loop: through Summary-Statistics data
 
             rowDomList.add(tr(dataDomList.toArray(new DomContent[]{})));
+
+            Double progressValue = (((double) i + 1) / statisticsElementList.size()) * 100;
+            support.firePropertyChange("Progress", "", progressValue);
         } // Loop: through all Summary-Statistics Elements
 
         /* Creating the table's header */

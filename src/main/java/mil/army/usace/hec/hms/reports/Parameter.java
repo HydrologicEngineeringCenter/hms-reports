@@ -35,22 +35,14 @@ public class Parameter {
             return this;
         } // 'subParameters' constructor
 
-        public Parameter build(){
-            return new Parameter(this);
-        }
+        public Parameter build(){ return new Parameter(this); }
     } // Builder class: as Parameter's Constructor
 
-    public static Builder builder(){
-        return new Builder();
-    }
+    public static Builder builder(){ return new Builder(); }
 
     /* Methods */
-    public String getName(){
-        return this.name;
-    }
-    public String getValue(){
-        return this.value;
-    }
+    public String getName(){ return this.name; }
+    public String getValue(){ return this.value; }
     public List<Parameter> getSubParameters() { return this.subParameters; }
 
 } // Parameter Class

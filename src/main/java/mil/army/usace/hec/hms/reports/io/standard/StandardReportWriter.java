@@ -33,7 +33,7 @@ public class StandardReportWriter extends ReportWriter {
                 .build();
 
         /* Check whether the simulation results was computed after the basin file or not */
-        if(!parser.isCorrectTime()) {
+        if(parser.outdatedSimulation()) {
             support.firePropertyChange("Error", "", "Data Changed, Recompute");
             return new ArrayList<>();
         } // If: User need to recompute
@@ -52,13 +52,6 @@ public class StandardReportWriter extends ReportWriter {
                 .globalParameterChoices(this.globalParameterChoices)
                 .build();
 
-        ElementParametersWriter elementParametersWriter = ElementParametersWriter.builder()
-                .elementList(elementList)
-                .chosenPlots(this.chosenPlots)
-                .reportSummaryChoice(this.reportSummaryChoice)
-                .elementParameterizationChoice(this.elementParameterizationChoice)
-                .build();
-
         /* HTML Layout */
         String htmlOutput = html(
                 head(   title("Standard Report"),
@@ -67,8 +60,9 @@ public class StandardReportWriter extends ReportWriter {
                 body(   printReportTitle(parser),
                         globalParametersWriter.printListGlobalParameter(),
                         globalResultsWriter.printGlobalSummary(),
-                        elementParametersWriter.printElementList())
+                        printElementList(elementList))
         ).renderFormatted();
+
         /* Writing to HTML output file */
         HtmlModifier.writeStandardReportToFile(this.pathToDestination.toString(), htmlOutput);
 
@@ -78,6 +72,42 @@ public class StandardReportWriter extends ReportWriter {
         return elementList;
     } // write()
 
+    private DomContent printElementList(List<Element> elementList) {
+        ElementParametersWriter elementParametersWriter = ElementParametersWriter.builder()
+                .elementList(elementList)
+                .elementParameterizationChoice(this.elementParameterizationChoice)
+                .build();
+
+        ElementResultsWriter elementResultsWriter = ElementResultsWriter.builder()
+                .elementList(elementList)
+                .reportSummaryChoice(reportSummaryChoice)
+                .chosenPlots(chosenPlots)
+                .build();
+
+        elementResultsWriter.addPropertyChangeListener(evt -> {
+            if((evt.getSource() instanceof ElementResultsWriter) && (evt.getPropertyName().equals("Progress"))) {
+                support.firePropertyChange("Progress", "", evt.getNewValue());
+            } // If: Progress from ElementResultsWriter
+        }); // For Progress Bar
+
+        List<DomContent> elementListDom = new ArrayList<>();
+        Map<String, DomContent> elementInputMap = elementParametersWriter.elementInputMap();
+        Map<String, DomContent> elementResultsMap = elementResultsWriter.elementResultsMap();
+
+        for(String elementName : elementInputMap.keySet()) {
+            List<DomContent> elementDom = new ArrayList<>();
+            DomContent elementInputDom = elementInputMap.get(elementName);
+            DomContent elementResultsDom = elementResultsMap.get(elementName);
+
+            if(elementInputDom != null) { elementDom.add(elementInputDom); }
+            if(elementResultsDom != null) { elementDom.add(elementResultsDom); }
+
+            elementListDom.add(div(attrs(".element"), elementDom.toArray(new DomContent[]{})));
+        } // Loop: to get each Element's DomContent
+
+        return main(elementListDom.toArray(new DomContent[]{}));
+    } // printElementList()
+
     private DomContent printReportTitle(BasinParser basinParser) {
         List<DomContent> reportTitleDom = new ArrayList<>();
 
@@ -85,25 +115,28 @@ public class StandardReportWriter extends ReportWriter {
         String projectName = Utilities.getFilePath(projectDirectory.toAbsolutePath().toString(), ".hms");
         projectName = projectName.substring(projectName.lastIndexOf(File.separator) + 1, projectName.indexOf(".hms"));
         DomContent projectTitle = h2(join(b("Project: "), StringBeautifier.beautifyString(projectName.trim())));
-        reportTitleDom.add(projectTitle);
 
         /* Simulation Name */
         String simulation = getSimulationTitle();
         Map<String, String> simulationData = basinParser.getSimulationData();
         DomContent simulationTitle = h2(join(b(simulation), simulationData.get("name").trim()));
-        reportTitleDom.add(simulationTitle);
 
         /* HMS Version Computed With */
         String hmsVersionNumber = basinParser.getHmsVersion();
         DomContent hmsVersion = h2(join(b("HMS Version: "), hmsVersionNumber));
-        reportTitleDom.add(hmsVersion);
 
         /* Start, End, and Execution Times */
-        DomContent startTime = h2(join(b("Start Time: "), simulationData.get("start").trim()));
-        DomContent endTime   = h2(join(b("End Time: "), simulationData.get("end").trim()));
+        DomContent startTime = h2(join(b("Simulation Start Time: "), simulationData.get("start").trim()));
+        DomContent endTime   = h2(join(b("Simulation End Time: "), simulationData.get("end").trim()));
         DomContent executionTime = h2(join(b("Execution Time: "), simulationData.get("execution")));
+
+        /* Adding in Order */
+        reportTitleDom.add(projectTitle);
+        reportTitleDom.add(simulationTitle);
         reportTitleDom.add(startTime);
         reportTitleDom.add(endTime);
+
+        reportTitleDom.add(hmsVersion);
         reportTitleDom.add(executionTime);
 
         return div(attrs(".report-title"), reportTitleDom.toArray(new DomContent[]{}));

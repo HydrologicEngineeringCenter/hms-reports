@@ -56,19 +56,16 @@ public class ElementResults {
 
     /* Methods */
     public String getName() { return this.name; }
-    public List<StatisticResult> getStatisticResults(){
-        return this.statisticResults;
-    }
-    public List<TimeSeriesResult> getTimeSeriesResults(){
-        return this.timeSeriesResults;
-    }
-    public Map<String, String> getOtherResults() {
-        return this.otherResults;
-    }
+
+    public List<TimeSeriesResult> getTimeSeriesResults(){ return this.timeSeriesResults; }
+
+    public Map<String, String> getOtherResults() { return this.otherResults; }
+
     public Map<String, String> getStatisticResultsMap() {
         Map<String, String> statisticMap = this.statisticResults.stream().collect(Collectors.toMap(StatisticResult::getName, StatisticResult::getValue));
         return statisticMap;
     }
+
     public Map<String, double[]> getTimeSeriesResultsMap() {
         Map<String, double[]> timeSeriesMap = this.timeSeriesResults.stream().collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getValues));
         return timeSeriesMap;

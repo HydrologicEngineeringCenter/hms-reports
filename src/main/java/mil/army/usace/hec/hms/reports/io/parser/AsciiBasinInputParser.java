@@ -5,6 +5,9 @@ import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -36,17 +39,45 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
     @Override
     public ZonedDateTime getLastModifiedTime() {
+        /* Getting all lines */
         List<String> fileLines = getBasinFileLines();
 
-        String lastModifiedDate = fileLines.stream().filter(line -> line.trim().startsWith("Last Modified Date:"))
-                .findFirst().orElse("").split(":", 2)[1].trim();
-        String lastModifiedTime = fileLines.stream().filter(line -> line.trim().startsWith("Last Modified Time:"))
-                .findFirst().orElse("").split(":", 2)[1].trim();
-        String combinedTime = lastModifiedDate + ", " + lastModifiedTime + " GMT";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy, HH:mm:ss z");
-        ZonedDateTime zonedDateTime = ZonedDateTime.parse(combinedTime, formatter);
+        /* Filter out lines of Last Modified Date */
+        List<String> lastModifiedDateList = fileLines.stream()
+                .filter(line -> line.trim().startsWith("Last Modified Date:"))
+                .collect(Collectors.toList());
 
-        return zonedDateTime;
+        /* Convert to LocalDate for Comparison */
+        Map<LocalDate, String> latestDateMap = new LinkedHashMap<>();
+        for(String lastModifiedDate : lastModifiedDateList) {
+            String date = lastModifiedDate.split(":", 2)[1].trim();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy");
+            LocalDate localDate = LocalDate.parse(date, formatter);
+            latestDateMap.put(localDate, lastModifiedDate.trim());
+        } // Loop: to convert to LocalDate for comparison
+
+        /* Getting the latest date */
+        LocalDate latestDate = latestDateMap.keySet().stream().max(LocalDate::compareTo).orElse(null);
+        ZonedDateTime defaultTime = ZonedDateTime.of(1500, 1, 1, 0, 0, 0, 0, ZoneId.of("GMT"));
+        if(latestDate == null) { return defaultTime; }
+
+        /* Getting the latest time */
+        List<LocalTime> timeList = new ArrayList<>();
+        for(int i = 0; i < fileLines.size(); i++) {
+            String line = fileLines.get(i);
+            if(line.contains(latestDateMap.get(latestDate))) {
+                LocalTime localTime = firstTimeAfterIndex(fileLines, i);
+                if(localTime == null) { return defaultTime; }
+                timeList.add(localTime);
+            } // If: is the latest date
+        } // Loop: through each line in file
+        LocalTime latestTime = timeList.stream().max(LocalTime::compareTo).orElse(null);
+        if(latestTime == null) { return defaultTime; }
+
+        /* Returning ZonedDateTime */
+        ZonedDateTime latestDateTime = ZonedDateTime.of(latestDate, latestTime, ZoneId.of("GMT"));
+
+        return latestDateTime;
     } // getLastModifiedTime()
 
     @Override
@@ -211,6 +242,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return fileLines;
     } // getBasinFileScanner()
+
     private List<Integer> getIndicesOfEndLines(List<String> fileLines) {
         List<Integer> indexList = new ArrayList<>();
         for(int i = 0; i < fileLines.size(); i++) {
@@ -219,10 +251,12 @@ public class AsciiBasinInputParser extends BasinInputParser {
         } // Loop: to get Indices of End Lines
         return indexList;
     } // getIndicesOfEndLines()
+
     private int getFirstAfterIndex(List<Integer> indexList, int index) {
         for(int i : indexList) { if(i > index) return i; }
         return -1;
     } // getFirstAfterIndex()
+
     private int[] getProcessRange(int startIndex, int endIndex) {
         int[] processRange = new int[2];
         int processStart = startIndex, processEnd = endIndex;
@@ -240,6 +274,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return processRange;
     } // getProcessRange()
+
     private Map<String, List<String>> basinTypeAndParameterProcesses() {
         Map<String, List<String>> typeProcessMap = new LinkedHashMap<>();
 
@@ -263,6 +298,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return typeProcessMap;
     } // basinTypeAndParameterProcesses()
+
     private Map<String, List<String>> basinTypeAndSingleProcesses() {
         Map<String, List<String>> typeProcessMap = new LinkedHashMap<>();
 
@@ -286,6 +322,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
         return typeProcessMap;
     } // basinTypeAndSingleProcesses()
+
     private Map<String, Integer> findMatchedString(String match, int startIndex, int endIndex) {
         Map<String, Integer> matchedMap = new HashMap<>();
         for(int i = startIndex; i < endIndex; i++) {
@@ -294,5 +331,17 @@ public class AsciiBasinInputParser extends BasinInputParser {
         } // Loop: through specified indices
         return matchedMap;
     } // findMatchedString()
+
+    private LocalTime firstTimeAfterIndex(List<String> fileLines, int index) {
+        for(int i = index + 1; i < fileLines.size(); i++) {
+            String line = fileLines.get(i);
+            if(line.trim().startsWith("Last Modified Time:")) {
+                String timeString = line.split(":", 2)[1].trim();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+                return LocalTime.parse(timeString, formatter);
+            } // If: is Last Modified Time
+        } // Loop: through file lines
+        return null;
+    } // firstTimeAfterIndex()
 
 } // AsciiBasinInputParser class

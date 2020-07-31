@@ -2,26 +2,47 @@ package mil.army.usace.hec.hms.reports.io.standard;
 
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.ElementResults;
+import mil.army.usace.hec.hms.reports.TimeSeriesResult;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
+import mil.army.usace.hec.hms.reports.util.FigureCreator;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.ValidCheck;
+import tech.tablesaw.api.DateTimeColumn;
+import tech.tablesaw.api.DoubleColumn;
+import tech.tablesaw.api.Table;
+import tech.tablesaw.columns.Column;
+import tech.tablesaw.plotly.components.Figure;
+import tech.tablesaw.plotly.components.Page;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static j2html.TagCreator.*;
 
 public class ElementResultsWriter {
     private List<Element> elementList;
+    private List<String> chosenPlots;
     private List<SummaryChoice> reportSummaryChoice;
+    private PropertyChangeSupport support;
 
     /* Constructors */
     private ElementResultsWriter(Builder builder){
         this.elementList = builder.elementList;
         this.reportSummaryChoice = builder.reportSummaryChoice;
+        this.chosenPlots = builder.chosenPlots;
+        support = new PropertyChangeSupport(this);
     } // ElementResultsWriter Constructor
+
     public static class Builder{
         List<Element> elementList;
         List<SummaryChoice> reportSummaryChoice;
+        List<String> chosenPlots;
 
         public Builder elementList(List<Element> elementList){
             this.elementList = elementList;
@@ -33,22 +54,279 @@ public class ElementResultsWriter {
             return this;
         } // 'reportSummaryChoice' constructor
 
+        public Builder chosenPlots(List<String> chosenPlots) {
+            this.chosenPlots = chosenPlots;
+            return this;
+        } // 'chosenPlots' constructor
+
         public ElementResultsWriter build(){
             return new ElementResultsWriter(this);
         }
     } // Builder class: as ElementResultsWriter's Constructor
+
     public static Builder builder(){
         return new Builder();
     }
 
+    /* Main Function */
+    Map<String, DomContent> elementResultsMap() {
+        Map<String, DomContent> elementResultsMap = new LinkedHashMap<>();
+        Map<String, DomContent> summaryResultsMap = printListResultsWriter();
+        if(summaryResultsMap == null) { summaryResultsMap = new HashMap<>(); }
+
+        for(int i = 0; i < elementList.size(); i++) {
+            Element element = elementList.get(i);
+            String elementName = element.getName();
+            ElementResults elementResults = element.getElementResults();
+            DomContent elementResultsDom = printElementResults(elementResults, summaryResultsMap.get(elementName));
+            elementResultsMap.put(elementName, elementResultsDom);
+            Double progressValue = (((double) i + 1) / elementList.size()) * 100;
+            support.firePropertyChange("Progress", "", progressValue);
+        } // Loop: through each element
+
+        return elementResultsMap;
+    } // elementResultsMap()
+
+    /* Element Results */
+    private DomContent printElementResults(ElementResults elementResults, DomContent summaryResults) {
+        List<DomContent> elementResultsDomList = new ArrayList<>();
+        if(elementResults == null) { return null; }
+
+        /* Get Summary Results Dom */
+        if(summaryResults != null) { elementResultsDomList.add(summaryResults); }
+        /* Get TimeSeries Results Dom */
+        String elementName = elementResults.getName();
+        DomContent timeSeriesResults = printTimeSeriesResult(elementResults.getTimeSeriesResults(), elementName);
+        elementResultsDomList.add(timeSeriesResults);
+
+        return div(attrs(".element-results"), elementResultsDomList.toArray(new DomContent[]{}));
+    } // printElementResults()
+
+    /* TimeSeries Results */
+    private DomContent printTimeSeriesResult(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
+        List<DomContent> timeSeriesPlotDomList = new ArrayList<>();
+        List<DomContent> maxPlotDom = new ArrayList<>();
+        int maxPlotsPerPage = 2;
+        Map<String, List<TimeSeriesResult>> sameTypeMap = new LinkedHashMap<>();
+
+        Map<String, TimeSeriesResult> timeSeriesResultMap = timeSeriesResultList.stream()
+                .filter(individual -> ValidCheck.validTimeSeriesPlot(individual.getType(), this.chosenPlots))
+                .collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getTimeSeriesResult,
+                        (value1, value2) -> {
+                            sameTypeMap.computeIfAbsent(value1.getType(), k -> new ArrayList<>());
+                            sameTypeMap.get(value1.getType()).add(value1);
+                            sameTypeMap.get(value1.getType()).add(value2);
+                            return value2;
+                        }));
+
+        /* Remove Duplicate Types in timeSeriesResultMap */
+        sameTypeMap.keySet().forEach(timeSeriesResultMap::remove);
+        /* Remove Duplicate Unit Types in sameTypeMap */
+        sameTypeMap.keySet().forEach(e -> sameTypeMap.replace(e, sameTypeMap.get(e).stream().distinct().collect(Collectors.toList())));
+
+        Map<String, Map<String, TimeSeriesResult>> combinedPlotMap = getCombinedPlotName(timeSeriesResultMap);
+        // Case: Combined Plot (Outflow and Precipitation, or others)
+        if(!combinedPlotMap.isEmpty()) {
+            for(String combinedPlotName : combinedPlotMap.keySet()) {
+                Map<String, TimeSeriesResult> combinedTsrMap = combinedPlotMap.get(combinedPlotName);
+                // Plot the corresponding Combined Plot
+                DomContent tsrDom = printTimeSeriesCombinedPlot(combinedTsrMap, combinedPlotName, elementName);
+                // Divide the plots by only having Max number of plots per page
+                if(maxPlotDom.size() < maxPlotsPerPage) {
+                    if(tsrDom != null) { maxPlotDom.add(tsrDom); }
+                } // If: we haven't reached 2 plots per page
+                else {
+                    timeSeriesPlotDomList.add(div(attrs(".max-plot"), maxPlotDom.toArray(new DomContent[]{})));
+                    maxPlotDom.clear();
+                    if(tsrDom != null) { maxPlotDom.add(tsrDom); }
+                } // Else: we have reached 2 plots per page
+                // Remove the used plots from the timeSeriesResultMap
+                for(String usedPlot : combinedTsrMap.keySet()) {
+                    timeSeriesResultMap.remove(usedPlot);
+                } // Loop: to remove used plots
+            } // Loop: To plot each Combined Plot
+        } // If: There is a combined plot
+
+        // Case: Single Plots (one dataset for each plot)
+        for(String key : timeSeriesResultMap.keySet()) {
+            List<TimeSeriesResult> timeSeriesResults = Collections.singletonList(timeSeriesResultMap.get(key));
+            DomContent tsrDom = printTimeSeriesPlot(timeSeriesResults, elementName);
+            if(maxPlotDom.size() < maxPlotsPerPage) {
+                if(tsrDom != null) { maxPlotDom.add(tsrDom); }
+            } // If: we haven't reached 2 plots per page
+            else {
+                timeSeriesPlotDomList.add(div(attrs(".max-plot"), maxPlotDom.toArray(new DomContent[]{})));
+                maxPlotDom.clear();
+                if(tsrDom != null) { maxPlotDom.add(tsrDom); }
+            } // Else: we have reached 2 plots per page
+        } // Loop: to print each single plot
+
+        // Case: Single Plots with Multiple Datasets for each plot
+        for(String key : sameTypeMap.keySet()) {
+            DomContent tsrDom = printTimeSeriesPlot(sameTypeMap.get(key), elementName);
+            if(maxPlotDom.size() < maxPlotsPerPage) { if(tsrDom != null) { maxPlotDom.add(tsrDom); } }
+        } // Loop: to print each single plot with multiple datasets
+
+        if(!maxPlotDom.isEmpty()) {
+            timeSeriesPlotDomList.add(div(attrs(".non-max-plot"), maxPlotDom.toArray(new DomContent[]{})));
+        } // If: We haven't maxed out number of plots in a page yet
+
+        return div(attrs(".group-plot"), timeSeriesPlotDomList.toArray(new DomContent[]{}));
+    } // printTimeSeriesResult
+
+    private DomContent printTimeSeriesPlot(List<TimeSeriesResult> timeSeriesResultList, String elementName) {
+        // Configure Plot Settings
+        TimeSeriesResult baseResult = timeSeriesResultList.get(0);
+        String plotName = baseResult.getType();
+        Table plotTable = getTimeSeriesTable(timeSeriesResultList, plotName);
+        if(plotTable == null) { return null; } // No PlotTable
+
+        String xAxisTit = "Time";
+        String yAxisTit = baseResult.getUnitType() + " (" + baseResult.getUnit() + ")";
+
+        // Create Plot
+        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, plotTable, xAxisTit, yAxisTit);
+        String plotDivName = StringBeautifier.getPlotDivName(elementName, plotName);
+        Page page = Page.pageBuilder(timeSeriesFigure, plotDivName).build();
+
+        // Extract Plot's Javascript
+        String plotHtml = page.asJavascript();
+        DomContent domContent = HtmlModifier.extractPlotlyJavascript(plotHtml);
+
+        return div(attrs(".single-plot"), domContent);
+    } // printTimeSeriesPlot()
+
+    private Table getTimeSeriesTable(List<TimeSeriesResult> timeSeriesResultList, String tableName) {
+        List<Column<?>> columnList = new ArrayList<>();
+
+        /* Get TimeSeries Column */
+        List<ZonedDateTime> zonedDateTimeList = timeSeriesResultList.get(0).getTimes();
+        List<LocalDateTime> localDateTimeList = zonedDateTimeList.stream().map(ZonedDateTime::toLocalDateTime).collect(Collectors.toList());
+
+        DateTimeColumn dateTimeColumn = DateTimeColumn.create("Time", localDateTimeList);
+        columnList.add(dateTimeColumn);
+
+        /* Get Value Array Columns */
+        for(TimeSeriesResult timeSeriesResult : timeSeriesResultList) {
+            double[] valueArray = timeSeriesResult.getValues();
+            if(valueArray.length == 0) { return null; } // TimeSeries without values
+
+            String columnName = timeSeriesResult.getUnitType();
+            DoubleColumn valueColumn = DoubleColumn.create(columnName, valueArray);
+            if(!columnList.contains(valueColumn)) { columnList.add(valueColumn); }
+        } // Loop: through all timeSeriesResult
+
+        /* Create a TimeSeriesTable with Columns from columnList */
+        Table timeSeriesTable = Table.create(tableName, columnList);
+
+        return timeSeriesTable;
+    } // timeSeriesToCsv
+
+    /* TimeSeries Custom Plots */
+    private DomContent printTimeSeriesCombinedPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
+        DomContent combinedPlotDom = null;
+
+        // Get the DomContent of the Plot
+        if(plotName.equals("Precipitation and Outflow"))
+            combinedPlotDom = getPrecipOutflowPlot(tsrMap, plotName, elementName);
+        else if(plotName.equals("Outflow and Observed Flow"))
+            combinedPlotDom = getOutflowObservedFlowPlot(tsrMap, plotName, elementName);
+
+        if(combinedPlotDom == null) { return null; }
+
+        return div(attrs(".single-plot"), combinedPlotDom);
+    } // printTimeSeriesCombinedPlot()
+
+    private DomContent getPrecipOutflowPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
+        List<TimeSeriesResult> topPlots = Arrays.asList(tsrMap.get("Precipitation"), tsrMap.get("Excess Precipitation"));
+        List<TimeSeriesResult> bottomPlots = Collections.singletonList(tsrMap.get("Outflow"));
+
+        // Creating Tables for both Top Plots and Bottom Plots
+        List<Table> topPlotTables = new ArrayList<>(), bottomPlotTables = new ArrayList<>();
+        for(TimeSeriesResult tsr : topPlots) {
+            List<TimeSeriesResult> tsrList = Collections.singletonList(tsr);
+            Table plotTable = getTimeSeriesTable(tsrList, tsr.getType());
+            if(plotTable == null) { return null; }
+            topPlotTables.add(plotTable);
+        } // Loop: to create Tables for Top Plots
+        for(TimeSeriesResult tsr : bottomPlots) {
+            List<TimeSeriesResult> tsrList = Collections.singletonList(tsr);
+            Table plotTable = getTimeSeriesTable(tsrList, tsr.getType());
+            if(plotTable == null) { return null; }
+            bottomPlotTables.add(plotTable);
+        } // Loop: to create Tables for Bottom Plots
+
+        // Setting Plot's configurations
+        String xAxisTitle = "Time";
+        String y1AxisTitle = bottomPlots.get(0).getUnitType() + " (" + bottomPlots.get(0).getUnit() + ")";
+        String y2AxisTitle = topPlots.get(0).getUnitType() + " (" +  topPlots.get(0).getUnit() + ")";
+        String divName = StringBeautifier.getPlotDivName(elementName, plotName);
+
+        // Create Plot
+        Figure timeSeriesFigure = FigureCreator.createPrecipOutflowPlot(plotName, topPlotTables, bottomPlotTables, xAxisTitle, y1AxisTitle, y2AxisTitle);
+        Page page = Page.pageBuilder(timeSeriesFigure, divName).build();
+
+        // Extract Plot's Javascript
+        String plotHtml = page.asJavascript();
+        DomContent domContent = HtmlModifier.extractPlotlyJavascript(plotHtml);
+
+        return domContent;
+    } // getPrecipOutflowPlot()
+
+    private DomContent getOutflowObservedFlowPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
+        TimeSeriesResult outflowPlot = tsrMap.get("Outflow"), observedFlowPlot = tsrMap.get("Observed Flow");
+        Table outflowTable = getTimeSeriesTable(Collections.singletonList(outflowPlot), "Outflow");
+        Table observedFlowTable = getTimeSeriesTable(Collections.singletonList(observedFlowPlot), "Observed Flow");
+        List<Table> plotList = Arrays.asList(outflowTable, observedFlowTable);
+
+        if(outflowTable == null || observedFlowTable == null) { return null; }
+
+        // Setting Plot's configurations
+        String xAxisTitle = "Time";
+        String yAxisTitle = outflowPlot.getUnitType();
+        String divName = StringBeautifier.getPlotDivName(elementName, plotName);
+
+        // Create Plot
+        Figure timeSeriesFigure = FigureCreator.createOutflowObservedFlowPlot(plotName, plotList, xAxisTitle, yAxisTitle);
+        Page page = Page.pageBuilder(timeSeriesFigure, divName).build();
+
+        // Extract Plot's Javascript
+        String plotHtml = page.asJavascript();
+        DomContent domContent = HtmlModifier.extractPlotlyJavascript(plotHtml);
+
+        return domContent;
+    } // getOutflowObservedFlowPlot()
+
+    private Map<String, Map<String, TimeSeriesResult>> getCombinedPlotName(Map<String, TimeSeriesResult> tsrMap) {
+        Map<String, Map<String, TimeSeriesResult>> combinedPlotMap = new HashMap<>();
+
+        if(tsrMap.containsKey("Precipitation") && tsrMap.containsKey("Outflow") && tsrMap.containsKey("Excess Precipitation")) {
+            Map<String, TimeSeriesResult> combinedMap = new HashMap<>();
+            combinedMap.put("Precipitation", tsrMap.get("Precipitation"));
+            combinedMap.put("Outflow", tsrMap.get("Outflow"));
+            combinedMap.put("Excess Precipitation", tsrMap.get("Excess Precipitation"));
+            String plotName = "Precipitation and Outflow";
+            combinedPlotMap.put(plotName, combinedMap);
+        } // If: CombinedPlot is a 'Precipitation and Outflow'
+
+        if(tsrMap.containsKey("Outflow") && tsrMap.containsKey("Observed Flow")) {
+            Map<String, TimeSeriesResult> combinedMap = new HashMap<>();
+            combinedMap.put("Observed Flow", tsrMap.get("Observed Flow"));
+            combinedMap.put("Outflow", tsrMap.get("Outflow"));
+            String plotName = "Outflow and Observed Flow";
+            combinedPlotMap.put(plotName, combinedMap);
+        } // If: CombinedPlot is a 'Outflow and Observed Flow plot'
+
+        return combinedPlotMap;
+    } // getCombinedPlotName()
+
     /* Element Results Tables */
-    Map<String, DomContent> printListResultsWriter() {
+    private Map<String, DomContent> printListResultsWriter() {
         if(reportSummaryChoice == null || !reportSummaryChoice.contains(SummaryChoice.ELEMENT_RESULTS_SUMMARY)) {
             return null;
         } // If: Report Summary Choice contains PARAMETER_SUMMARY
 
         Map<String, DomContent> elementResultsMap = new HashMap<>();
-        String divAttribute = ".global-parameter";
 
         for(Element element: this.elementList) {
             String elementType = element.getElementInput().getElementType().toUpperCase();
@@ -123,6 +401,7 @@ public class ElementResultsWriter {
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
     } // printSubbasinResultsTable()
+
     private DomContent printReachResultsTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
@@ -147,6 +426,7 @@ public class ElementResultsWriter {
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
     } // printReachResultsTable()
+
     private DomContent printJunctionResultsTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
@@ -162,6 +442,7 @@ public class ElementResultsWriter {
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
     } // printJunctionResultsTable()
+
     private DomContent printSinkResultsTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
@@ -198,6 +479,7 @@ public class ElementResultsWriter {
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
     } // printSinkResultsTable()
+
     private DomContent printSourceResultsTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
@@ -213,6 +495,7 @@ public class ElementResultsWriter {
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
     } // printSourceResultsTable()
+
     private DomContent printReservoirResultsTable(Element element) {
         List<DomContent> globalParameterTableDom = new ArrayList<>();
         String tdAttribute = ".global-parameter";
@@ -277,6 +560,7 @@ public class ElementResultsWriter {
 
         return table(attrs(tdAttribute), globalParameterTableDom.toArray(new DomContent[]{}));
     } // printReservoirResultsTable()
+
     private List<DomContent> printDefaultResultsData(Element element) {
         List<DomContent> defaultDomList = new ArrayList<>();
         DomContent rowDom;
@@ -295,6 +579,7 @@ public class ElementResultsWriter {
 
         return defaultDomList;
     } // printDefaultResultsData()
+
     private DomContent printResultsTableRow(Element element, String mapKey, String dataName) {
         String tdAttribute = ".global-parameter";
         String mapData;
@@ -324,4 +609,12 @@ public class ElementResultsWriter {
         DomContent rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
         return rowDom;
     } // printResultsTableRow()
-}
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl){
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl){
+        support.removePropertyChangeListener(pcl);
+    }
+} // ElementResultsWriter Class

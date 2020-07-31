@@ -35,24 +35,14 @@ public class ElementInput {
             return this;
         } // 'processes' constructor
 
-        public ElementInput build(){
-            return new ElementInput(this);
-        }
+        public ElementInput build(){ return new ElementInput(this); }
     } // Builder class: as ElementInput's Constructor
 
-    public static Builder builder(){
-        return new Builder();
-    }
+    public static Builder builder(){ return new Builder(); }
 
     /* Methods */
-    public String getName() {
-        return this.name;
-    }
-    public String getElementType() {
-        return this.elementType;
-    }
-    public List<Process> getProcesses(){
-        return this.processes;
-    }
+    public String getName() { return this.name; }
+    public String getElementType() { return this.elementType; }
+    public List<Process> getProcesses(){ return this.processes; }
 
 } // ElementInput Class

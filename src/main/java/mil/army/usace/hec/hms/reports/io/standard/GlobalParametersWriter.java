@@ -24,6 +24,7 @@ public class GlobalParametersWriter {
         this.reportSummaryChoice = builder.reportSummaryChoice;
         this.globalParameterChoices = builder.globalParameterChoices;
     } // GlobalParametersWriter Constructor
+
     public static class Builder{
         List<Element> elementList;
         List<SummaryChoice> reportSummaryChoice;
@@ -48,6 +49,7 @@ public class GlobalParametersWriter {
             return new GlobalParametersWriter(this);
         }
     } // Builder class: as GlobalParametersWriter's Constructor
+
     public static Builder builder(){
         return new Builder();
     }
@@ -168,6 +170,7 @@ public class GlobalParametersWriter {
 
         return separatedElementMap;
     } // separateElementsByType()
+
     private Map<String, List<String>> availableProcessAndParameters(List<Element> elementList) {
         Map<String, List<String>> availableMap = new LinkedHashMap<>();
 
@@ -206,6 +209,7 @@ public class GlobalParametersWriter {
 
         return availableMap;
     } // availableProcessAndParameters()
+
     private List<String> processesWithMethod() {
         List<String> processWithMethodList = new ArrayList<>();
         processWithMethodList.add("TRANSFORM");
@@ -215,11 +219,13 @@ public class GlobalParametersWriter {
         processWithMethodList.add("LOSSRATE");
         return processWithMethodList;
     } // processesWithMethod()
+
     private boolean isLocationProcess(Process process) {
         String finalProcessName = process.getName().toUpperCase();
         List<String> locationProcesses = Arrays.asList("LATITUDE", "LONGITUDE");
         return locationProcesses.stream().anyMatch(finalProcessName::contains);
     } // isLocationProcess()
+
     private DomContent getProcessTables(DomContent sectionTitle, List<Element> elementList, List<String> processChoices, String domAttrs) {
         List<DomContent> tableDomList = new ArrayList<>();
         Map<String, List<DomContent>> processTablesMap = new LinkedHashMap<>(); // 'Table Name' x 'List of Rows'
@@ -308,6 +314,7 @@ public class GlobalParametersWriter {
 
         return div(attrs(domAttrs), tableDomList.toArray(new DomContent[]{}));
     } // getProcessTables()
+
     private DomContent printBaseflowTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
         List<DomContent> domList = new ArrayList<>();
 
@@ -319,6 +326,7 @@ public class GlobalParametersWriter {
 
         return tr(attrs(trAttribute), domList.toArray(new DomContent[]{})); // Table Row type
     } // printTableDataRow()
+
     private List<DomContent> getLocationDataRows(Element element, List<Process> processList, String domAttrs) {
         List<DomContent> locationDataRows = new ArrayList<>();
 
@@ -346,6 +354,7 @@ public class GlobalParametersWriter {
 
         return locationDataRows;
     } // getLocationDataRows()
+
     private List<DomContent> getBaseflowDataRows(Element element, Process process, List<String> availableParameters, String domAttrs) {
         List<DomContent> baseflowDataRows = new ArrayList<>();
         List<Parameter> baseflowLayerList = process.getParameters().get(0).getSubParameters();

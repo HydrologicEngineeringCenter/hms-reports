@@ -44,11 +44,13 @@ public class StringBeautifier {
 
         return result.trim();
     } // beautifyString
+
     private static String beautifyCamelCase (String name) {
         // Capitalizing the first letter. Turn into PascalCase
         name = name.substring(0,1).toUpperCase() + name.substring(1);
         return beautifyPascalCase(name);
     } // beautifyCamelCase()
+
     private static String beautifyPascalCase (String name) {
         StringBuilder result = new StringBuilder();
         char[] charArray = name.toCharArray();
@@ -77,6 +79,7 @@ public class StringBeautifier {
 
         return result.toString();
     } // beautifyPascalCase()
+
     private static String beautifyUpperUnderscore(String name) {
         StringBuilder result = new StringBuilder();
         name = name.toLowerCase();
@@ -89,6 +92,7 @@ public class StringBeautifier {
 
         return result.toString();
     } // beautifyUpperUnderscore()
+
     private static String beautifyNumber(String name) {
         Double number = Double.parseDouble(name);
         String roundedNumber;
@@ -100,6 +104,7 @@ public class StringBeautifier {
 
         return roundedNumber;
     } // beautifyNumber()
+
     private static String beautifyMathStrings(String name) {
         String result = name.trim();
         result = result.replaceAll("\\+", " + ");
@@ -109,15 +114,18 @@ public class StringBeautifier {
 
         return result;
     } // beautifyMathStrings()
+
     private static boolean isNumeric(String name) {
         boolean isNumeric = true;
         try { Double num = Double.parseDouble(name); }
         catch (NumberFormatException e) { isNumeric = false; }
         return isNumeric;
     } // isDouble()
+
     private static boolean hasMathSigns(String name) {
         return name.contains("+") || name.contains("-") || name.contains("*") || name.contains("=");
     } // hasMathSigns()
+
     public static String getPlotDivName(String elementName, String plotName) {
 
         String plotDivName = elementName.toLowerCase() + "_";
@@ -127,6 +135,7 @@ public class StringBeautifier {
 
         return result;
     } // getPlotDivName
+
     public static String readFileToString(File file) {
         StringBuilder contentBuilder = new StringBuilder();
         try (Stream<String> stream = Files.lines(file.toPath(), StandardCharsets.UTF_8))
@@ -134,6 +143,7 @@ public class StringBeautifier {
         catch (IOException e) { e.printStackTrace(); }
         return contentBuilder.toString();
     } // readFileToString()
+
     public static void writeStringToFile(File outputFile, String content) {
         try { Files.write(outputFile.toPath(), content.getBytes()); } catch (IOException e) { e.printStackTrace(); }
     } // writeStringToFile()

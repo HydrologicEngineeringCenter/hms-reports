@@ -24,6 +24,7 @@ public class Utilities {
     public static List<String> getAvailablePlot(String pathToResult) {
         return new ArrayList<>();
     }
+
     public static List<String> getAvailablePlots(String pathToResult, SimulationType simulationType) {
         BasinResultsParser resultsParser = BasinResultsParser.builder()
                 .pathToBasinResultsFile(pathToResult)
@@ -31,6 +32,7 @@ public class Utilities {
                 .build();
         return resultsParser.getAvailablePlots();
     }
+
     public static String getFilePath(String directoryToSearch, String fileName) {
         final String[] x = new String[1];
 
@@ -49,6 +51,7 @@ public class Utilities {
 
         return x[0];
     } // getFilePath()
+
     public static Map<String, List<String>> getParameterMap(String pathToJsonInput, ParameterSummary parameterChoice) {
         Map<String, List<String>> parameterMap = new HashMap<>();
         BasinInputParser basinInputParser = BasinInputParser.builder().pathToBasinInputFile(pathToJsonInput).build();
@@ -90,6 +93,7 @@ public class Utilities {
 
         return parameterMap;
     } // getParameterMap()
+
     public static JSONObject getJsonObject(String pathToJson) {
         /* Read in Json File */
         File file = new File(pathToJson);
@@ -97,6 +101,7 @@ public class Utilities {
         /* Convert JSON string to JSONObject */
         return new JSONObject(content);
     } // getJsonObject()
+
     public static List<String> getAvailableBasinType(String pathToJsonInput) {
         List<String> availableBasinType = new ArrayList<>();
         BasinInputParser basinInputParser = BasinInputParser.builder().pathToBasinInputFile(pathToJsonInput).build();
@@ -111,9 +116,11 @@ public class Utilities {
 
         return availableBasinType;
     } // getAvailableBasinType()
+
     public static int getNumberOfElements(String pathToBasinInput) {
         BasinInputParser basinInputParser = BasinInputParser.builder().pathToBasinInputFile(pathToBasinInput).build();
         List<ElementInput> elementList = basinInputParser.getElementInput();
         return elementList.size();
     } // getNumberOfElements()
+
 } // Utilities class

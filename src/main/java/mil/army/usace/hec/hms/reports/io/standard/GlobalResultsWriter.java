@@ -22,6 +22,7 @@ public class GlobalResultsWriter {
         this.elementList = builder.elementList;
         this.reportSummaryChoice = builder.reportSummaryChoice;
     } // GlobalResultsWriter Constructor
+
     public static class Builder{
         List<Element> elementList;
         List<SummaryChoice> reportSummaryChoice;
@@ -40,6 +41,7 @@ public class GlobalResultsWriter {
             return new GlobalResultsWriter(this);
         }
     } // Builder class: as GlobalResultsWriter's Constructor
+
     public static Builder builder(){
         return new Builder();
     }
