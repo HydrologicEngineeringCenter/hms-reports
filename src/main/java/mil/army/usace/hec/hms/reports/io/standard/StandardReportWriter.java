@@ -85,25 +85,28 @@ public class StandardReportWriter extends ReportWriter {
         String projectName = Utilities.getFilePath(projectDirectory.toAbsolutePath().toString(), ".hms");
         projectName = projectName.substring(projectName.lastIndexOf(File.separator) + 1, projectName.indexOf(".hms"));
         DomContent projectTitle = h2(join(b("Project: "), StringBeautifier.beautifyString(projectName.trim())));
-        reportTitleDom.add(projectTitle);
 
         /* Simulation Name */
         String simulation = getSimulationTitle();
         Map<String, String> simulationData = basinParser.getSimulationData();
         DomContent simulationTitle = h2(join(b(simulation), simulationData.get("name").trim()));
-        reportTitleDom.add(simulationTitle);
 
         /* HMS Version Computed With */
         String hmsVersionNumber = basinParser.getHmsVersion();
         DomContent hmsVersion = h2(join(b("HMS Version: "), hmsVersionNumber));
-        reportTitleDom.add(hmsVersion);
 
         /* Start, End, and Execution Times */
-        DomContent startTime = h2(join(b("Start Time: "), simulationData.get("start").trim()));
-        DomContent endTime   = h2(join(b("End Time: "), simulationData.get("end").trim()));
+        DomContent startTime = h2(join(b("Simulation Start Time: "), simulationData.get("start").trim()));
+        DomContent endTime   = h2(join(b("Simulation End Time: "), simulationData.get("end").trim()));
         DomContent executionTime = h2(join(b("Execution Time: "), simulationData.get("execution")));
+
+        /* Adding in Order */
+        reportTitleDom.add(projectTitle);
+        reportTitleDom.add(simulationTitle);
         reportTitleDom.add(startTime);
         reportTitleDom.add(endTime);
+
+        reportTitleDom.add(hmsVersion);
         reportTitleDom.add(executionTime);
 
         return div(attrs(".report-title"), reportTitleDom.toArray(new DomContent[]{}));
