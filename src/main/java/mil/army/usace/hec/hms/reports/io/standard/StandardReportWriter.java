@@ -52,13 +52,6 @@ public class StandardReportWriter extends ReportWriter {
                 .globalParameterChoices(this.globalParameterChoices)
                 .build();
 
-        ElementParametersWriter elementParametersWriter = ElementParametersWriter.builder()
-                .elementList(elementList)
-                .chosenPlots(this.chosenPlots)
-                .reportSummaryChoice(this.reportSummaryChoice)
-                .elementParameterizationChoice(this.elementParameterizationChoice)
-                .build();
-
         /* HTML Layout */
         String htmlOutput = html(
                 head(   title("Standard Report"),
@@ -67,8 +60,9 @@ public class StandardReportWriter extends ReportWriter {
                 body(   printReportTitle(parser),
                         globalParametersWriter.printListGlobalParameter(),
                         globalResultsWriter.printGlobalSummary(),
-                        elementParametersWriter.printElementList())
+                        printElementList(elementList))
         ).renderFormatted();
+
         /* Writing to HTML output file */
         HtmlModifier.writeStandardReportToFile(this.pathToDestination.toString(), htmlOutput);
 
@@ -77,6 +71,36 @@ public class StandardReportWriter extends ReportWriter {
 
         return elementList;
     } // write()
+
+    private DomContent printElementList(List<Element> elementList) {
+        ElementParametersWriter elementParametersWriter = ElementParametersWriter.builder()
+                .elementList(elementList)
+                .elementParameterizationChoice(this.elementParameterizationChoice)
+                .build();
+
+        ElementResultsWriter elementResultsWriter = ElementResultsWriter.builder()
+                .elementList(elementList)
+                .reportSummaryChoice(reportSummaryChoice)
+                .chosenPlots(chosenPlots)
+                .build();
+
+        List<DomContent> elementListDom = new ArrayList<>();
+        Map<String, DomContent> elementInputMap = elementParametersWriter.elementInputMap();
+        Map<String, DomContent> elementResultsMap = elementResultsWriter.elementResultsMap();
+
+        for(String elementName : elementInputMap.keySet()) {
+            List<DomContent> elementDom = new ArrayList<>();
+            DomContent elementInputDom = elementInputMap.get(elementName);
+            DomContent elementResultsDom = elementResultsMap.get(elementName);
+
+            if(elementInputDom != null) { elementDom.add(elementInputDom); }
+            if(elementResultsDom != null) { elementDom.add(elementResultsDom); }
+
+            elementListDom.add(div(attrs(".element"), elementDom.toArray(new DomContent[]{})));
+        } // Loop: to get each Element's DomContent
+
+        return main(elementListDom.toArray(new DomContent[]{}));
+    } // printElementList()
 
     private DomContent printReportTitle(BasinParser basinParser) {
         List<DomContent> reportTitleDom = new ArrayList<>();

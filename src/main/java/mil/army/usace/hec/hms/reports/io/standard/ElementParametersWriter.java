@@ -1,54 +1,36 @@
 package mil.army.usace.hec.hms.reports.io.standard;
 
 import j2html.tags.DomContent;
+import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.ElementInput;
+import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
-import mil.army.usace.hec.hms.reports.*;
-import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
 import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 import mil.army.usace.hec.hms.reports.util.ValidCheck;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static j2html.TagCreator.*;
 
 public class ElementParametersWriter {
     private List<Element> elementList;
-    private List<String> chosenPlots;
-    private List<SummaryChoice> reportSummaryChoice;
     private Map<String, List<String>> elementParameterizationChoice;
 
     /* Constructors */
     private ElementParametersWriter(Builder builder){
         this.elementList = builder.elementList;
-        this.chosenPlots = builder.chosenPlots;
-        this.reportSummaryChoice = builder.reportSummaryChoice;
         this.elementParameterizationChoice = builder.elementParameterizationChoice;
     } // ElementParametersWriter Constructor
 
     public static class Builder{
         List<Element> elementList;
-        List<String> chosenPlots;
-        List<SummaryChoice> reportSummaryChoice;
         Map<String, List<String>> elementParameterizationChoice;
 
         public Builder elementList(List<Element> elementList){
             this.elementList = elementList;
             return this;
         } // 'elementList' constructor
-
-        Builder chosenPlots(List<String> chosenPlots) {
-            this.chosenPlots = chosenPlots;
-            return this;
-        } // 'chosenPlots' constructor
-
-        Builder reportSummaryChoice(List<SummaryChoice> reportSummaryChoice) {
-            this.reportSummaryChoice = reportSummaryChoice;
-            return this;
-        } // 'reportSummaryChoice' constructor
 
         Builder elementParameterizationChoice(Map<String, List<String>> elementParameterizationChoice) {
             this.elementParameterizationChoice = elementParameterizationChoice;
@@ -65,36 +47,21 @@ public class ElementParametersWriter {
     }
 
     /* Main Function */
-    DomContent printElementList() {
-        List<DomContent> elementDomList = new ArrayList<>();
-        ElementResultsWriter elementResultsWriter = ElementResultsWriter.builder()
-                .elementList(elementList)
-                .reportSummaryChoice(reportSummaryChoice)
-                .chosenPlots(chosenPlots)
-                .build();
-        Map<String, DomContent> elementResultsMap = elementResultsWriter.printListResultsWriter();
+    Map<String, DomContent> elementInputMap() {
+        Map<String, DomContent> elementInputMap = new LinkedHashMap<>();
 
-        /* For each element, print: ElementInput and ElementResults */
-        for(Element element : this.elementList) {
+        for(Element element : elementList) {
             if(!this.elementParameterizationChoice.containsKey(StringBeautifier.beautifyString(element.getElementInput().getElementType()))) {
                 continue;
             } // Skip: element types that were not chosen
 
-            List<DomContent> elementDom = new ArrayList<>(); // Holds elementInput and elementResult
-            // Getting ElementInput DomContent
             ElementInput elementInput = element.getElementInput();
             DomContent elementInputDom = printElementInput(elementInput);
-            if(elementInputDom != null) { elementDom.add(elementInputDom); }
-            // Getting ElementResults DomContent
-            ElementResults elementResults = element.getElementResults();
-            DomContent elementResultsDom = elementResultsWriter.printElementResults(elementResults, elementResultsMap.get(element.getName()));
-            if(elementResultsDom != null) { elementDom.add(elementResultsDom); }
-            // Creating a 'div', 'class: element'
-            elementDomList.add(div(attrs(".element"), elementDom.toArray(new DomContent[]{})));
-        } // Loop: through elementList to print each Element
+            elementInputMap.put(elementInput.getName(), elementInputDom);
+        } // Loop: through each element
 
-        return main(elementDomList.toArray(new DomContent[]{}));
-    } // printElementList()
+        return elementInputMap;
+    } // elementInputMap()
 
     /* Element Input */
     private DomContent printElementInput(ElementInput elementInput) {
@@ -208,4 +175,5 @@ public class ElementParametersWriter {
 
         return table(attrs(".single"), parameterDom.toArray(new DomContent[]{})); // Table of Parameters
     } // printParameterTable()
+
 } // ElementParametersWriter Class

@@ -64,13 +64,29 @@ public class ElementResultsWriter {
         return new Builder();
     }
 
+    /* Main Function */
+    Map<String, DomContent> elementResultsMap() {
+        Map<String, DomContent> elementResultsMap = new LinkedHashMap<>();
+        Map<String, DomContent> summaryResultsMap = printListResultsWriter();
+        if(summaryResultsMap == null) { summaryResultsMap = new HashMap<>(); }
+
+        for(Element element : elementList) {
+            String elementName = element.getName();
+            ElementResults elementResults = element.getElementResults();
+            DomContent elementResultsDom = printElementResults(elementResults, summaryResultsMap.get(elementName));
+            elementResultsMap.put(elementName, elementResultsDom);
+        } // Loop: through each element
+
+        return elementResultsMap;
+    } // elementResultsMap()
+
     /* Element Results */
-    DomContent printElementResults(ElementResults elementResults, DomContent summaryResults) {
+    private DomContent printElementResults(ElementResults elementResults, DomContent summaryResults) {
         List<DomContent> elementResultsDomList = new ArrayList<>();
         if(elementResults == null) { return null; }
 
         /* Get Summary Results Dom */
-        elementResultsDomList.add(summaryResults);
+        if(summaryResults != null) { elementResultsDomList.add(summaryResults); }
         /* Get TimeSeries Results Dom */
         String elementName = elementResults.getName();
         DomContent timeSeriesResults = printTimeSeriesResult(elementResults.getTimeSeriesResults(), elementName);
@@ -298,13 +314,12 @@ public class ElementResultsWriter {
     } // getCombinedPlotName()
 
     /* Element Results Tables */
-    Map<String, DomContent> printListResultsWriter() {
+    private Map<String, DomContent> printListResultsWriter() {
         if(reportSummaryChoice == null || !reportSummaryChoice.contains(SummaryChoice.ELEMENT_RESULTS_SUMMARY)) {
             return null;
         } // If: Report Summary Choice contains PARAMETER_SUMMARY
 
         Map<String, DomContent> elementResultsMap = new HashMap<>();
-        String divAttribute = ".global-parameter";
 
         for(Element element: this.elementList) {
             String elementType = element.getElementInput().getElementType().toUpperCase();
