@@ -110,6 +110,8 @@ public class StandardReportWriter extends ReportWriter {
 
     private DomContent printReportTitle(BasinParser basinParser) {
         List<DomContent> reportTitleDom = new ArrayList<>();
+        List<DomContent> firstSectionDom = new ArrayList<>();
+        List<DomContent> secondSectionDom = new ArrayList<>();
 
         /* Project Name */
         String projectName = Utilities.getFilePath(projectDirectory.toAbsolutePath().toString(), ".hms");
@@ -126,20 +128,31 @@ public class StandardReportWriter extends ReportWriter {
         DomContent hmsVersion = h2(join(b("HMS Version: "), hmsVersionNumber));
 
         /* Start, End, and Execution Times */
-        DomContent startTime = h2(join(b("Simulation Start Time: "), simulationData.get("start").trim()));
-        DomContent endTime   = h2(join(b("Simulation End Time: "), simulationData.get("end").trim()));
-        DomContent executionTime = h2(join(b("Execution Time: "), simulationData.get("execution")));
+        DomContent startTime = h2(join(b("Simulation Start: "), simulationData.get("start").trim()));
+        DomContent endTime   = h2(join(b("Simulation End: "), simulationData.get("end").trim()));
+        DomContent executionTime = h2(join(b("Executed: "), simulationData.get("execution")));
 
-        /* Adding in Order */
-        reportTitleDom.add(projectTitle);
-        reportTitleDom.add(simulationTitle);
-        reportTitleDom.add(startTime);
-        reportTitleDom.add(endTime);
+        /* First Section Dom */
+        firstSectionDom.add(projectTitle);
+        firstSectionDom.add(simulationTitle);
+        firstSectionDom.add(startTime);
+        firstSectionDom.add(endTime);
+        DomContent firstDom = div(attrs("#first-section.report-title "), firstSectionDom.toArray(new DomContent[]{}));
 
-        reportTitleDom.add(hmsVersion);
-        reportTitleDom.add(executionTime);
+        /* White Space Dom */
+        DomContent whiteSpaceDom = div(attrs("#title-white-space"));
 
-        return div(attrs(".report-title"), reportTitleDom.toArray(new DomContent[]{}));
+        /* Second Section Dom */
+        secondSectionDom.add(hmsVersion);
+        secondSectionDom.add(executionTime);
+        DomContent secondDom = div(attrs("#second-section.report-title"), secondSectionDom.toArray(new DomContent[]{}));
+
+        /* Adding All Together */
+        reportTitleDom.add(firstDom);
+        reportTitleDom.add(whiteSpaceDom);
+        reportTitleDom.add(secondDom);
+
+        return div(attrs(".report-header"), reportTitleDom.toArray(new DomContent[]{}));
     } // printReportTitle()
 
     private String getSimulationTitle() {
@@ -149,16 +162,16 @@ public class StandardReportWriter extends ReportWriter {
                 simulationName = "Simulation Run: ";
                 break;
             case FORECAST:
-                simulationName = "Forecast Trial: ";
+                simulationName = "Forecast Alternative: ";
                 break;
             case OPTIMIZATION:
                 simulationName = "Optimization Trial: ";
                 break;
             case DEPTH_AREA:
-                simulationName = "Depth Area Trial: ";
+                simulationName = "Depth Area Analysis: ";
                 break;
             case MONTE_CARLO:
-                simulationName = "Monte Carlo Trial: ";
+                simulationName = "Uncertainty Analysis: ";
                 break;
             default:
                 simulationName = "<Unknown Simulation Type>: ";

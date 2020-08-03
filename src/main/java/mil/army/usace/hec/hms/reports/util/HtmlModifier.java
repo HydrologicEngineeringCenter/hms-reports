@@ -90,6 +90,10 @@ public class HtmlModifier {
                 "\t-webkit-print-color-adjust: exact;\n" +
                 "}\n" +
                 "\n" +
+                "#title-white-space{\n" +
+                "\tpadding: 3px;\n" +
+                "}\n" +
+                "\n" +
                 "/* CSS for Report Title's H2 */\n" +
                 "div.report-title h2 {\n" +
                 "\tfont-weight: normal;\n" +
