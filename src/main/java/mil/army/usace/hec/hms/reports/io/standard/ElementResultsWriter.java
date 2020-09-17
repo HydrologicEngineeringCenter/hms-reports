@@ -1,5 +1,6 @@
 package mil.army.usace.hec.hms.reports.io.standard;
 
+import hec.heclib.util.Heclib;
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementResults;
@@ -209,6 +210,10 @@ public class ElementResultsWriter {
         /* Get Value Array Columns */
         for(TimeSeriesResult timeSeriesResult : timeSeriesResultList) {
             double[] valueArray = timeSeriesResult.getValues();
+            for(int i = 0; i < valueArray.length; i++) {
+                if(valueArray[i] == Heclib.UNDEFINED_DOUBLE)
+                    valueArray[i] = Double.NaN;
+            } // Converting HEC Missing Data to NaN
             if(valueArray.length == 0) { return null; } // TimeSeries without values
 
             String columnName = timeSeriesResult.getUnitType();
