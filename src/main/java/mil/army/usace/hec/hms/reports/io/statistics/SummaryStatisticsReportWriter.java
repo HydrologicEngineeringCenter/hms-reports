@@ -4,6 +4,7 @@ import hec.heclib.util.Heclib;
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.DisplayRange;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.enums.StatisticsType;
 import mil.army.usace.hec.hms.reports.io.BasinParser;
 import mil.army.usace.hec.hms.reports.io.ReportWriter;
@@ -13,11 +14,14 @@ import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.beans.PropertyChangeSupport;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static j2html.TagCreator.*;
 
 public class SummaryStatisticsReportWriter extends ReportWriter {
+    private static final Logger logger = Logger.getLogger(SummaryStatisticsReportWriter.class.getName());
     private String rmseStdev = "Observed Flow RMSE Stdev";
     private String nashSutcliffe = "Observed Flow Nash Sutcliffe";
     private String percentBias = "Observed Flow Percent Bias";
@@ -67,7 +71,12 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
     } // write()
 
     private boolean isSummaryStatistics(Element element) {
-        Map<String, String> statisticResults = element.getElementResults().getStatisticResultsMap();
+        ElementResults elementResults = element.getElementResults();
+        if(elementResults == null) {
+            logger.log(Level.WARNING, "Element:" + element.getName() + " - has no element results");
+            return false;
+        } // If: No Element Results, Then: Log a Warning
+        Map<String, String> statisticResults = elementResults.getStatisticResultsMap();
         return statisticResults.containsKey(rmseStdev) && statisticResults.containsKey(nashSutcliffe) && statisticResults.containsKey(percentBias);
     } // getStatisticsElement()
 
