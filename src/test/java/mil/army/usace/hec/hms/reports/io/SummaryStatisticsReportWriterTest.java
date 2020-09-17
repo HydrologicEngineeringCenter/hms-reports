@@ -106,4 +106,23 @@ class SummaryStatisticsReportWriterTest {
         List<Element> elementList = reportWriter.write();
     } // writeBH()
 
+    @Test
+    void writeBH2() {
+        String pathToInput = "C:\\Users\\q0hecntv\\Desktop\\hms\\Bighorn2018.basin";
+        String pathToResult = "C:\\Users\\q0hecntv\\Desktop\\hms\\results\\RUN_2017_test4_5.results";
+        String pathToDestination = "C:\\HyperNick\\HmsReportOutput\\Statistics-BH2.html";
+        String projectDirectory = "C:\\Users\\q0hecntv\\Desktop\\hms";
+
+        ReportWriter reportWriter = ReportWriter.builder()
+                .pathToInput(pathToInput)
+                .pathToResult(pathToResult)
+                .pathToDestination(pathToDestination)
+                .projectDirectory(projectDirectory)
+                .reportWriterType(ReportWriterType.SUMMARY_STATISTICS_REPORT)
+                .simulationType(SimulationType.RUN)
+                .build();
+
+        List<Element> elementList = reportWriter.write();
+    }
+
 } // SummaryStatisticsReportWriterTest

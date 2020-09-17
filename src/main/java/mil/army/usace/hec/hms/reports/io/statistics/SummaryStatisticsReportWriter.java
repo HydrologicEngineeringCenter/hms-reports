@@ -172,10 +172,10 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
         if(this.displayRangeMap == null || this.displayRangeMap.isEmpty()) { statisticsDisplayRangeMap = getDefaultDisplayMap(); }
         else { statisticsDisplayRangeMap = this.displayRangeMap; }
 
-        String nashColor = getMatchedBinColor(Double.parseDouble(statisticsMap.get(nashSutcliffe)), statisticsDisplayRangeMap.get(StatisticsType.NASH_SUTCLIFFE_EFFICIENCY));
-        String rmseColor = getMatchedBinColor(Double.parseDouble(statisticsMap.get(rmseStdev)), statisticsDisplayRangeMap.get(StatisticsType.RMSE_STDEV));
-        String biasColor = getMatchedBinColor(Double.parseDouble(statisticsMap.get(percentBias)), statisticsDisplayRangeMap.get(StatisticsType.PERCENT_BIAS));
-        String r2Color   = getMatchedBinColor(Double.parseDouble(statisticsMap.get(r2Coefficient)), statisticsDisplayRangeMap.get(StatisticsType.COEFFICIENT_OF_DETERMINATION));
+        String nashColor = getMatchedBinColor(statisticsMap.get(nashSutcliffe), statisticsDisplayRangeMap.get(StatisticsType.NASH_SUTCLIFFE_EFFICIENCY));
+        String rmseColor = getMatchedBinColor(statisticsMap.get(rmseStdev), statisticsDisplayRangeMap.get(StatisticsType.RMSE_STDEV));
+        String biasColor = getMatchedBinColor(statisticsMap.get(percentBias), statisticsDisplayRangeMap.get(StatisticsType.PERCENT_BIAS));
+        String r2Color   = getMatchedBinColor(statisticsMap.get(r2Coefficient), statisticsDisplayRangeMap.get(StatisticsType.COEFFICIENT_OF_DETERMINATION));
 
         colorMap.put(nashSutcliffe, nashColor);
         colorMap.put(rmseStdev, rmseColor);
@@ -233,8 +233,11 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
         return defaultDisplayRanges;
     } // getDefaultDisplayRanges()
 
-    private static String getMatchedBinColor(double value, List<DisplayRange> displayRanges) {
+    private static String getMatchedBinColor(String valueString, List<DisplayRange> displayRanges) {
         /* Find the first displayRange that the value matched with. If none matched, return null. */
+        double value;
+        try { value = Double.parseDouble(valueString); } // If: Not a double
+        catch(NumberFormatException exception) { return "#000000"; } // Then: return color black
         Optional<DisplayRange> matchedDisplayRange = displayRanges.stream().filter(e->e.inRange(value)).findFirst();
         return matchedDisplayRange.map(DisplayRange::getColorCode).orElse(null);
     } // getMatchedBinColor()
