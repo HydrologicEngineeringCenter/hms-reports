@@ -78,7 +78,6 @@ public class FigureCreator {
                     .name(plot.name())
                     .marker(Marker.builder().color(colorWay.get(count)).build())
                     .yAxis("y2")
-                    .xAxis("x2")
                     .build();
             count++;
             traceList.add(plotTrace);
