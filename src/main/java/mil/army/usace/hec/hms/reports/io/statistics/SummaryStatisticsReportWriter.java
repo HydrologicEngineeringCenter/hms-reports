@@ -112,7 +112,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
             rowDomList.add(tr(dataDomList.toArray(new DomContent[]{})));
 
-            Double progressValue = (basinParserPercent * 100) + ((double) i + 1) / statisticsElementList.size() * otherPercent;
+            Double progressValue = basinParserPercent + ((double) i + 1) / statisticsElementList.size() * otherPercent;
             support.firePropertyChange("Progress", "", progressValue);
         } // Loop: through all Summary-Statistics Elements
 
