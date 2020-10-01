@@ -2,6 +2,8 @@ package mil.army.usace.hec.hms.reports.io.parser;
 
 import mil.army.usace.hec.hms.reports.ElementInput;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
@@ -9,9 +11,11 @@ import java.util.List;
 
 public abstract class BasinInputParser {
     Path pathToBasinInputFile;
+    PropertyChangeSupport support;
 
     BasinInputParser(Builder builder){
         this.pathToBasinInputFile = builder.pathToBasinInputFile;
+        support = new PropertyChangeSupport(this);
     }
 
     public static class Builder {
@@ -43,4 +47,12 @@ public abstract class BasinInputParser {
     public abstract List<ElementInput> getElementInput();
     public abstract ZonedDateTime getLastModifiedTime();
     public abstract String getHmsVersion();
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl){
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl){
+        support.removePropertyChangeListener(pcl);
+    }
 }

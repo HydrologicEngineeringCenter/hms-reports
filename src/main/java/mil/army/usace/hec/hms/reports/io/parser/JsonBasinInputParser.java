@@ -27,6 +27,8 @@ public class JsonBasinInputParser extends BasinInputParser {
         for(int i = 0; i < elementArray.length(); i++) {
             ElementInput elementInput = populateElement(elementArray.getJSONObject(i));
             elementInputList.add(elementInput);
+            Double progressValue = ((double) i + 1) / elementArray.length();
+            support.firePropertyChange("Progress", "", progressValue);
         } // Loop over all elements and populate them
 
         return elementInputList;

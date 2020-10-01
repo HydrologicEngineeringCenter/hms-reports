@@ -26,6 +26,8 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
     private String nashSutcliffe = "Observed Flow Nash Sutcliffe";
     private String percentBias = "Observed Flow Percent Bias";
     private String r2Coefficient = "Coefficient of Determination";
+    private Double basinParserPercent = 0.85;
+    private Double otherPercent = 0.15;
 
     public SummaryStatisticsReportWriter(Builder builder) {
         super(builder);
@@ -41,6 +43,15 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
                 .pathToProjectDirectory(this.projectDirectory.toAbsolutePath().toString())
                 .simulationType(this.simulationType)
                 .build();
+
+        parser.addPropertyChangeListener(evt -> {
+            if((evt.getSource() instanceof BasinParser) && (evt.getPropertyName().equals("Progress"))) {
+                if(evt.getNewValue() instanceof Double) {
+                    Double progressValue = (Double) evt.getNewValue() * basinParserPercent * 100;
+                    support.firePropertyChange("Progress", "", progressValue);
+                }
+            }
+        });
 
         /* Check whether the simulation results was computed after the basin file or not */
         if(parser.outdatedSimulation()) {
@@ -101,7 +112,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
             rowDomList.add(tr(dataDomList.toArray(new DomContent[]{})));
 
-            Double progressValue = (((double) i + 1) / statisticsElementList.size()) * 100;
+            Double progressValue = (basinParserPercent * 100) + ((double) i + 1) / statisticsElementList.size() * otherPercent * 100;
             support.firePropertyChange("Progress", "", progressValue);
         } // Loop: through all Summary-Statistics Elements
 

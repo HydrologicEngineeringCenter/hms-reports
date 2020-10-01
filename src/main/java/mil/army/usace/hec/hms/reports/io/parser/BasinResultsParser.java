@@ -4,6 +4,8 @@ import hec.heclib.util.HecTime;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.enums.SimulationType;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
@@ -14,11 +16,13 @@ public abstract class BasinResultsParser {
     Path pathToBasinResultsFile;
     Path pathToProjectDirectory;
     SimulationType simulationType;
+    PropertyChangeSupport support;
 
     BasinResultsParser(Builder builder){
         this.pathToBasinResultsFile = builder.pathToBasinResultsFile;
         this.pathToProjectDirectory = builder.pathToProjectDirectory;
         this.simulationType = builder.simulationType;
+        this.support = new PropertyChangeSupport(this);
     }
 
     public static class Builder {
@@ -74,6 +78,14 @@ public abstract class BasinResultsParser {
     public abstract HecTime getEndTime();
 
     public abstract ZonedDateTime getLastComputedTime();
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl){
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl){
+        support.removePropertyChangeListener(pcl);
+    }
 }
 
 

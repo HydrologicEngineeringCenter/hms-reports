@@ -54,6 +54,8 @@ public class MonteCarloResultsParser extends BasinResultsParser {
                 if(elementObject == null) throw new IllegalArgumentException(i + ": Not an JSONObject");
                 ElementResults elementResults = populateElement(elementObject);
                 elementResultsList.put(elementResults.getName(), elementResults);
+                Double progressValue = ((double) i + 1) / analysisPointArray.length();
+                support.firePropertyChange("Progress", "", progressValue);
             } // Loop: through analysisPointArray
         } // If: More than one Analysis Points
         else {

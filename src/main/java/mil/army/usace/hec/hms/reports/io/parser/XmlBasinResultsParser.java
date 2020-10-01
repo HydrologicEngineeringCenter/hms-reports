@@ -53,6 +53,8 @@ public class XmlBasinResultsParser extends BasinResultsParser {
             for(int i = 0; i < elementArray.length(); i++) {
                 ElementResults elementResults = populateElement(elementArray.getJSONObject(i));
                 elementResultsList.put(elementResults.getName(), elementResults);
+                Double progressValue = ((double) i + 1) / elementArray.length();
+                support.firePropertyChange("Progress", "", progressValue);
             } // Loop through all element's results, and populate
         } // If: has more than one element (is an ElementArray)
         else {

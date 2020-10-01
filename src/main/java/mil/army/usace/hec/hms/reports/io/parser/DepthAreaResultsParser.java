@@ -49,6 +49,8 @@ public class DepthAreaResultsParser extends BasinResultsParser {
             for(int i = 0; i < analysisPointArray.length(); i++) {
                 ElementResults elementResults = populateElement(analysisPointArray.getJSONObject(i));
                 elementResultsList.put(elementResults.getName(), elementResults);
+                Double progressValue = ((double) i + 1) / analysisPointArray.length();
+                support.firePropertyChange("Progress", "", progressValue);
             } // Loop: through all Analysis Points
         } // If: Has more than one Analysis Point(s)
         else {

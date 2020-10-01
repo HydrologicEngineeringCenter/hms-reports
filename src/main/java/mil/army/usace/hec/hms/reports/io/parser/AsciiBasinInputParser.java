@@ -29,9 +29,13 @@ public class AsciiBasinInputParser extends BasinInputParser {
         endLineList = getIndicesOfEndLines(basinFileLines);
 
         List<String> elementLineList = basinFileLines.stream().filter(line -> basinTypes.stream().anyMatch(line::startsWith)).collect(Collectors.toList());
-        for(String elementLine : elementLineList) {
+        for(int i = 0; i < elementLineList.size(); i++) {
+            String elementLine = elementLineList.get(i);
             ElementInput elementInput = populateElement(elementLine);
             elementInputList.add(elementInput);
+
+            Double progressValue = ((double) i + 1) / elementInputList.size();
+            support.firePropertyChange("Progress", "", progressValue);
         } // Loop: through each elementInput Lines
 
         return elementInputList;
