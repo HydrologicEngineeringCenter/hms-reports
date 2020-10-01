@@ -81,7 +81,7 @@ public class ElementResultsWriter {
             ElementResults elementResults = element.getElementResults();
             DomContent elementResultsDom = printElementResults(elementResults, summaryResultsMap.get(elementName));
             elementResultsMap.put(elementName, elementResultsDom);
-            Double progressValue = (((double) i + 1) / elementList.size()) * 100;
+            Double progressValue = ((double) i + 1) / elementList.size();
             support.firePropertyChange("Progress", "", progressValue);
         } // Loop: through each element
 

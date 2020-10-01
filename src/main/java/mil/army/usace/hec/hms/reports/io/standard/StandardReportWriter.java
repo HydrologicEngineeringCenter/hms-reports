@@ -17,6 +17,9 @@ import java.util.Map;
 import static j2html.TagCreator.*;
 
 public class StandardReportWriter extends ReportWriter {
+    private Double basinParserPercent = 40.0;
+    private Double otherPercent = 60.0;
+
     public StandardReportWriter(Builder builder) {
         super(builder);
         support = new PropertyChangeSupport(this);
@@ -31,6 +34,14 @@ public class StandardReportWriter extends ReportWriter {
                 .pathToProjectDirectory(this.projectDirectory.toAbsolutePath().toString())
                 .simulationType(simulationType)
                 .build();
+        parser.addPropertyChangeListener(evt -> {
+            if((evt.getSource() instanceof BasinParser) && (evt.getPropertyName().equals("Progress"))) {
+                if(evt.getNewValue() instanceof Double) {
+                    Double progressValue = (Double) evt.getNewValue() * basinParserPercent;
+                    support.firePropertyChange("Progress", "", progressValue);
+                }
+            }
+        });
 
         /* Check whether the simulation results was computed after the basin file or not */
         if(parser.outdatedSimulation()) {
@@ -86,7 +97,10 @@ public class StandardReportWriter extends ReportWriter {
 
         elementResultsWriter.addPropertyChangeListener(evt -> {
             if((evt.getSource() instanceof ElementResultsWriter) && (evt.getPropertyName().equals("Progress"))) {
-                support.firePropertyChange("Progress", "", evt.getNewValue());
+                if(evt.getNewValue() instanceof Double) {
+                    Double progressValue = (Double) evt.getNewValue() * otherPercent + basinParserPercent;
+                    support.firePropertyChange("Progress", "", progressValue);
+                }
             } // If: Progress from ElementResultsWriter
         }); // For Progress Bar
 
