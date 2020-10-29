@@ -5,8 +5,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StringBeautifier {
@@ -148,4 +149,16 @@ public class StringBeautifier {
         try { Files.write(outputFile.toPath(), content.getBytes()); } catch (IOException e) { e.printStackTrace(); }
     } // writeStringToFile()
 
+    public static String mostOccurredString(List<String> stringList) {
+        /* Removing nulls from list */
+        try { stringList.removeIf(Objects::isNull); }
+        catch(UnsupportedOperationException e) { return ""; }
+        if(stringList.isEmpty()) { return ""; }
+
+        Map<String, Long> occurrences = stringList.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        long maxValue = Collections.max(occurrences.values());
+        Map.Entry<String, Long> maxEntry = occurrences.entrySet().stream().filter(s -> s.getValue() == maxValue).findFirst().orElse(null);
+
+        return (maxEntry != null) ? maxEntry.getKey() : "";
+    } // mostOccurredString()
 } // StringBeautifier class
