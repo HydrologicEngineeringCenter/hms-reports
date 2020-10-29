@@ -2,6 +2,7 @@ package mil.army.usace.hec.hms.reports;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ElementResults {
@@ -61,8 +62,8 @@ public class ElementResults {
 
     public Map<String, String> getOtherResults() { return this.otherResults; }
 
-    public Map<String, String> getStatisticResultsMap() {
-        Map<String, String> statisticMap = this.statisticResults.stream().collect(Collectors.toMap(StatisticResult::getName, StatisticResult::getValue));
+    public Map<String, StatisticResult> getStatisticResultsMap() {
+        Map<String, StatisticResult> statisticMap = this.statisticResults.stream().collect(Collectors.toMap(StatisticResult::getName, Function.identity()));
         return statisticMap;
     }
 

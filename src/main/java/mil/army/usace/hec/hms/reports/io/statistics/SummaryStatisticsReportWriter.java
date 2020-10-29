@@ -5,6 +5,7 @@ import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.DisplayRange;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementResults;
+import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.enums.StatisticsType;
 import mil.army.usace.hec.hms.reports.io.BasinParser;
 import mil.army.usace.hec.hms.reports.io.ReportWriter;
@@ -87,7 +88,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
             logger.log(Level.WARNING, "Element:" + element.getName() + " - has no element results");
             return false;
         } // If: No Element Results, Then: Log a Warning
-        Map<String, String> statisticResults = elementResults.getStatisticResultsMap();
+        Map<String, StatisticResult> statisticResults = elementResults.getStatisticResultsMap();
         return statisticResults.containsKey(rmseStdev) && statisticResults.containsKey(nashSutcliffe) && statisticResults.containsKey(percentBias);
     } // getStatisticsElement()
 
@@ -126,11 +127,11 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
     private Map<String, String> summaryStatisticsMap(Element statisticsElement) {
         Map<String, String> summaryMap = new LinkedHashMap<>();
-        Map<String, String> statisticsMap = statisticsElement.getElementResults().getStatisticResultsMap();
+        Map<String, StatisticResult> statisticsMap = statisticsElement.getElementResults().getStatisticResultsMap();
 
-        summaryMap.put(rmseStdev, statisticsMap.get(rmseStdev));
-        summaryMap.put(nashSutcliffe, statisticsMap.get(nashSutcliffe));
-        summaryMap.put(percentBias, statisticsMap.get(percentBias));
+        summaryMap.put(rmseStdev, statisticsMap.get(rmseStdev).getValue());
+        summaryMap.put(nashSutcliffe, statisticsMap.get(nashSutcliffe).getValue());
+        summaryMap.put(percentBias, statisticsMap.get(percentBias).getValue());
         summaryMap.put(r2Coefficient, calculateCoefficientOfDetermination(statisticsElement));
 
         return summaryMap;

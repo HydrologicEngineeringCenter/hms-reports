@@ -62,9 +62,9 @@ public class GlobalResultsWriter {
             ElementResults elementResults = element.getElementResults();
             if(elementResults == null) { continue; } // Skip Elements without ElementResults
             rowData.add(element.getElementResults().getOtherResults().get("DrainageArea")); // Drainage Area
-            rowData.add(element.getElementResults().getStatisticResultsMap().get("Maximum Outflow")); // Peak Discharge
-            rowData.add(element.getElementResults().getStatisticResultsMap().get("Time of Maximum Outflow")); // Time of Peak
-            rowData.add(element.getElementResults().getStatisticResultsMap().get("Outflow Depth")); // Volume
+            rowData.add(element.getElementResults().getStatisticResultsMap().get("Maximum Outflow").getValue()); // Peak Discharge
+            rowData.add(element.getElementResults().getStatisticResultsMap().get("Time of Maximum Outflow").getValue()); // Time of Peak
+            rowData.add(element.getElementResults().getStatisticResultsMap().get("Outflow Depth").getValue()); // Volume
 
             rowData.replaceAll(t -> Objects.isNull(t) ? "N/A" : t);
             rowData.replaceAll(t -> t.equals("") ? "Not specified" : t);

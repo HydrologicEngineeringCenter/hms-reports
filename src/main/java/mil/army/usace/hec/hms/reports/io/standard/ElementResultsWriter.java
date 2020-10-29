@@ -4,6 +4,7 @@ import hec.heclib.util.Heclib;
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementResults;
+import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.FigureCreator;
@@ -587,27 +588,16 @@ public class ElementResultsWriter {
 
     private DomContent printResultsTableRow(Element element, String mapKey, String dataName) {
         String tdAttribute = ".global-parameter";
-        String mapData;
-        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
+        Map<String, StatisticResult> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
         Map<String, String> otherResultsMap = element.getElementResults().getOtherResults();
 
-        if(statisticResultsMap.containsKey(mapKey)) {
-            mapData = statisticResultsMap.get(mapKey);
-        } // If: the mapKey is in statisticResultsMap
-        else if(otherResultsMap.containsKey(mapKey)) {
-            mapData = otherResultsMap.get(mapKey);
-        } // Else if: the mapKey is in otherResultsMap
-        else {
-            mapData = "Not specified";
-        } // Else: mapKey is not found
+        String valueInStatistics = statisticResultsMap.get(mapKey).getValue();
+        String valueInOther = otherResultsMap.getOrDefault(mapKey, "Not specified");
+        String mapData = (statisticResultsMap.containsKey(mapKey)) ? valueInStatistics : valueInOther;
 
         if(mapKey.contains("Percent")) {
-            if(mapData.equals("Not specified")) {
-                mapData = StringBeautifier.beautifyString(mapData);
-            } // If: Not specified
-            else {
-                mapData = StringBeautifier.beautifyString(mapData) + "%";
-            } // Else: Specified
+            mapData = StringBeautifier.beautifyString(mapData);
+            mapData = (mapData.equals("Not specified")) ? mapData : mapData  + "%";
         } // If: is a percentage
 
         List<String> rowData = Arrays.asList(dataName, mapData);
