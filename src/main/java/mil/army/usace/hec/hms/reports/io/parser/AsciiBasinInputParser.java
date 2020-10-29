@@ -139,10 +139,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
             String matchedLine = matchedMap.keySet().stream().findFirst().map(Object::toString).orElse("");
             if(matchedLine.isEmpty()) {continue;}
             String processName = matchedLine.substring(0, matchedLine.indexOf(":")).trim();
-            String distanceUnit = processName + " (" + displayUnits.getDistanceUnit() + ")";
-            String areaUnit = processName + " (" + displayUnits.getAreaUnit() + ")";
-            processName = (ValidCheck.isDistanceMeasurement(processName)) ? distanceUnit : processName;
-            processName = (ValidCheck.isAreaMeasurement(processName)) ? areaUnit : processName;
+            processName = addUnitsToProcessName(processName);
             String processValue = matchedLine.substring(matchedLine.indexOf(":") + 1).trim();
             List<Parameter> parameters = new ArrayList<>();
             Process process = Process.builder().name(processName).value(processValue).parameters(parameters).build();
@@ -154,6 +151,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
             String matchedLine =  matchedMap.keySet().stream().findFirst().map(Object::toString).orElse("");
             if(matchedLine.isEmpty()) {continue;}
             String processName = matchedLine.substring(0, matchedLine.indexOf(":")).trim();
+            processName = addUnitsToProcessName(processName);
             String processValue = matchedLine.substring(matchedLine.indexOf(":") + 1).trim();
             if(processValue.equals("None")) { continue; } // Skip Processes that have None Method
             int processStartIndex = matchedMap.get(matchedLine);
@@ -242,6 +240,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
         for(int i = processStartIndex + 1; i < basinEndIndex; i++) {
             String paramLine = basinFileLines.get(i).trim();
             String name = paramLine.substring(0, paramLine.indexOf(":")).trim();
+            name = addUnitsToProcessName(name);
             String value = paramLine.substring(paramLine.indexOf(":") + 1).trim();
             if(value.equals("None")) { continue; } // Skip Parameters with 'None' Value
             Parameter parameter = Parameter.builder().name(name).value(value).subParameters(new ArrayList<>()).build();
@@ -353,6 +352,14 @@ public class AsciiBasinInputParser extends BasinInputParser {
         } // Loop: through specified indices
         return matchedMap;
     } // findMatchedString()
+
+    private String addUnitsToProcessName(String processName) {
+        String distanceUnit = processName + " (" + displayUnits.getDistanceUnit() + ")";
+        String areaUnit = processName + " (" + displayUnits.getAreaUnit() + ")";
+        processName = (ValidCheck.isDistanceMeasurement(processName)) ? distanceUnit : processName;
+        processName = (ValidCheck.isAreaMeasurement(processName)) ? areaUnit : processName;
+        return processName;
+    }
 
     private LocalTime firstTimeAfterIndex(List<String> fileLines, int index) {
         for(int i = index + 1; i < fileLines.size(); i++) {
