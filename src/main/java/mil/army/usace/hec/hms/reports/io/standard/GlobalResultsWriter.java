@@ -2,14 +2,12 @@ package mil.army.usace.hec.hms.reports.io.standard;
 
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
-import mil.army.usace.hec.hms.reports.ElementResults;
+import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
+import mil.army.usace.hec.hms.reports.util.StringBeautifier;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static j2html.TagCreator.*;
 
@@ -55,28 +53,46 @@ public class GlobalResultsWriter {
         List<DomContent> globalSummaryDomList = new ArrayList<>();
         String tdAttribute = ".global-summary";
 
-        for(Element element : this.elementList) {
-            List<String> rowData = new ArrayList<>();
-            rowData.add(element.getName()); // Element Name
+        List<String> drainageAreaUnits  = new ArrayList<>();
+        List<String> peakDischargeUnits = new ArrayList<>();
+        List<String> volumeUnits        = new ArrayList<>();
 
-            ElementResults elementResults = element.getElementResults();
-            if(elementResults == null) { continue; } // Skip Elements without ElementResults
-            rowData.add(element.getElementResults().getOtherResults().get("DrainageArea")); // Drainage Area
-            rowData.add(element.getElementResults().getStatisticResultsMap().get("Maximum Outflow").getValue()); // Peak Discharge
-            rowData.add(element.getElementResults().getStatisticResultsMap().get("Time of Maximum Outflow").getValue()); // Time of Peak
-            rowData.add(element.getElementResults().getStatisticResultsMap().get("Outflow Depth").getValue()); // Volume
+        for(Element element : this.elementList) {
+            if(element.getElementResults() == null) { continue; } // Skip Elements without ElementResults
+            List<String> rowData = new ArrayList<>();
+
+            Map<String, String> otherResultsMap = element.getElementResults().getOtherResults();
+            Map<String, StatisticResult> statisticResultMap = element.getElementResults().getStatisticResultsMap();
+
+            StatisticResult peakDischarge = statisticResultMap.get("Maximum Outflow");
+            StatisticResult timeOfPeak    = statisticResultMap.get("Time of Maximum Outflow");
+            StatisticResult volume        = statisticResultMap.get("Outflow Depth");
+
+            rowData.add(element.getName()); // Element Name
+            rowData.add(otherResultsMap.get("DrainageArea")); // Drainage Area
+            rowData.add(peakDischarge.getValue()); // Peak Discharge
+            rowData.add(timeOfPeak.getValue()); // Time of Peak
+            rowData.add(volume.getValue()); // Volume
+
+            drainageAreaUnits.add(otherResultsMap.get("DrainageAreaUnits"));
+            peakDischargeUnits.add(peakDischarge.getUnits());
+            volumeUnits.add(volume.getUnits());
 
             rowData.replaceAll(t -> Objects.isNull(t) ? "N/A" : t);
             rowData.replaceAll(t -> t.equals("") ? "Not specified" : t);
 
             DomContent rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
             globalSummaryDomList.add(rowDom);
-        }
+        } // Loop: through each element
 
         /* Adding Head of the Table if there is a table */
         if(!globalSummaryDomList.isEmpty()) {
-            DomContent head = HtmlModifier.printTableHeadRow(Arrays.asList("Hydrologic Element", "Drainage Area (MI2)",
-                    "Peak Discharge (CFS)", "Time of Peak", "Volume (IN)"), tdAttribute, tdAttribute);
+            String drainageAreaUnit  = StringBeautifier.mostOccurredString(drainageAreaUnits);
+            String peakDischargeUnit = StringBeautifier.mostOccurredString(peakDischargeUnits);
+            String volumeUnit        = StringBeautifier.mostOccurredString(volumeUnits);
+
+            DomContent head = HtmlModifier.printTableHeadRow(Arrays.asList("Hydrologic Element", "Drainage Area (" + drainageAreaUnit + ")",
+                    "Peak Discharge (" + peakDischargeUnit + ")", "Time of Peak", "Volume (" + volumeUnit + ")"), tdAttribute, tdAttribute);
             globalSummaryDomList.add(0, head); // Add to front
         } // If: There is a table
 
