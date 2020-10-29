@@ -2,6 +2,7 @@ package mil.army.usace.hec.hms.reports.io.standard;
 
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
+import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.HtmlModifier;
@@ -58,15 +59,15 @@ public class GlobalResultsWriter {
         List<String> volumeUnits        = new ArrayList<>();
 
         for(Element element : this.elementList) {
-            if(element.getElementResults() == null) { continue; } // Skip Elements without ElementResults
+            ElementResults elementResults = element.getElementResults();
+            if(elementResults == null) { continue; } // Skip Elements without ElementResults
             List<String> rowData = new ArrayList<>();
 
             Map<String, String> otherResultsMap = element.getElementResults().getOtherResults();
-            Map<String, StatisticResult> statisticResultMap = element.getElementResults().getStatisticResultsMap();
 
-            StatisticResult peakDischarge = statisticResultMap.get("Maximum Outflow");
-            StatisticResult timeOfPeak    = statisticResultMap.get("Time of Maximum Outflow");
-            StatisticResult volume        = statisticResultMap.get("Outflow Depth");
+            StatisticResult peakDischarge = elementResults.getStatisticSResult("Maximum Outflow");
+            StatisticResult timeOfPeak    = elementResults.getStatisticSResult("Time of Maximum Outflow");
+            StatisticResult volume        = elementResults.getStatisticSResult("Outflow Depth");
 
             rowData.add(element.getName()); // Element Name
             rowData.add(otherResultsMap.get("DrainageArea")); // Drainage Area

@@ -4,7 +4,6 @@ import hec.heclib.util.Heclib;
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementResults;
-import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.FigureCreator;
@@ -588,10 +587,10 @@ public class ElementResultsWriter {
 
     private DomContent printResultsTableRow(Element element, String mapKey, String dataName) {
         String tdAttribute = ".global-parameter";
-        Map<String, StatisticResult> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
+        Map<String, String> statisticResultsMap = element.getElementResults().getStatisticResultsMap();
         Map<String, String> otherResultsMap = element.getElementResults().getOtherResults();
 
-        String valueInStatistics = statisticResultsMap.get(mapKey).getValue();
+        String valueInStatistics = statisticResultsMap.getOrDefault(mapKey, "Not specified");
         String valueInOther = otherResultsMap.getOrDefault(mapKey, "Not specified");
         String mapData = (statisticResultsMap.containsKey(mapKey)) ? valueInStatistics : valueInOther;
 
