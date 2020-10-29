@@ -1,8 +1,8 @@
 package mil.army.usace.hec.hms.reports.io.parser;
 
-import mil.army.usace.hec.hms.reports.ElementInput;
-import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
+import mil.army.usace.hec.hms.reports.*;
+import mil.army.usace.hec.hms.reports.util.ValidCheck;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -21,12 +21,14 @@ public class AsciiBasinInputParser extends BasinInputParser {
     private List<String> basinTypes = Arrays.asList("Subbasin:","Sink:","Source:","Junction:","Reach:","Reservoir:");
     private List<String> basinFileLines = new ArrayList<>();
     private List<Integer> endLineList = new ArrayList<>();
+    private DisplayUnits displayUnits;
 
     @Override
     public List<ElementInput> getElementInput() {
         List<ElementInput> elementInputList = new ArrayList<>(); // List of ElementInputs
         basinFileLines = getBasinFileLines();
         endLineList = getIndicesOfEndLines(basinFileLines);
+        displayUnits = getDisplayUnitSystem();
 
         List<String> elementLineList = basinFileLines.stream().filter(line -> basinTypes.stream().anyMatch(line::startsWith)).collect(Collectors.toList());
         for(int i = 0; i < elementLineList.size(); i++) {
@@ -94,6 +96,18 @@ public class AsciiBasinInputParser extends BasinInputParser {
         return hmsVersion;
     } // getHmsVersion()
 
+    private DisplayUnits getDisplayUnitSystem() {
+        List<String> fileLines = getBasinFileLines();
+
+        String unitSystem = fileLines.stream().filter(line -> line.trim().startsWith("Unit System:"))
+                .findFirst().orElse("").split(":", 2)[1].trim();
+
+        if(unitSystem.equalsIgnoreCase("english")) { return new EnglishDisplayUnits(); }
+        else if(unitSystem.equalsIgnoreCase("metric")) { return new MetricDisplayUnits(); }
+
+        return null;
+    }
+
     private ElementInput populateElement(String elementLine) {
         /* ElementInput's name and type */
         String basinName = elementLine.substring(elementLine.indexOf(":") + 1).trim();
@@ -125,6 +139,10 @@ public class AsciiBasinInputParser extends BasinInputParser {
             String matchedLine = matchedMap.keySet().stream().findFirst().map(Object::toString).orElse("");
             if(matchedLine.isEmpty()) {continue;}
             String processName = matchedLine.substring(0, matchedLine.indexOf(":")).trim();
+            String distanceUnit = processName + " (" + displayUnits.getDistanceUnit() + ")";
+            String areaUnit = processName + " (" + displayUnits.getAreaUnit() + ")";
+            processName = (ValidCheck.isDistanceMeasurement(processName)) ? distanceUnit : processName;
+            processName = (ValidCheck.isAreaMeasurement(processName)) ? areaUnit : processName;
             String processValue = matchedLine.substring(matchedLine.indexOf(":") + 1).trim();
             List<Parameter> parameters = new ArrayList<>();
             Process process = Process.builder().name(processName).value(processValue).parameters(parameters).build();

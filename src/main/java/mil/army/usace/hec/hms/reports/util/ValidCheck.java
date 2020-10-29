@@ -50,5 +50,19 @@ public class ValidCheck {
         return false;
     } // validTimeSeriesPlot()
 
+    public static boolean isDistanceMeasurement(String processName) {
+        List<String> measurementNames = new ArrayList<>();
+        measurementNames.add("length");
+        measurementNames.add("width");
+
+        return measurementNames.contains(processName.toLowerCase().trim());
+    } // isDistanceMeasurement()
+
+    public static boolean isAreaMeasurement(String processName) {
+        List<String> measurementNames = new ArrayList<>();
+        measurementNames.add("area");
+
+        return measurementNames.contains(processName.toLowerCase().trim());
+    } // isAreaMeasurement()
 
 } // ValidCheck class
