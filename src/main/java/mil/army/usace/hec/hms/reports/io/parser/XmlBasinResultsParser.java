@@ -165,6 +165,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         JSONObject drainageArea = elementObject.getJSONObject("DrainageArea");
         Map<String, String> otherMap = new HashMap<>();
         otherMap.put("DrainageArea", drainageArea.opt("area").toString());
+        otherMap.put("DrainageAreaUnits", drainageArea.opt("units").toString());
         JSONObject observedFlowGage = elementObject.optJSONObject("ObservedFlowGage");
         if(observedFlowGage != null) {
             otherMap.put("ObservedFlowGage", observedFlowGage.opt("name").toString());
