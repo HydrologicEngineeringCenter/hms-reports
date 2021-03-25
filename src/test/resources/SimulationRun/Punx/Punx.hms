@@ -1,0 +1,27 @@
+Project: Punx
+     Description: 
+     Version: 4.9
+     Filepath Separator: \
+     DSS File Name: Punx.dss
+     Time Zone ID: America/Los_Angeles
+End:
+
+Precipitation: Sep-2018
+     Filename: Sep_2018.met
+     Description: 
+     Last Modified Date: 26 February 2020
+     Last Modified Time: 22:08
+End:
+
+Basin: punxsutawney
+     Filename: punxsutawney.basin
+     Description: 
+     Last Modified Date: 14 April 2020
+     Last Modified Time: 21:32
+End:
+
+Control: Sep-2018
+     FileName: Sep_2018.control
+     Description: 
+End:
+

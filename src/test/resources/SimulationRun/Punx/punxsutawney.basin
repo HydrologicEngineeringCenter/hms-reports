@@ -1,0 +1,289 @@
+Basin: punxsutawney
+     Last Modified Date: 26 February 2020
+     Last Modified Time: 22:10:20
+     Version: 4.9
+     Filepath Separator: \
+     Unit System: English
+     Missing Flow To Zero: No
+     Enable Flow Ratio: No
+     Compute Local Flow At Junctions: No
+     Unregulated Output Required: No
+
+     Enable Sediment Routing: No
+
+     Enable Quality Routing: No
+End:
+
+Subbasin: EB Mahoning Ck
+     Last Modified Date: 26 February 2020
+     Last Modified Time: 22:11:43
+     Latitude Degrees:  40.97944848820452
+     Longitude Degrees: -78.7858587588502
+     Canvas X: 1428988.4218750861
+     Canvas Y: 2126466.8962404653
+     Area: 42.030
+     Downstream: Mahoning Ck
+
+     Discretization: File-Specified
+     File: regions\punxsutawney.mod
+
+     Canopy: Simple
+     Allow Simultaneous Precip Et: No
+     Plant Uptake Method: Simple
+     Initial Canopy Storage Percent: 0
+     Canopy Storage Capacity: 0.1
+     Crop Coefficient: 1.0
+     End Canopy:
+
+     Surface: None
+
+     LossRate: Deficit Constant
+     Percent Impervious Area: 2
+     Initial Deficit: 2.25
+     Maximum Deficit: 2.25
+     Percolation Rate: 0.12
+     Recovery Factor: 1.0
+
+     Transform: Modified Clark
+     Time of Concentration: 3
+     Storage Coefficient: 5
+
+     Baseflow: Linear Reservoir
+     Groundwater Layer: 1
+     GW-1 Baseflow Fraction: 0.5
+     GW-1 Number Reservoirs: 1
+     GW-1 Routing Coefficient: 30
+     GW-1 Initial Flow/Area Ratio: 0
+     Groundwater Layer: 2
+     GW-2 Baseflow Fraction: 0.5
+     GW-2 Number Reservoirs: 1
+     GW-2 Routing Coefficient: 150
+     GW-2 Initial Flow/Area Ratio: 1
+End:
+
+Subbasin: Stump Ck
+     Last Modified Date: 14 April 2020
+     Last Modified Time: 21:32:33
+     Latitude Degrees:  41.03917810344616
+     Longitude Degrees: -78.80111111111111
+     Canvas X: 1426527.6156816613
+     Canvas Y: 2132815.660635109
+     Area: 27.991
+     Downstream: Mahoning Ck
+
+     Discretization: File-Specified
+     File: regions\punxsutawney.mod
+
+     Canopy: Simple
+     Allow Simultaneous Precip Et: No
+     Plant Uptake Method: Simple
+     Initial Canopy Storage Percent: 0
+     Canopy Storage Capacity: 0.1
+     Crop Coefficient: 1.0
+     End Canopy:
+
+     Surface: None
+
+     LossRate: Deficit Constant
+     Percent Impervious Area: 2
+     Initial Deficit: 2.25
+     Maximum Deficit: 2.25
+     Percolation Rate: 0.12
+     Recovery Factor: 1.0
+
+     Transform: Modified Clark
+     Time of Concentration: 3
+     Storage Coefficient: 5
+
+     Baseflow: Linear Reservoir
+     Groundwater Layer: 1
+     GW-1 Baseflow Fraction: 0.5
+     GW-1 Number Reservoirs: 1
+     GW-1 Routing Coefficient: 30
+     GW-1 Initial Flow/Area Ratio: 0
+     Groundwater Layer: 2
+     GW-2 Baseflow Fraction: 0.5
+     GW-2 Number Reservoirs: 1
+     GW-2 Routing Coefficient: 250
+     GW-2 Initial Flow/Area Ratio: 1
+End:
+
+Reach: Mahoning Ck
+     Last Modified Date: 24 September 2019
+     Last Modified Time: 22:49:55
+     Canvas X: 1411561.0923079024
+     Canvas Y: 2118676.7102225865
+     From Canvas X: 1417306.214074731
+     From Canvas Y: 2119535.304106332
+     Downstream: Sink-1
+
+     Route: Muskingum
+     Initial Variable: Combined Inflow
+     Muskingum K: 5
+     Muskingum x: 0.25
+     Muskingum Steps: 5
+     Channel Loss: None
+End:
+
+Subbasin: Punx Local
+     Last Modified Date: 14 April 2020
+     Last Modified Time: 21:32:33
+     Latitude Degrees:  40.955000000000005
+     Longitude Degrees: -78.93722222222223
+     Canvas X: 1417056.889711296
+     Canvas Y: 2121496.7970963805
+     Area: 87.274
+     Downstream: Sink-1
+
+     Discretization: File-Specified
+     File: regions\punxsutawney.mod
+
+     Canopy: Simple
+     Allow Simultaneous Precip Et: No
+     Plant Uptake Method: Simple
+     Initial Canopy Storage Percent: 0
+     Canopy Storage Capacity: 0.1
+     Crop Coefficient: 1.0
+     End Canopy:
+
+     Surface: None
+
+     LossRate: Deficit Constant
+     Percent Impervious Area: 5
+     Initial Deficit: 2.25
+     Maximum Deficit: 2.25
+     Percolation Rate: 0.12
+     Recovery Factor: 1.0
+
+     Transform: Modified Clark
+     Time of Concentration: 3
+     Storage Coefficient: 5
+
+     Baseflow: Linear Reservoir
+     Groundwater Layer: 1
+     GW-1 Baseflow Fraction: 0.5
+     GW-1 Number Reservoirs: 1
+     GW-1 Routing Coefficient: 20
+     GW-1 Initial Flow/Area Ratio: 0
+     Groundwater Layer: 2
+     GW-2 Baseflow Fraction: 0.5
+     GW-2 Number Reservoirs: 1
+     GW-2 Routing Coefficient: 250
+     GW-2 Initial Flow/Area Ratio: 1
+End:
+
+Sink: Sink-1
+     Last Modified Date: 11 September 2019
+     Last Modified Time: 22:03:33
+     Canvas X: 1411561.0923079024
+     Canvas Y: 2118676.7102225865
+     Observed Hydrograph Gage: USGS 03034000 Mahoning Creek
+End:
+
+Basin Layer Properties:
+     Element Layer:
+          Name: Icons
+          Layer shown: No
+     End Layer:
+     Element Layer:
+          Name: Reaches
+          Layer shown: Yes
+     End Layer:
+     Element Layer:
+          Name: Subbasins
+          Layer shown: Yes
+     End Layer:
+     Discretization Layer:
+          Layer shown: Yes
+     End Layer:
+     2D Connection Layer:
+          Layer shown: Yes
+     End Layer:
+     Map Layer:
+          Filename: maps\MahoningCreekatPunx.shp
+          Layer:0
+          Display name: MahoningCreekatPunx
+          Minimum Scale: Undefined
+          Maximum Scale: Undefined
+          Layer shown: No
+          Properties Filename: maps\MahoningCreekatPunx2227112542019.gdr
+     End Layer:
+     Map Layer:
+          Filename: maps\shg_grid_region.shp
+          Layer:0
+          Display name: shg_grid_region
+          Minimum Scale: Undefined
+          Maximum Scale: Undefined
+          Layer shown: Yes
+          Properties Filename: maps\shg_grid_region0626152632019.gdr
+     End Layer:
+     Breakpoint Layer:
+          Layer shown: No
+     End Layer:
+     Base Layer:
+          Name: Identified Streams
+          Layer shown: No
+          Properties Filename: maps\streams1624112542019.xml
+     End Layer:
+     Base Layer:
+          Name: Flow Accumulation
+          Layer shown: No
+          Properties Filename: maps\flowaccum3723112542019.xml
+     End Layer:
+     Base Layer:
+          Name: Flow Direction
+          Layer shown: No
+          Properties Filename: maps\flowdir3723112542019.xml
+     End Layer:
+     Base Layer:
+          Name: Sink Locations
+          Layer shown: No
+          Properties Filename: maps\sinklocs2423112542019.xml
+     End Layer:
+     Base Layer:
+          Name: Sink Fill
+          Layer shown: No
+          Properties Filename: maps\sinkfill2423112542019.xml
+     End Layer:
+     Base Layer:
+          Name: Terrain
+          Layer shown: Yes
+          Properties Filename: maps\elevation0323112542019.xml
+     End Layer:
+End:
+
+Basin Spatial Properties:
+     Coordinate System: PROJCS["USA_Contiguous_Albers_Equal_Area_Conic_USGS_version",GEOGCS["NAD83",DATUM["North_American_Datum_1983",SPHEROID["GRS 1980",6378137,298.257222101004,AUTHORITY["EPSG","7019"]],AUTHORITY["EPSG","6269"]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4269"]],PROJECTION["Albers_Conic_Equal_Area"],PARAMETER["standard_parallel_1",29.5],PARAMETER["standard_parallel_2",45.5],PARAMETER["latitude_of_center",23],PARAMETER["longitude_of_center",-96],PARAMETER["false_easting",0],PARAMETER["false_northing",0],UNIT["metre",1,AUTHORITY["EPSG","9001"]],AXIS["Easting",EAST],AXIS["Northing",NORTH]]
+     Terrain: NED_30m
+     Threshold: 20
+     Break Point: Outlet1
+          X Coordinate: 1411564.5820503528
+          Y Coordinate: 2118682.0170216984
+     End Break Point:
+End:
+
+Basin Schematic Properties:
+     Last View N: 2132815.660635109
+     Last View S: 2118676.7102225865
+     Last View W: 1411561.0923079024
+     Last View E: 1428988.4218750861
+     Maximum View N: 2132815.660635109
+     Maximum View S: 2118676.7102225865
+     Maximum View W: 1411561.0923079024
+     Maximum View E: 1428988.4218750861
+     Extent Method: Manual
+     Buffer: 0
+     Draw Icons: Yes
+     Draw Icon Labels: Name
+     Draw Map Objects: No
+     Draw Gridlines: No
+     Draw Flow Direction: No
+     Draw HillShade Layer: Yes
+     Draw Elevation Layer: Yes
+     Elevation Layer Color Palette: Default
+     Ignore Elevation Color Ramp Scale: No
+     Use Interpolated Color Ramp for Elevation Layer: Yes
+     Color Ramp Opacity Level for Elevation Layer: 33.0
+     Fix Element Locations: No
+     Fix Hydrologic Order: No
+End:
