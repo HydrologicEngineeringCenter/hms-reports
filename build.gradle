@@ -16,8 +16,8 @@ repositories {
 dependencies {
     implementation 'org.json:json:20190722'
     implementation 'com.j2html:j2html:1.4.0'
-    implementation 'tech.tablesaw:tablesaw-core:0.37.3'
-    implementation 'tech.tablesaw:tablesaw-jsplot:0.37.3'
+    implementation 'tech.tablesaw:tablesaw-core:0.38.1'
+    implementation 'tech.tablesaw:tablesaw-jsplot:0.38.1'
     implementation 'org.jsoup:jsoup:1.12.2'
 
     implementation 'com.rmanet:rma:6.0.0.51'
