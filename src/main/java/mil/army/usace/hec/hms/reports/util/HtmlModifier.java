@@ -54,7 +54,7 @@ public class HtmlModifier {
         String fullPathToCss = Paths.get(pathToHtml).getParent().toAbsolutePath().toString() + File.separator + "styleStandard.css";
         StringBeautifier.writeStringToFile(new File(pathToHtml), content);
         StringBeautifier.writeStringToFile(new File(fullPathToCss), getStandardReportCSS());
-        setPlotlyFont(fullPathToHtml, "Vollkorn, serif", "12");
+        /* setPlotlyFont(fullPathToHtml, "Vollkorn, serif", "12"); */
     } // writeStandardReportToFile()
 
     public static void writeStatisticsReportToFile(String pathToHtml, String content) {
