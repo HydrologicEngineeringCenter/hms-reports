@@ -61,7 +61,7 @@ public class FigureCreator {
                 .title(plotTitle)
                 .height(500)
                 .width(850)
-                .xAxis(Axis.builder().title(xAxisTitle).build())
+                .xAxis(Axis.builder().title(xAxisTitle).visible(false).build())
                 .yAxis(Axis.builder().title(y1AxisTitle).build())
                 .yAxis2(Axis.builder().title(y2AxisTitle).autoRange(Axis.AutoRange.REVERSED).build())
                 .grid(grid)
@@ -78,6 +78,7 @@ public class FigureCreator {
                     .name(plot.name())
                     .marker(Marker.builder().color(colorWay.get(count)).build())
                     .yAxis("y2")
+                    .xAxis("x2")
                     .build();
             count++;
             traceList.add(plotTrace);

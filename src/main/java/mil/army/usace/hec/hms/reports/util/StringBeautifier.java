@@ -128,11 +128,11 @@ public class StringBeautifier {
     } // hasMathSigns()
 
     public static String getPlotDivName(String elementName, String plotName) {
-
         String plotDivName = elementName.toLowerCase() + "_";
         String reformatName = plotName.toLowerCase();
         String result = (plotDivName + reformatName).replace(' ', '_');
-        result = result.replace('-', '_');
+        result = result.replaceAll("-", "_");
+        result = result.replaceAll("[^a-zA-Z0-9]", "_");
 
         return result;
     } // getPlotDivName
