@@ -16,11 +16,11 @@ import java.util.logging.Logger;
 public class TimeSeriesResult {
     private static final Logger logger = Logger.getLogger(TimeSeriesResult.class.getName());
 
-    private String type;
-    private String pathToFile;
-    private String variable;
-    private HecTime startTime;
-    private HecTime endTime;
+    private final String type;
+    private final String pathToFile;
+    private final String variable;
+    private final HecTime startTime;
+    private final HecTime endTime;
 
     private volatile double[] values;
     private volatile List<ZonedDateTime> times;

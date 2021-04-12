@@ -1,9 +1,11 @@
 package mil.army.usace.hec.hms.reports;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Process implements Comparable {
+public class Process implements Comparable<Process> {
     /* Class Variables */
     private final String name;
     private final String value;
@@ -17,9 +19,7 @@ public class Process implements Comparable {
     } // Process Constructor
 
     @Override
-    public int compareTo(Object o) {
-        Process compareProcess = (Process) o;
-
+    public int compareTo(@NonNull Process process) {
         List<String> orderedProcess = new ArrayList<>();
         orderedProcess.add("area");
         orderedProcess.add("latitude");
@@ -32,8 +32,8 @@ public class Process implements Comparable {
             thisProcessIndex = orderedProcess.indexOf(this.getName());
         } // If: this process is in the orderedProcess List
 
-        if(orderedProcess.contains(compareProcess.getName())) {
-            compareProcessIndex = orderedProcess.indexOf(compareProcess.getName());
+        if(orderedProcess.contains(process.getName())) {
+            compareProcessIndex = orderedProcess.indexOf(process.getName());
         } // If: compare process is in the orderedProcess List
 
         // Ascending Order

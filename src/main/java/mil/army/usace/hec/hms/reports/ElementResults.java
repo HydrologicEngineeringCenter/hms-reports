@@ -62,13 +62,11 @@ public class ElementResults {
     public Map<String, String> getOtherResults() { return this.otherResults; }
 
     public Map<String, String> getStatisticResultsMap() {
-        Map<String, String> statisticMap = this.statisticResults.stream().collect(Collectors.toMap(StatisticResult::getName, StatisticResult::getValue));
-        return statisticMap;
+        return statisticResults.stream().collect(Collectors.toMap(StatisticResult::getName, StatisticResult::getValue));
     }
 
     public Map<String, double[]> getTimeSeriesResultsMap() {
-        Map<String, double[]> timeSeriesMap = this.timeSeriesResults.stream().collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getValues));
-        return timeSeriesMap;
+        return timeSeriesResults.stream().collect(Collectors.toMap(TimeSeriesResult::getType, TimeSeriesResult::getValues));
     }
 
     public StatisticResult getStatisticSResult(String statisticsName) {
