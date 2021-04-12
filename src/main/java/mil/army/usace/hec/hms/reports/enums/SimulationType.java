@@ -7,7 +7,7 @@ public enum SimulationType {
     MONTE_CARLO("MonteCarloAnalysisResults"),
     DEPTH_AREA("DepthAreaAnalysisResults");
 
-    private String name;
+    private final String name;
     SimulationType(String name) { this.name = name; } // StatisticsType's Constructor
     public String getName() { return this.name; } // getName()
 
