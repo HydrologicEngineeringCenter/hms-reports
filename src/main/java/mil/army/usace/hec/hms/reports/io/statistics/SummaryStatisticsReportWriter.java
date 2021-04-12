@@ -22,12 +22,11 @@ import static j2html.TagCreator.*;
 
 public class SummaryStatisticsReportWriter extends ReportWriter {
     private static final Logger logger = Logger.getLogger(SummaryStatisticsReportWriter.class.getName());
-    private String rmseStdev = "Observed Flow RMSE Stdev";
-    private String nashSutcliffe = "Observed Flow Nash Sutcliffe";
-    private String percentBias = "Observed Flow Percent Bias";
-    private String r2Coefficient = "Coefficient of Determination";
-    private Double basinParserPercent = 85.0;
-    private Double otherPercent = 15.0;
+    private final String rmseStdev = "Observed Flow RMSE Stdev";
+    private final String nashSutcliffe = "Observed Flow Nash Sutcliffe";
+    private final String percentBias = "Observed Flow Percent Bias";
+    private final String r2Coefficient = "Coefficient of Determination";
+    private final Double basinParserPercent = 85.0;
 
     public SummaryStatisticsReportWriter(Builder builder) {
         super(builder);
@@ -112,6 +111,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
             rowDomList.add(tr(dataDomList.toArray(new DomContent[]{})));
 
+            double otherPercent = 15.0;
             Double progressValue = basinParserPercent + ((double) i + 1) / statisticsElementList.size() * otherPercent;
             support.firePropertyChange("Progress", "", progressValue);
         } // Loop: through all Summary-Statistics Elements
@@ -239,9 +239,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
             ratingUnsatisfactory = new DisplayRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, red);
         } // Else If: Coefficient of Determination
 
-        List<DisplayRange> defaultDisplayRanges = Arrays.asList(ratingVeryGood, ratingGood, ratingSatisfactory, ratingUnsatisfactory);
-
-        return defaultDisplayRanges;
+        return Arrays.asList(ratingVeryGood, ratingGood, ratingSatisfactory, ratingUnsatisfactory);
     } // getDefaultDisplayRanges()
 
     private static String getMatchedBinColor(String valueString, List<DisplayRange> displayRanges) {

@@ -23,7 +23,7 @@ public class BasinParser {
     private final Path pathToBasinResultsFile;
     private final Path pathToProjectDirectory;
     private final SimulationType simulationType;
-    private PropertyChangeSupport support;
+    private final PropertyChangeSupport support;
 
     private BasinParser(Builder builder){
         this.pathToBasinInputFile = builder.pathToBasinInputFile;
