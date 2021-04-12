@@ -14,8 +14,8 @@ import java.util.*;
 import static j2html.TagCreator.*;
 
 public class ElementParametersWriter {
-    private List<Element> elementList;
-    private Map<String, List<String>> elementParameterizationChoice;
+    private final List<Element> elementList;
+    private final Map<String, List<String>> elementParameterizationChoice;
 
     /* Constructors */
     private ElementParametersWriter(Builder builder){

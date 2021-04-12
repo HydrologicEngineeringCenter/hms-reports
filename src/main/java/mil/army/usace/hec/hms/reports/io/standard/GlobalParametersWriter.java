@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 import static j2html.TagCreator.*;
 
 public class GlobalParametersWriter {
-    private List<Element> elementList;
-    private List<SummaryChoice> reportSummaryChoice;
-    private Map<String, List<String>> globalParameterChoices; // {"Subbasin", ["Canopy", "Loss", etc...]}
+    private final List<Element> elementList;
+    private final List<SummaryChoice> reportSummaryChoice;
+    private final Map<String, List<String>> globalParameterChoices; // {"Subbasin", ["Canopy", "Loss", etc...]}
 
     /* Constructors */
     private GlobalParametersWriter(Builder builder){
@@ -139,32 +139,32 @@ public class GlobalParametersWriter {
         Map<String, List<Element>> separatedElementMap = new HashMap<>();
 
         List<Element> subbasinElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("SUBBASIN"))
+                .filter(element -> element.getElementInput().getElementType().equalsIgnoreCase("SUBBASIN"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Subbasin", subbasinElements);
 
         List<Element> reachElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("REACH"))
+                .filter(element -> element.getElementInput().getElementType().equalsIgnoreCase("REACH"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Reach", reachElements);
 
         List<Element> junctionElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("JUNCTION"))
+                .filter(element -> element.getElementInput().getElementType().equalsIgnoreCase("JUNCTION"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Junction", junctionElements);
 
         List<Element> sinkElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("SINK"))
+                .filter(element -> element.getElementInput().getElementType().equalsIgnoreCase("SINK"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Sink", sinkElements);
 
         List<Element> sourceElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("SOURCE"))
+                .filter(element -> element.getElementInput().getElementType().equalsIgnoreCase("SOURCE"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Source", sourceElements);
 
         List<Element> reservoirElements = listElement.stream()
-                .filter(element -> element.getElementInput().getElementType().toUpperCase().equals("RESERVOIR"))
+                .filter(element -> element.getElementInput().getElementType().equalsIgnoreCase("RESERVOIR"))
                 .collect(Collectors.toList());
         separatedElementMap.put("Reservoir", reservoirElements);
 

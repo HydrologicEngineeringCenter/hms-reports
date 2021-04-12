@@ -13,8 +13,8 @@ import java.util.*;
 import static j2html.TagCreator.*;
 
 public class GlobalResultsWriter {
-    private List<Element> elementList;
-    private List<SummaryChoice> reportSummaryChoice;
+    private final List<Element> elementList;
+    private final List<SummaryChoice> reportSummaryChoice;
 
     /* Constructors */
     private GlobalResultsWriter(Builder builder){

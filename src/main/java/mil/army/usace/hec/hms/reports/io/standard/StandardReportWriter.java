@@ -17,8 +17,8 @@ import java.util.Map;
 import static j2html.TagCreator.*;
 
 public class StandardReportWriter extends ReportWriter {
-    private Double basinParserPercent = 40.0;
-    private Double otherPercent = 60.0;
+    private final Double basinParserPercent = 40.0;
+    private final Double otherPercent = 60.0;
 
     public StandardReportWriter(Builder builder) {
         super(builder);
