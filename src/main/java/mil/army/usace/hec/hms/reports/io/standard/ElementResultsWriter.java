@@ -5,8 +5,8 @@ import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -356,14 +356,14 @@ public class ElementResultsWriter {
 
         /* Add Percentage to Data Value */
         if(processName.toLowerCase().contains("percent")) {
-            dataValue = StringBeautifier.beautifyString(dataValue);
+            dataValue = StringUtil.beautifyString(dataValue);
             dataValue = (dataValue.equals("Not specified")) ? dataValue : dataValue  + "%";
         }
 
         /* Return a row DOM */
         if(dataValue.equalsIgnoreCase("Not specified")) return null;
         List<String> rowData = Arrays.asList(dataName, dataValue);
-        return HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
+        return HtmlUtil.printTableDataRow(rowData, tdAttribute, tdAttribute);
     }
 
     private String getProcessDisplayName(String processName) {
@@ -403,12 +403,12 @@ public class ElementResultsWriter {
         String mapData = (statisticResultsMap.containsKey(mapKey)) ? valueInStatistics : valueInOther;
 
         if(mapKey.contains("Percent")) {
-            mapData = StringBeautifier.beautifyString(mapData);
+            mapData = StringUtil.beautifyString(mapData);
             mapData = (mapData.equals("Not specified")) ? mapData : mapData  + "%";
         } // If: is a percentage
 
         List<String> rowData = Arrays.asList(dataName, mapData);
-        return HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
+        return HtmlUtil.printTableDataRow(rowData, tdAttribute, tdAttribute);
     } // printResultsTableRow()
 
     public void addPropertyChangeListener(PropertyChangeListener pcl){

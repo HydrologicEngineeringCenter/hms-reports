@@ -4,8 +4,8 @@ import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.io.BasinParser;
 import mil.army.usace.hec.hms.reports.io.ReportWriter;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 import mil.army.usace.hec.hms.reports.util.Utilities;
 
 import java.beans.PropertyChangeSupport;
@@ -75,7 +75,7 @@ public class StandardReportWriter extends ReportWriter {
         ).renderFormatted();
 
         /* Writing to HTML output file */
-        HtmlModifier.writeStandardReportToFile(this.pathToDestination.toString(), htmlOutput);
+        HtmlUtil.writeStandardReportToFile(this.pathToDestination.toString(), htmlOutput);
 
         /* Notify HMS that the report has been successfully generated */
         support.firePropertyChange("Message", "", "Success");
@@ -130,7 +130,7 @@ public class StandardReportWriter extends ReportWriter {
         /* Project Name */
         String projectName = Utilities.getFilePath(projectDirectory.toAbsolutePath().toString(), ".hms");
         projectName = projectName.substring(projectName.lastIndexOf(File.separator) + 1, projectName.indexOf(".hms"));
-        DomContent projectTitle = h2(join(b("Project: "), StringBeautifier.beautifyString(projectName.trim())));
+        DomContent projectTitle = h2(join(b("Project: "), StringUtil.beautifyString(projectName.trim())));
 
         /* Simulation Name */
         String simulation = getSimulationTitle();

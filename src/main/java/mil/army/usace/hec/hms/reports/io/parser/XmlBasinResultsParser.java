@@ -5,8 +5,8 @@ import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
 import mil.army.usace.hec.hms.reports.enums.SimulationType;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
-import mil.army.usace.hec.hms.reports.util.TimeConverter;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
+import mil.army.usace.hec.hms.reports.util.TimeUtil;
 import mil.army.usace.hec.hms.reports.util.Utilities;
 import mil.army.usace.hec.hms.reports.util.ValidCheck;
 import org.json.JSONArray;
@@ -35,8 +35,8 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dMMMyyyy, HH:mm z");
         DateTimeFormatter executionFormatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm:ss z");
-        this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
-        this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
+        this.startTime = TimeUtil.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
+        this.endTime   = TimeUtil.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
         this.computedTime = ZonedDateTime.parse(executionTime, executionFormatter);
         this.simulationResults = runResults;
     } // XMLBasinResultsParser Constructor
@@ -150,7 +150,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         /* Read in XML File */
         File file = new File(pathToJson);
         /* Read XML's content to 'content' */
-        String content = StringBeautifier.readFileToString(file);
+        String content = StringUtil.readFileToString(file);
         JSONObject object = XML.toJSONObject(content);
 
         return object;

@@ -4,9 +4,9 @@ import hec.heclib.util.Heclib;
 import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
-import mil.army.usace.hec.hms.reports.util.FigureCreator;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.PlotUtil;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 import mil.army.usace.hec.hms.reports.util.ValidCheck;
 import tech.tablesaw.api.DateTimeColumn;
 import tech.tablesaw.api.DoubleColumn;
@@ -194,16 +194,16 @@ public class TimeSeriesPlotWriter {
         String xAxisTitle = "Time";
         String y1AxisTitle = bottomPlots.get(0).getUnitType() + " (" + bottomPlots.get(0).getUnit() + ")";
         String y2AxisTitle = topPlots.get(0).getUnitType() + " (" +  topPlots.get(0).getUnit() + ")";
-        String divName = StringBeautifier.getPlotDivName(elementName, plotName);
+        String divName = StringUtil.getPlotDivName(elementName, plotName);
 
         // Create Plot
-        Figure timeSeriesFigure = FigureCreator.createPrecipOutflowPlot(plotName, topPlotTables, bottomPlotTables, xAxisTitle, y1AxisTitle, y2AxisTitle);
+        Figure timeSeriesFigure = PlotUtil.createPrecipOutflowPlot(plotName, topPlotTables, bottomPlotTables, xAxisTitle, y1AxisTitle, y2AxisTitle);
         Page page = Page.pageBuilder(timeSeriesFigure, divName).build();
 
         // Extract Plot's Javascript
         String plotHtml = page.asJavascript();
 
-        return HtmlModifier.extractPlotlyJavascript(plotHtml);
+        return HtmlUtil.extractPlotlyJavascript(plotHtml);
     } // getPrecipOutflowPlot()
 
     private DomContent getOutflowObservedFlowPlot(Map<String, TimeSeriesResult> tsrMap, String plotName, String elementName) {
@@ -217,16 +217,16 @@ public class TimeSeriesPlotWriter {
         // Setting Plot's configurations
         String xAxisTitle = "Time";
         String yAxisTitle = outflowPlot.getUnitType();
-        String divName = StringBeautifier.getPlotDivName(elementName, plotName);
+        String divName = StringUtil.getPlotDivName(elementName, plotName);
 
         // Create Plot
-        Figure timeSeriesFigure = FigureCreator.createOutflowObservedFlowPlot(plotName, plotList, xAxisTitle, yAxisTitle);
+        Figure timeSeriesFigure = PlotUtil.createOutflowObservedFlowPlot(plotName, plotList, xAxisTitle, yAxisTitle);
         Page page = Page.pageBuilder(timeSeriesFigure, divName).build();
 
         // Extract Plot's Javascript
         String plotHtml = page.asJavascript();
 
-        return HtmlModifier.extractPlotlyJavascript(plotHtml);
+        return HtmlUtil.extractPlotlyJavascript(plotHtml);
     } // getOutflowObservedFlowPlot()
 
     private Table getTimeSeriesTable(List<TimeSeriesResult> timeSeriesResultList, String tableName) {
@@ -268,13 +268,13 @@ public class TimeSeriesPlotWriter {
         String yAxisTit = baseResult.getUnitType() + " (" + baseResult.getUnit() + ")";
 
         // Create Plot
-        Figure timeSeriesFigure = FigureCreator.createTimeSeriesPlot(plotName, plotTable, xAxisTit, yAxisTit);
-        String plotDivName = StringBeautifier.getPlotDivName(elementName, plotName);
+        Figure timeSeriesFigure = PlotUtil.createTimeSeriesPlot(plotName, plotTable, xAxisTit, yAxisTit);
+        String plotDivName = StringUtil.getPlotDivName(elementName, plotName);
         Page page = Page.pageBuilder(timeSeriesFigure, plotDivName).build();
 
         // Extract Plot's Javascript
         String plotHtml = page.asJavascript();
-        DomContent domContent = HtmlModifier.extractPlotlyJavascript(plotHtml);
+        DomContent domContent = HtmlUtil.extractPlotlyJavascript(plotHtml);
 
         return div(attrs(".single-plot"), domContent);
     } // printTimeSeriesPlot()

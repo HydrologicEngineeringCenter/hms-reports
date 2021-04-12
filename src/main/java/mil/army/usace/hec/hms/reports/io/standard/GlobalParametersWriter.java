@@ -5,8 +5,8 @@ import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -182,8 +182,8 @@ public class GlobalParametersWriter {
                 List<String> paramNames = parameterList.stream().map(Parameter::getName).collect(Collectors.toList());
 
                 String processName = process.getName().toUpperCase();
-                String tableName = StringBeautifier.beautifyString(process.getName());
-                String processValue = StringBeautifier.beautifyString(process.getValue());
+                String tableName = StringUtil.beautifyString(process.getName());
+                String processValue = StringUtil.beautifyString(process.getValue());
 
                 /* For Processes with Method, add Method to tableName */
                 if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + processValue; }
@@ -235,13 +235,13 @@ public class GlobalParametersWriter {
             List<Process> processList = element.getElementInput().getProcesses();
             /* Filter Out Processes that weren't chosen by the user */
             List<Process> chosenProcesses = processList.stream()
-                    .filter(p -> processChoices.contains(StringBeautifier.beautifyString(p.getName())))
+                    .filter(p -> processChoices.contains(StringUtil.beautifyString(p.getName())))
                     .collect(Collectors.toList());
             /* Filter Out Location Processes and Get Location Table*/
             if(!processTablesMap.containsKey("Location")) {
                 List<DomContent> locationDataRows = new ArrayList<>();
                 List<String> headerList = Arrays.asList("Element Name", "Longitude Degrees", "Latitude Degrees");
-                DomContent headerDom = HtmlModifier.printTableHeadRow(headerList, domAttrs, domAttrs);
+                DomContent headerDom = HtmlUtil.printTableHeadRow(headerList, domAttrs, domAttrs);
                 DomContent captionDom = caption("Location");
                 locationDataRows.add(0, headerDom);
                 locationDataRows.add(0, captionDom);
@@ -257,8 +257,8 @@ public class GlobalParametersWriter {
                 /* Get Process's Name and Table Name */
                 if(process.getValue().equals("None")) { continue; }
                 String processName = process.getName().toUpperCase();
-                String tableName = StringBeautifier.beautifyString(process.getName());
-                String processValue = StringBeautifier.beautifyString(process.getValue());
+                String tableName = StringUtil.beautifyString(process.getName());
+                String processValue = StringUtil.beautifyString(process.getValue());
                 /* For Processes with Method, add Method to tableName */
                 if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + processValue; }
 
@@ -276,17 +276,17 @@ public class GlobalParametersWriter {
 
                 if(parameterValues.isEmpty()) { parameterValues.add(process.getValue()); } // For Single Processes
                 parameterValues.add(0, element.getName());
-                List<DomContent> dataRowDom = Collections.singletonList(HtmlModifier.printTableDataRow(parameterValues, domAttrs, domAttrs));
+                List<DomContent> dataRowDom = Collections.singletonList(HtmlUtil.printTableDataRow(parameterValues, domAttrs, domAttrs));
 
                 /* Place Data to processTablesMap. If key not there, new key */
                 List<String> parametersNames = new ArrayList<>(availableParameters);
                 if(parametersNames.isEmpty()) { parametersNames.add(process.getName()); }
                 parametersNames.add(0, "Element Name");
-                DomContent processTableHeader = HtmlModifier.printTableHeadRow(parametersNames, domAttrs, domAttrs);
+                DomContent processTableHeader = HtmlUtil.printTableHeadRow(parametersNames, domAttrs, domAttrs);
 
                 if(!processTablesMap.containsKey(tableName)) {
-                    tableName = StringBeautifier.beautifyString(process.getName());
-                    if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + StringBeautifier.beautifyString(process.getValue()); }
+                    tableName = StringUtil.beautifyString(process.getName());
+                    if(processesWithMethod().contains(processName)) { tableName = tableName + ": " + StringUtil.beautifyString(process.getValue()); }
                     processTablesMap.put(tableName, Arrays.asList(processTableHeader, caption(tableName)));
                 } // If: Table didn't exist, new key with table's header and caption
 
@@ -319,7 +319,7 @@ public class GlobalParametersWriter {
         List<DomContent> domList = new ArrayList<>();
 
         for(String data : dataRow) {
-            String reformatString = StringBeautifier.beautifyString(data);
+            String reformatString = StringUtil.beautifyString(data);
             DomContent dataDom = td(attrs(tdAttribute), b(reformatString)); // Table Data type
             domList.add(dataDom);
         } // Convert 'data' to Dom
@@ -349,7 +349,7 @@ public class GlobalParametersWriter {
 
         /* Create a DomContent for Row and Add to LocationDataRows */
         List<String> rowData = Arrays.asList(elementName, longitudeProcess.getValue(), latitudeProcess.getValue());
-        DomContent rowDataDom = HtmlModifier.printTableDataRow(rowData, domAttrs, domAttrs);
+        DomContent rowDataDom = HtmlUtil.printTableDataRow(rowData, domAttrs, domAttrs);
         locationDataRows.add(rowDataDom);
 
         return locationDataRows;
@@ -386,7 +386,7 @@ public class GlobalParametersWriter {
 
             /* Add Layer's data to baseflowDataRows */
             subParametersValues.add(0, "Layer " + count);
-            DomContent layerRow = HtmlModifier.printTableDataRow(subParametersValues, domAttrs, domAttrs);
+            DomContent layerRow = HtmlUtil.printTableDataRow(subParametersValues, domAttrs, domAttrs);
             baseflowDataRows.add(layerRow);
             count++;
         } // Loop: through all Layers of Baseflow

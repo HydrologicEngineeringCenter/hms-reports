@@ -3,7 +3,7 @@ package mil.army.usace.hec.hms.reports.io.parser;
 import hec.heclib.util.HecTime;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.TimeSeriesResult;
-import mil.army.usace.hec.hms.reports.util.TimeConverter;
+import mil.army.usace.hec.hms.reports.util.TimeUtil;
 import mil.army.usace.hec.hms.reports.util.Utilities;
 import mil.army.usace.hec.hms.reports.util.ValidCheck;
 import org.json.JSONArray;
@@ -34,8 +34,8 @@ public class MonteCarloResultsParser extends BasinResultsParser {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm z");
         DateTimeFormatter executionFormatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm:ss z");
-        this.startTime = TimeConverter.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
-        this.endTime   = TimeConverter.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
+        this.startTime = TimeUtil.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
+        this.endTime   = TimeUtil.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
         this.computedTime = ZonedDateTime.parse(executionTime, executionFormatter);
         this.simulationResults = runResults;
     } // MonteCarloResultsParser Constructor

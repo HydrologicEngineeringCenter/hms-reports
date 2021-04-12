@@ -4,7 +4,7 @@ import hec.heclib.dss.HecTimeSeries;
 import hec.heclib.util.HecTime;
 import hec.heclib.util.HecTimeArray;
 import hec.io.TimeSeriesContainer;
-import mil.army.usace.hec.hms.reports.util.TimeConverter;
+import mil.army.usace.hec.hms.reports.util.TimeUtil;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class TimeSeriesResult {
         List<ZonedDateTime> zonedDateTimeArray = new ArrayList<>();
         for(int i = 0; i < timeArray.numberElements(); i++) {
             HecTime singleTime = timeArray.element(i);
-            ZonedDateTime zonedTime = TimeConverter.toZonedDateTime(singleTime);
+            ZonedDateTime zonedTime = TimeUtil.toZonedDateTime(singleTime);
             zonedDateTimeArray.add(zonedTime);
         } // Loop: through HecTimeArray
 

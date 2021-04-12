@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FigureCreator {
-    private FigureCreator() {}
+public class PlotUtil {
+    private PlotUtil() {}
 
     public static Figure createTimeSeriesPlot(String plotTitle, Table plotData, String xAxisTitle, String yAxisTitle) {
         /* Create Layout for Plot */

@@ -8,8 +8,8 @@ import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.enums.StatisticsType;
 import mil.army.usace.hec.hms.reports.io.BasinParser;
 import mil.army.usace.hec.hms.reports.io.ReportWriter;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.beans.PropertyChangeSupport;
@@ -73,7 +73,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
         ).renderFormatted();
 
         /* Writing to HTML output file */
-        HtmlModifier.writeStatisticsReportToFile(this.pathToDestination.toString(), htmlOutput);
+        HtmlUtil.writeStatisticsReportToFile(this.pathToDestination.toString(), htmlOutput);
 
         /* Notify HMS that the report has been successfully generated */
         support.firePropertyChange("Message", "", "Success");
@@ -104,7 +104,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
             for(String statisticsType : statisticsMap.keySet()) {
                 String statisticsData = statisticsMap.get(statisticsType);
-                String reformatData = StringBeautifier.beautifyString(statisticsData);
+                String reformatData = StringUtil.beautifyString(statisticsData);
                 DomContent dataButton = button(reformatData).withStyle("background-color:" + colorMap.get(statisticsType));
                 DomContent dataDom = td(dataButton);
                 dataDomList.add(dataDom);
@@ -118,7 +118,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
         /* Creating the table's header */
         List<String> headerList = Arrays.asList("Computation Point", "RMSE Stdev", "Nash Sutcliffe", "Percent Bias", "R2");
-        rowDomList.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
+        rowDomList.add(0, HtmlUtil.printTableHeadRow(headerList, tdAttribute, tdAttribute));
         rowDomList.add(0, caption("Summary Statistics Table"));
 
         return table(attrs(tdAttribute), rowDomList.toArray(new DomContent[]{}));

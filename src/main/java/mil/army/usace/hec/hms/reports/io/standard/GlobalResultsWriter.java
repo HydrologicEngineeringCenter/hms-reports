@@ -5,8 +5,8 @@ import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 
 import java.util.*;
 
@@ -82,17 +82,17 @@ public class GlobalResultsWriter {
             rowData.replaceAll(t -> Objects.isNull(t) ? "N/A" : t);
             rowData.replaceAll(t -> t.equals("") ? "Not specified" : t);
 
-            DomContent rowDom = HtmlModifier.printTableDataRow(rowData, tdAttribute, tdAttribute);
+            DomContent rowDom = HtmlUtil.printTableDataRow(rowData, tdAttribute, tdAttribute);
             globalSummaryDomList.add(rowDom);
         } // Loop: through each element
 
         /* Adding Head of the Table if there is a table */
         if(!globalSummaryDomList.isEmpty()) {
-            String drainageAreaUnit  = StringBeautifier.mostOccurredString(drainageAreaUnits);
-            String peakDischargeUnit = StringBeautifier.mostOccurredString(peakDischargeUnits);
-            String volumeUnit        = StringBeautifier.mostOccurredString(volumeUnits);
+            String drainageAreaUnit  = StringUtil.mostOccurredString(drainageAreaUnits);
+            String peakDischargeUnit = StringUtil.mostOccurredString(peakDischargeUnits);
+            String volumeUnit        = StringUtil.mostOccurredString(volumeUnits);
 
-            DomContent head = HtmlModifier.printTableHeadRow(Arrays.asList("Hydrologic Element", "Drainage Area (" + drainageAreaUnit + ")",
+            DomContent head = HtmlUtil.printTableHeadRow(Arrays.asList("Hydrologic Element", "Drainage Area (" + drainageAreaUnit + ")",
                     "Peak Discharge (" + peakDischargeUnit + ")", "Time of Peak", "Volume (" + volumeUnit + ")"), tdAttribute, tdAttribute);
             globalSummaryDomList.add(0, head); // Add to front
         } // If: There is a table
