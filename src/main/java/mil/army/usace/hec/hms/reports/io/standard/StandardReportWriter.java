@@ -133,7 +133,7 @@ public class StandardReportWriter extends ReportWriter {
         DomContent projectTitle = h2(join(b("Project: "), StringUtil.beautifyString(projectName.trim())));
 
         /* Simulation Name */
-        String simulation = getSimulationTitle();
+        String simulation = simulationType.getTitle();
         Map<String, String> simulationData = basinParser.getSimulationData();
         DomContent simulationTitle = h2(join(b(simulation), simulationData.get("name").trim()));
 
@@ -168,31 +168,5 @@ public class StandardReportWriter extends ReportWriter {
 
         return div(attrs(".report-header"), reportTitleDom.toArray(new DomContent[]{}));
     } // printReportTitle()
-
-    private String getSimulationTitle() {
-        String simulationName;
-        switch(simulationType) {
-            case RUN:
-                simulationName = "Simulation Run: ";
-                break;
-            case FORECAST:
-                simulationName = "Forecast Alternative: ";
-                break;
-            case OPTIMIZATION:
-                simulationName = "Optimization Trial: ";
-                break;
-            case DEPTH_AREA:
-                simulationName = "Depth Area Analysis: ";
-                break;
-            case MONTE_CARLO:
-                simulationName = "Uncertainty Analysis: ";
-                break;
-            default:
-                simulationName = "<Unknown Simulation Type>: ";
-                break;
-        } // Switch Case
-
-        return simulationName;
-    } // getSimulationTitle()
 
 } // StandardReportWriter class
