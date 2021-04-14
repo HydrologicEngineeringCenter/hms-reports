@@ -94,7 +94,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
                 .split(":", 2)[1].trim();
     } // getHmsVersion()
 
-    private DisplayUnits getDisplayUnitSystem() {
+    public DisplayUnits getDisplayUnitSystem() {
         List<String> fileLines = getBasinFileLines();
 
         String unitSystem = fileLines.stream().filter(line -> line.trim().startsWith("Unit System:"))

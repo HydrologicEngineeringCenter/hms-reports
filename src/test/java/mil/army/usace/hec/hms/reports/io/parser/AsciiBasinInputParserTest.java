@@ -1,7 +1,6 @@
 package mil.army.usace.hec.hms.reports.io.parser;
 
-import mil.army.usace.hec.hms.reports.ElementInput;
-import mil.army.usace.hec.hms.reports.Parameter;
+import mil.army.usace.hec.hms.reports.*;
 import mil.army.usace.hec.hms.reports.Process;
 import org.junit.jupiter.api.Test;
 
@@ -94,6 +93,6 @@ class AsciiBasinInputParserTest {
         BasinInputParser parser = BasinInputParser.builder().pathToBasinInputFile(basinPath).build();
         assertTrue(parser instanceof AsciiBasinInputParser);
         AsciiBasinInputParser asciiParser = (AsciiBasinInputParser) parser;
-
+        assertTrue(asciiParser.getDisplayUnitSystem() instanceof EnglishDisplayUnits);
     }
 }
