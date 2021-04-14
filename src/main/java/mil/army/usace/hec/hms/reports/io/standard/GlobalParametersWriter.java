@@ -9,8 +9,6 @@ import mil.army.usace.hec.hms.reports.util.HtmlUtil;
 import mil.army.usace.hec.hms.reports.util.StringUtil;
 
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static j2html.TagCreator.*;
@@ -20,7 +18,6 @@ public class GlobalParametersWriter {
     private final List<Element> elementList;
     private final List<SummaryChoice> reportSummaryChoice;
     private final Map<String, List<String>> globalParameterChoices; // {"Subbasin", ["Canopy", "Loss", etc...]}
-    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     /* Constructors */
     private GlobalParametersWriter(Builder builder){
@@ -154,7 +151,7 @@ public class GlobalParametersWriter {
                 processTablesMap.put("Location", locationDataRows);
             } // If: New Location Table, Then: Add Header and Caption
             List<DomContent> locationDataRows = new ArrayList<>(processTablesMap.get("Location"));
-            locationDataRows.addAll(getLocationDataRows(element, chosenProcesses, domAttrs));
+            locationDataRows.addAll(getLocationDataRows(element, chosenProcesses));
             processTablesMap.put("Location", locationDataRows);
 
             for(Process process : chosenProcesses) {
@@ -198,7 +195,7 @@ public class GlobalParametersWriter {
 
                 // Adding in this Element's Row Data
                 List<DomContent> tableDataRows = new ArrayList<>(processTablesMap.get(tableName));
-                if(processName.equals("BASEFLOW")) { dataRowDom = new ArrayList<>(getBaseflowDataRows(element, process, availableParameters, domAttrs)); }
+                if(processName.equals("BASEFLOW")) { dataRowDom = new ArrayList<>(getBaseflowDataRows(element, process, availableParameters)); }
                 tableDataRows.addAll(dataRowDom);
                 processTablesMap.put(tableName, tableDataRows);
             } // Loop: through all Processes
@@ -231,19 +228,19 @@ public class GlobalParametersWriter {
         return tableName;
     }
 
-    private DomContent printBaseflowTableDataRow(List<String> dataRow, String tdAttribute, String trAttribute) {
+    private DomContent printBaseflowTableDataRow(List<String> dataRow) {
         List<DomContent> domList = new ArrayList<>();
 
         for(String data : dataRow) {
             String reformatString = StringUtil.beautifyString(data);
-            DomContent dataDom = td(attrs(tdAttribute), b(reformatString)); // Table Data type
+            DomContent dataDom = td(attrs(domAttrs), b(reformatString)); // Table Data type
             domList.add(dataDom);
         } // Convert 'data' to Dom
 
-        return tr(attrs(trAttribute), domList.toArray(new DomContent[]{})); // Table Row type
+        return tr(attrs(domAttrs), domList.toArray(new DomContent[]{})); // Table Row type
     } // printTableDataRow()
 
-    private List<DomContent> getLocationDataRows(Element element, List<Process> processList, String domAttrs) {
+    private List<DomContent> getLocationDataRows(Element element, List<Process> processList) {
         List<DomContent> locationDataRows = new ArrayList<>();
 
         /* Element Name */
@@ -271,7 +268,7 @@ public class GlobalParametersWriter {
         return locationDataRows;
     } // getLocationDataRows()
 
-    private List<DomContent> getBaseflowDataRows(Element element, Process process, List<String> availableParameters, String domAttrs) {
+    private List<DomContent> getBaseflowDataRows(Element element, Process process, List<String> availableParameters) {
         List<DomContent> baseflowDataRows = new ArrayList<>();
         List<Parameter> baseflowLayerList = process.getParameters().get(0).getSubParameters();
 
@@ -279,7 +276,7 @@ public class GlobalParametersWriter {
         List<String> nameRow  = new ArrayList<>();
         nameRow.add(element.getName());
         for(int i = 0; i < availableParameters.size(); i++) { nameRow.add(""); }
-        DomContent nameRowDom = printBaseflowTableDataRow(nameRow, domAttrs, domAttrs);
+        DomContent nameRowDom = printBaseflowTableDataRow(nameRow);
         baseflowDataRows.add(nameRowDom);
 
         /* Subsequent Layer Rows */
