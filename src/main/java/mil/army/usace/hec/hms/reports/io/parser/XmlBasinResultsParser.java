@@ -19,10 +19,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class XmlBasinResultsParser extends BasinResultsParser {
-    private HecTime startTime;
-    private HecTime endTime;
-    private JSONObject simulationResults;
-    private ZonedDateTime computedTime;
+    private final HecTime startTime;
+    private final HecTime endTime;
+    private final JSONObject simulationResults;
+    private final ZonedDateTime computedTime;
 
     XmlBasinResultsParser(Builder builder) {
         super(builder);
@@ -151,9 +151,8 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         File file = new File(pathToJson);
         /* Read XML's content to 'content' */
         String content = StringUtil.readFileToString(file);
-        JSONObject object = XML.toJSONObject(content);
 
-        return object;
+        return XML.toJSONObject(content);
     } // getJsonObject()
 
     private ElementResults populateElement(JSONObject elementObject) {
@@ -176,14 +175,12 @@ public class XmlBasinResultsParser extends BasinResultsParser {
             otherMap.put("ObservedPoolElevationGage", observedPoolGageName);
         } // If: observedFlowGage exists
 
-        ElementResults elementResults = ElementResults.builder()
+        return ElementResults.builder()
                 .name(name)
                 .timeSeriesResults(timeSeriesResult)
                 .statisticResults(statisticResults)
                 .otherResults(otherMap)
                 .build();
-
-        return elementResults;
     } // populateElement()
 
     private List<TimeSeriesResult> populateTimeSeriesResult(JSONObject hydrologyObject) {
@@ -218,14 +215,13 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         String type = timeObject.getJSONObject("TimeSeriesType").getString("displayString");
 
         /* Building TimeSeriesResult */
-        TimeSeriesResult timeSeriesResult = TimeSeriesResult.builder()
+        return TimeSeriesResult.builder()
                 .type(type)
                 .pathToFile(pathToDss)
                 .variable(variable)
                 .startTime(this.startTime)
                 .endTime(this.endTime)
                 .build();
-        return timeSeriesResult;
     } // populateSingleTimeSeriesResult()
 
     private List<StatisticResult> populateStatisticsResult(JSONObject statisticsObject) {
