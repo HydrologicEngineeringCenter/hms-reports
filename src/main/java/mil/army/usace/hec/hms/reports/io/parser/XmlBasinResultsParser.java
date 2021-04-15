@@ -17,12 +17,15 @@ import java.io.File;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class XmlBasinResultsParser extends BasinResultsParser {
     private final HecTime startTime;
     private final HecTime endTime;
     private final JSONObject simulationResults;
     private final ZonedDateTime computedTime;
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
 
     XmlBasinResultsParser(Builder builder) {
         super(builder);
@@ -47,7 +50,6 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         JSONArray elementArray = simulationResults.optJSONArray("BasinElement");
         JSONObject elementObject = simulationResults.optJSONObject("BasinElement");
-        if(elementArray == null && elementObject == null) { throw new IllegalArgumentException("No Elements Found"); }
 
         if(elementArray != null) {
             for(int i = 0; i < elementArray.length(); i++) {
@@ -57,10 +59,14 @@ public class XmlBasinResultsParser extends BasinResultsParser {
                 support.firePropertyChange("Progress", "", progressValue);
             } // Loop through all element's results, and populate
         } // If: has more than one element (is an ElementArray)
-        else {
+        else if(elementObject != null) {
             ElementResults elementResults = populateElement(elementObject);
             elementResultsList.put(elementResults.getName(), elementResults);
-        } // Else: has only one element (is an ElementObject)
+        } // Else if: has only one element (is an ElementObject)
+        else {
+            logger.log(Level.WARNING, "getElementResults() - No Elements Found");
+            return null;
+        } // Else: no elements found
 
         return elementResultsList;
     } // getElementResults()
@@ -69,9 +75,12 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     public String getSimulationName() {
         String simulationName = "";
 
-        if(simulationType == SimulationType.FORECAST) { simulationName = simulationResults.opt("ForecastName").toString(); }
-        else if(simulationType == SimulationType.RUN) { simulationName = simulationResults.opt("RunName").toString(); }
-        else if(simulationType == SimulationType.OPTIMIZATION) { simulationName = simulationResults.opt("AnalysisName").toString(); }
+        if(simulationType == SimulationType.FORECAST)
+            simulationName = simulationResults.opt("ForecastName").toString();
+        else if(simulationType == SimulationType.RUN)
+            simulationName = simulationResults.opt("RunName").toString();
+        else if(simulationType == SimulationType.OPTIMIZATION)
+            simulationName = simulationResults.opt("AnalysisName").toString();
 
         return simulationName;
     } // getSimulationName()
@@ -84,17 +93,25 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         JSONArray elementArray = runResults.optJSONArray("BasinElement");
         JSONObject elementObject = runResults.optJSONObject("BasinElement");
-        if(elementArray == null && elementObject == null) { throw new IllegalArgumentException("No Elements Found"); }
 
         if(elementArray != null) {
             for(int i = 0; i < elementArray.length(); i++) {
                 JSONObject elementObj = elementArray.optJSONObject(i);
-                availablePlots = new ArrayList<>(getElementAvailablePlots(elementObj, availablePlots));
+                availablePlots = getElementAvailablePlots(elementObj, availablePlots);
             } // Loop through all element's results, and populate
         } // If: has more than one element (is an ElementArray)
+        else if(elementObject != null) {
+            availablePlots = getElementAvailablePlots(elementObject, availablePlots);
+        } // Else if: has only one element (is an ElementObject)
         else {
-            availablePlots = new ArrayList<>(getElementAvailablePlots(elementObject, availablePlots));
-        } // Else: has only one element (is an ElementObject)
+            logger.log(Level.WARNING, "getAvailablePlots() - No Elements Found");
+            return null;
+        } // Else: no elements found
+
+        if(availablePlots == null) {
+            logger.log(Level.WARNING, "No available plots");
+            return null;
+        }
 
         // Sort the list Alphabetically
         Collections.sort(availablePlots);
@@ -119,7 +136,10 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
     private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
         List<String> elementPlots = new ArrayList<>(availablePlots);
-        if(elementObject == null) return elementPlots;
+        if(elementObject == null){
+            logger.log(Level.WARNING, "getElementAvailablePlots() - elementObject is null");
+            return null;
+        }
 
         JSONObject hydrologyObject = elementObject.optJSONObject("Hydrology");
         JSONArray timeSeriesArray = hydrologyObject.optJSONArray("TimeSeries");
@@ -161,25 +181,13 @@ public class XmlBasinResultsParser extends BasinResultsParser {
         List<TimeSeriesResult> timeSeriesResult = populateTimeSeriesResult(hydrologyObject);
         JSONObject statisticsArray = elementObject.getJSONObject("Statistics");
         List<StatisticResult> statisticResults = populateStatisticsResult(statisticsArray);
-        JSONObject drainageArea = elementObject.getJSONObject("DrainageArea");
-        Map<String, String> otherMap = new HashMap<>();
-        otherMap.put("DrainageArea", drainageArea.opt("area").toString());
-        otherMap.put("DrainageAreaUnits", drainageArea.opt("units").toString());
-        JSONObject observedFlowGage = elementObject.optJSONObject("ObservedFlowGage");
-        if(observedFlowGage != null) {
-            otherMap.put("ObservedFlowGage", observedFlowGage.opt("name").toString());
-        } // If: observedFlowGage exists
-        JSONArray observedPoolGage = elementObject.optJSONArray("ObservedPoolElevationGage");
-        if(observedPoolGage != null) {
-            String observedPoolGageName = observedPoolGage.optJSONObject(0).optString("name");
-            otherMap.put("ObservedPoolElevationGage", observedPoolGageName);
-        } // If: observedFlowGage exists
+        Map<String, String> otherResults = populateOtherResults(elementObject);
 
         return ElementResults.builder()
                 .name(name)
                 .timeSeriesResults(timeSeriesResult)
                 .statisticResults(statisticResults)
-                .otherResults(otherMap)
+                .otherResults(otherResults)
                 .build();
     } // populateElement()
 
@@ -201,7 +209,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
             if(timeSeriesResult != null) { timeSeriesResultList.add(timeSeriesResult); }
         } // Else if: is JSONObject
         else {
-            System.out.println("Invalid object");
+            logger.log(Level.WARNING, "populateTimeSeriesResult() - Invalid object");
         } // Else: invalid object
 
         return timeSeriesResultList;
@@ -260,10 +268,34 @@ public class XmlBasinResultsParser extends BasinResultsParser {
             statisticResultList.add(statisticResult);
         } // Else if: is JSONObject
         else {
-            System.out.println("Invalid object");
+            logger.log(Level.WARNING, "populateStatisticsResult() - Invalid object");
         } // Else: Invalid object
 
         return statisticResultList;
     } // populateStatisticsResult()
+
+    private Map<String, String> populateOtherResults(JSONObject elementObject) {
+        Map<String, String> otherResults = new HashMap<>();
+
+        /* Drainage Area & Units*/
+        JSONObject drainageArea = elementObject.getJSONObject("DrainageArea");
+        otherResults.put("DrainageArea", drainageArea.opt("area").toString());
+        otherResults.put("DrainageAreaUnits", drainageArea.opt("units").toString());
+
+        /* Observed Flow Gage */
+        JSONObject observedFlowGage = elementObject.optJSONObject("ObservedFlowGage");
+        if(observedFlowGage != null) {
+            otherResults.put("ObservedFlowGage", observedFlowGage.opt("name").toString());
+        }
+
+        /* Observed Pool Elevation Gage */
+        JSONArray observedPoolGage = elementObject.optJSONArray("ObservedPoolElevationGage");
+        if(observedPoolGage != null) {
+            String observedPoolGageName = observedPoolGage.optJSONObject(0).optString("name");
+            otherResults.put("ObservedPoolElevationGage", observedPoolGageName);
+        }
+
+        return otherResults;
+    }
 
 } // XmlBasinResultsParser class

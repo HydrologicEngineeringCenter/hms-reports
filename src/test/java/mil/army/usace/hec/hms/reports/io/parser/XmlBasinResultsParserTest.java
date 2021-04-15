@@ -1,5 +1,6 @@
 package mil.army.usace.hec.hms.reports.io.parser;
 
+import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.enums.SimulationType;
 import mil.army.usace.hec.hms.reports.util.TimeUtil;
 import org.junit.jupiter.api.Test;
@@ -8,10 +9,30 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class XmlBasinResultsParserTest {
+    @Test
+    void getElementResults() {
+        String projectPath = "src/test/resources/SimulationRun/Punx";
+        String resultsPath = projectPath + "/RUN_Sep_2018.results";
+        BasinResultsParser parser = BasinResultsParser.builder()
+                .pathToBasinResultsFile(resultsPath)
+                .pathToProjectDirectory(projectPath)
+                .simulationType(SimulationType.RUN)
+                .build();
+
+        Map<String, ElementResults> resultsMap = parser.getElementResults();
+        System.out.println("Hello World");
+
+        assertEquals(5, resultsMap.size());
+        assertEquals(40, resultsMap.get("EB Mahoning Ck").getStatisticResultsMap().size());
+        assertEquals(24, resultsMap.get("EB Mahoning Ck").getTimeSeriesResultsMap().size());
+        assertEquals(2, resultsMap.get("EB Mahoning Ck").getOtherResults().size());
+    }
+
     @Test
     void getSimulationName_RUN() {
         String projectPath = "src/test/resources/SimulationRun/Punx";
