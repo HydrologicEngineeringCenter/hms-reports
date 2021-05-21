@@ -25,8 +25,6 @@ class XmlBasinResultsParserTest {
                 .build();
 
         Map<String, ElementResults> resultsMap = parser.getElementResults();
-        System.out.println("Hello World");
-
         assertEquals(5, resultsMap.size());
         assertEquals(40, resultsMap.get("EB Mahoning Ck").getStatisticResultsMap().size());
         assertEquals(24, resultsMap.get("EB Mahoning Ck").getTimeSeriesResultsMap().size());

@@ -48,25 +48,15 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     public Map<String,ElementResults> getElementResults() {
         Map<String, ElementResults> elementResultsList = new HashMap<>();
 
-        JSONArray elementArray = simulationResults.optJSONArray("BasinElement");
-        JSONObject elementObject = simulationResults.optJSONObject("BasinElement");
+        JSONArray elementArray = getElementArray();
+        if(elementArray == null) return null;
 
-        if(elementArray != null) {
-            for(int i = 0; i < elementArray.length(); i++) {
-                ElementResults elementResults = populateElement(elementArray.getJSONObject(i));
-                elementResultsList.put(elementResults.getName(), elementResults);
-                Double progressValue = ((double) i + 1) / elementArray.length();
-                support.firePropertyChange("Progress", "", progressValue);
-            } // Loop through all element's results, and populate
-        } // If: has more than one element (is an ElementArray)
-        else if(elementObject != null) {
-            ElementResults elementResults = populateElement(elementObject);
+        for(int i = 0; i < elementArray.length(); i++) {
+            ElementResults elementResults = populateElement(elementArray.getJSONObject(i));
             elementResultsList.put(elementResults.getName(), elementResults);
-        } // Else if: has only one element (is an ElementObject)
-        else {
-            logger.log(Level.WARNING, "getElementResults() - No Elements Found");
-            return null;
-        } // Else: no elements found
+            Double progressValue = ((double) i + 1) / elementArray.length();
+            support.firePropertyChange("Progress", "", progressValue);
+        } // Loop through all element's results, and populate
 
         return elementResultsList;
     } // getElementResults()
@@ -88,25 +78,14 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     @Override
     public List<String> getAvailablePlots() {
         List<String> availablePlots = new ArrayList<>();
-        JSONObject resultFile = getJsonObject(this.pathToBasinResultsFile.toString());
-        JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
 
-        JSONArray elementArray = runResults.optJSONArray("BasinElement");
-        JSONObject elementObject = runResults.optJSONObject("BasinElement");
+        JSONArray elementArray = getElementArray();
+        if(elementArray == null) return null;
 
-        if(elementArray != null) {
-            for(int i = 0; i < elementArray.length(); i++) {
-                JSONObject elementObj = elementArray.optJSONObject(i);
-                availablePlots = getElementAvailablePlots(elementObj, availablePlots);
-            } // Loop through all element's results, and populate
-        } // If: has more than one element (is an ElementArray)
-        else if(elementObject != null) {
-            availablePlots = getElementAvailablePlots(elementObject, availablePlots);
-        } // Else if: has only one element (is an ElementObject)
-        else {
-            logger.log(Level.WARNING, "getAvailablePlots() - No Elements Found");
-            return null;
-        } // Else: no elements found
+        for(int i = 0; i < elementArray.length(); i++) {
+            JSONObject elementObj = elementArray.optJSONObject(i);
+            availablePlots = getElementAvailablePlots(elementObj, availablePlots);
+        } // Loop through all element's results, and populate
 
         if(availablePlots == null) {
             logger.log(Level.WARNING, "No available plots");
@@ -133,6 +112,20 @@ public class XmlBasinResultsParser extends BasinResultsParser {
     public ZonedDateTime getLastComputedTime() {
         return this.computedTime;
     } // getLastComputedTime()
+
+    private JSONArray getElementArray() {
+        JSONArray elementArray = simulationResults.optJSONArray("BasinElement");
+        JSONObject elementObject = simulationResults.optJSONObject("BasinElement");
+
+        if(elementArray != null)
+            return elementArray;
+        else if(elementObject != null)
+            return new JSONArray(elementObject);
+        else
+            logger.log(Level.WARNING, "No Elements Found");
+
+        return null;
+    } // getElementArray()
 
     private List<String> getElementAvailablePlots(JSONObject elementObject, List<String> availablePlots) {
         List<String> elementPlots = new ArrayList<>(availablePlots);
