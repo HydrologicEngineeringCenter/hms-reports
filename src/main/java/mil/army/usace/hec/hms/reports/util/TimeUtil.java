@@ -7,9 +7,9 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
-public class TimeConverter {
+public class TimeUtil {
 
-    private TimeConverter(){}
+    private TimeUtil(){}
 
     public static ZonedDateTime toZonedDateTime(HecTime hecTime) {
         return ZonedDateTime.parse(hecTime.getXMLDateTime(0));

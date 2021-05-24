@@ -8,8 +8,8 @@ import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.enums.StatisticsType;
 import mil.army.usace.hec.hms.reports.io.BasinParser;
 import mil.army.usace.hec.hms.reports.io.ReportWriter;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import java.beans.PropertyChangeSupport;
@@ -22,12 +22,11 @@ import static j2html.TagCreator.*;
 
 public class SummaryStatisticsReportWriter extends ReportWriter {
     private static final Logger logger = Logger.getLogger(SummaryStatisticsReportWriter.class.getName());
-    private String rmseStdev = "Observed Flow RMSE Stdev";
-    private String nashSutcliffe = "Observed Flow Nash Sutcliffe";
-    private String percentBias = "Observed Flow Percent Bias";
-    private String r2Coefficient = "Coefficient of Determination";
-    private Double basinParserPercent = 85.0;
-    private Double otherPercent = 15.0;
+    private final String rmseStdev = "Observed Flow RMSE Stdev";
+    private final String nashSutcliffe = "Observed Flow Nash Sutcliffe";
+    private final String percentBias = "Observed Flow Percent Bias";
+    private final String r2Coefficient = "Coefficient of Determination";
+    private final Double basinParserPercent = 85.0;
 
     public SummaryStatisticsReportWriter(Builder builder) {
         super(builder);
@@ -73,7 +72,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
         ).renderFormatted();
 
         /* Writing to HTML output file */
-        HtmlModifier.writeStatisticsReportToFile(this.pathToDestination.toString(), htmlOutput);
+        HtmlUtil.writeStatisticsReportToFile(this.pathToDestination.toString(), htmlOutput);
 
         /* Notify HMS that the report has been successfully generated */
         support.firePropertyChange("Message", "", "Success");
@@ -104,7 +103,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
             for(String statisticsType : statisticsMap.keySet()) {
                 String statisticsData = statisticsMap.get(statisticsType);
-                String reformatData = StringBeautifier.beautifyString(statisticsData);
+                String reformatData = StringUtil.beautifyString(statisticsData);
                 DomContent dataButton = button(reformatData).withStyle("background-color:" + colorMap.get(statisticsType));
                 DomContent dataDom = td(dataButton);
                 dataDomList.add(dataDom);
@@ -112,13 +111,14 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
 
             rowDomList.add(tr(dataDomList.toArray(new DomContent[]{})));
 
+            double otherPercent = 15.0;
             Double progressValue = basinParserPercent + ((double) i + 1) / statisticsElementList.size() * otherPercent;
             support.firePropertyChange("Progress", "", progressValue);
         } // Loop: through all Summary-Statistics Elements
 
         /* Creating the table's header */
         List<String> headerList = Arrays.asList("Computation Point", "RMSE Stdev", "Nash Sutcliffe", "Percent Bias", "R2");
-        rowDomList.add(0, HtmlModifier.printTableHeadRow(headerList, tdAttribute, tdAttribute));
+        rowDomList.add(0, HtmlUtil.printTableHeadRow(headerList, tdAttribute, tdAttribute));
         rowDomList.add(0, caption("Summary Statistics Table"));
 
         return table(attrs(tdAttribute), rowDomList.toArray(new DomContent[]{}));
@@ -239,9 +239,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
             ratingUnsatisfactory = new DisplayRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, red);
         } // Else If: Coefficient of Determination
 
-        List<DisplayRange> defaultDisplayRanges = Arrays.asList(ratingVeryGood, ratingGood, ratingSatisfactory, ratingUnsatisfactory);
-
-        return defaultDisplayRanges;
+        return Arrays.asList(ratingVeryGood, ratingGood, ratingSatisfactory, ratingUnsatisfactory);
     } // getDefaultDisplayRanges()
 
     private static String getMatchedBinColor(String valueString, List<DisplayRange> displayRanges) {

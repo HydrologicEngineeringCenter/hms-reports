@@ -1,12 +1,19 @@
 package mil.army.usace.hec.hms.reports;
 
 public class EnglishDisplayUnits implements DisplayUnits {
-    private String distanceUnit = "ft";
-    private String areaUnit = "ft\u00B2";
 
     @Override
-    public String getDistanceUnit() { return distanceUnit; }
+    public String getDistanceUnit() {
+        return "FT";
+    }
 
     @Override
-    public String getAreaUnit() { return areaUnit; }
+    public String getAreaUnit() {
+        return "MI\u00B2";
+    }
+
+    @Override
+    public String getSlopeUnit() {
+        return "FT/FT";
+    }
 }

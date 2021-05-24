@@ -5,8 +5,8 @@ import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementInput;
 import mil.army.usace.hec.hms.reports.Parameter;
 import mil.army.usace.hec.hms.reports.Process;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 import mil.army.usace.hec.hms.reports.util.ValidCheck;
 
 import java.util.*;
@@ -14,8 +14,8 @@ import java.util.*;
 import static j2html.TagCreator.*;
 
 public class ElementParametersWriter {
-    private List<Element> elementList;
-    private Map<String, List<String>> elementParameterizationChoice;
+    private final List<Element> elementList;
+    private final Map<String, List<String>> elementParameterizationChoice;
 
     /* Constructors */
     private ElementParametersWriter(Builder builder){
@@ -51,7 +51,7 @@ public class ElementParametersWriter {
         Map<String, DomContent> elementInputMap = new LinkedHashMap<>();
 
         for(Element element : elementList) {
-            if(!this.elementParameterizationChoice.containsKey(StringBeautifier.beautifyString(element.getElementInput().getElementType()))) {
+            if(!this.elementParameterizationChoice.containsKey(StringUtil.beautifyString(element.getElementInput().getElementType()))) {
                 continue;
             } // Skip: element types that were not chosen
 
@@ -69,7 +69,7 @@ public class ElementParametersWriter {
 
         /* For each elementInput, print: Name, ElementType, and Processes */
         String elementName = elementInput.getName();
-        String elementType = StringBeautifier.beautifyString(elementInput.getElementType());
+        String elementType = StringUtil.beautifyString(elementInput.getElementType());
         DomContent elementNameAndType = h2(elementType + ": " + elementName);
         elementInputDomList.add(elementNameAndType);
 
@@ -78,7 +78,7 @@ public class ElementParametersWriter {
         List<Process> processTable = new ArrayList<>();  // For Processes with Parameters to make a table
 
         for(Process process : processList) {
-            if(!this.elementParameterizationChoice.get(elementType).contains(StringBeautifier.beautifyString(process.getName()))) {
+            if(!this.elementParameterizationChoice.get(elementType).contains(StringUtil.beautifyString(process.getName()))) {
                 continue;
             } // If: Choice doesn't contain process's name, skip
 
@@ -105,8 +105,8 @@ public class ElementParametersWriter {
                 continue;
             } // Skipping unnecessary processes
 
-            String processName = StringBeautifier.beautifyString(process.getName());
-            String processValue = StringBeautifier.beautifyString(process.getValue());
+            String processName = StringUtil.beautifyString(process.getName());
+            String processValue = StringUtil.beautifyString(process.getValue());
             DomContent singleDom = join(b(processName), ":", processValue, br());
             singleProcessesDomList.add(singleDom);
         } // Loop: through each single process
@@ -120,8 +120,8 @@ public class ElementParametersWriter {
         List<DomContent> tableProcessesDomList = new ArrayList<>();
 
         for(Process process : tableProcesses) {
-            String tableName = StringBeautifier.beautifyString(process.getName());
-            tableName = tableName + ": " + StringBeautifier.beautifyString(process.getValue());
+            String tableName = StringUtil.beautifyString(process.getName());
+            tableName = tableName + ": " + StringUtil.beautifyString(process.getValue());
             List<Parameter> parameterList = process.getParameters();
             DomContent tableDom  = printParameterTable(parameterList, tableName); // The Table of Parameters
             tableProcessesDomList.add(tableDom);
@@ -148,7 +148,7 @@ public class ElementParametersWriter {
             } // If: Parameter contains SubParameters
             else {
                 List<String> tableRow = Arrays.asList(parameter.getName(), parameter.getValue());
-                DomContent row = HtmlModifier.printTableDataRow(tableRow, tdAttribute, tdAttribute);
+                DomContent row = HtmlUtil.printTableDataRow(tableRow, tdAttribute, tdAttribute);
                 parameterDom.add(row);
             } // Else: Parameter does not contain SubParameters
         } // Loop: through Parameter List
@@ -158,7 +158,7 @@ public class ElementParametersWriter {
         for(Parameter nestedParameter : nestedParameterList) {
             /* Note: Nested Parameter's table should be in a row */
             List<DomContent> nestedParameterDom = new ArrayList<>();
-            String reformatName = StringBeautifier.beautifyString(nestedParameter.getName());
+            String reformatName = StringUtil.beautifyString(nestedParameter.getName());
             DomContent tableName = td(reformatName);
             List<Parameter> subParameters = nestedParameter.getSubParameters();
             DomContent subParameterTable = td(attrs(".nested-table"), printParameterTable(subParameters,""));

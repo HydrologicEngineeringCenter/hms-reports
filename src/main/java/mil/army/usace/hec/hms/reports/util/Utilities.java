@@ -61,7 +61,7 @@ public class Utilities {
             String elementType = element.getElementType();
             List<String> typeProcess = new ArrayList<>();
 
-            if(!parameterMap.containsKey(StringBeautifier.beautifyString(elementType))) {
+            if(!parameterMap.containsKey(StringUtil.beautifyString(elementType))) {
                 List<Process> processList = element.getProcesses();
 
                 for(Process process : processList) {
@@ -76,10 +76,10 @@ public class Utilities {
                         } // Skip: unnecessary element processes
                     } // Else if: Element Parameters
 
-                    typeProcess.add(StringBeautifier.beautifyString(process.getName()));
+                    typeProcess.add(StringUtil.beautifyString(process.getName()));
                 } // Get: all types for each process
 
-                parameterMap.put(StringBeautifier.beautifyString(elementType), typeProcess);
+                parameterMap.put(StringUtil.beautifyString(elementType), typeProcess);
             } // If: parameterMap doesn't already have this element type
         } // Loop: through all elements
 
@@ -97,7 +97,7 @@ public class Utilities {
     public static JSONObject getJsonObject(String pathToJson) {
         /* Read in Json File */
         File file = new File(pathToJson);
-        String content = StringBeautifier.readFileToString(file);
+        String content = StringUtil.readFileToString(file);
         /* Convert JSON string to JSONObject */
         return new JSONObject(content);
     } // getJsonObject()
@@ -109,8 +109,8 @@ public class Utilities {
 
         for(ElementInput element : elementList) {
             String elementType = element.getElementType();
-            if(!availableBasinType.contains(StringBeautifier.beautifyString(elementType))) {
-                availableBasinType.add(StringBeautifier.beautifyString(elementType));
+            if(!availableBasinType.contains(StringUtil.beautifyString(elementType))) {
+                availableBasinType.add(StringUtil.beautifyString(elementType));
             } // availableBasinType()
         } // Loop: through all the elementList
 

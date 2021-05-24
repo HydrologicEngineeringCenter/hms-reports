@@ -1,9 +1,9 @@
 package mil.army.usace.hec.hms.reports;
 
 public class DisplayRange {
-    private double min;
-    private double max;
-    private String colorCode;
+    private final double min;
+    private final double max;
+    private final String colorCode;
 
     public DisplayRange(double min, double max, String colorCode) {
         this.min = min;

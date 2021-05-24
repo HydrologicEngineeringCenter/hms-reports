@@ -18,7 +18,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
     AsciiBasinInputParser(Builder builder) {
         super(builder);
     }
-    private List<String> basinTypes = Arrays.asList("Subbasin:","Sink:","Source:","Junction:","Reach:","Reservoir:");
+    private final List<String> basinTypes = Arrays.asList("Subbasin:","Sink:","Source:","Junction:","Reach:","Reservoir:");
     private List<String> basinFileLines = new ArrayList<>();
     private List<Integer> endLineList = new ArrayList<>();
     private DisplayUnits displayUnits;
@@ -81,22 +81,20 @@ public class AsciiBasinInputParser extends BasinInputParser {
         if(latestTime == null) { return defaultTime; }
 
         /* Returning ZonedDateTime */
-        ZonedDateTime latestDateTime = ZonedDateTime.of(latestDate, latestTime, ZoneId.of("GMT"));
-
-        return latestDateTime;
+        return ZonedDateTime.of(latestDate, latestTime, ZoneId.of("GMT"));
     } // getLastModifiedTime()
 
     @Override
     public String getHmsVersion() {
         List<String> fileLines = getBasinFileLines();
-
-        String hmsVersion = fileLines.stream().filter(line -> line.trim().startsWith("Version:"))
-                .findFirst().orElse("").split(":", 2)[1].trim();
-
-        return hmsVersion;
+        return fileLines.stream()
+                .filter(line -> line.trim().startsWith("Version:"))
+                .findFirst()
+                .orElse("")
+                .split(":", 2)[1].trim();
     } // getHmsVersion()
 
-    private DisplayUnits getDisplayUnitSystem() {
+    public DisplayUnits getDisplayUnitSystem() {
         List<String> fileLines = getBasinFileLines();
 
         String unitSystem = fileLines.stream().filter(line -> line.trim().startsWith("Unit System:"))
@@ -119,13 +117,11 @@ public class AsciiBasinInputParser extends BasinInputParser {
         List<Process> processList = getProcessList(basinType, basinLineRange);
 
         /* Building ElementInput object */
-        ElementInput elementInput = ElementInput.builder()
+        return ElementInput.builder()
                 .name(basinName)
                 .elementType(basinType)
                 .processes(processList)
                 .build();
-
-        return elementInput;
     } // populateElement()
 
     private List<Process> getProcessList(String basinType, int[] basinLineRange) {
@@ -196,7 +192,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
             List<Parameter> subParameterList = new ArrayList<>();
             if(parameterName.equals("Groundwater Layer")) {
                 hasLayers = true;
-                parameterName = line.substring(line.indexOf(":") + 1).trim();
+                parameterName = parameterValue;
                 parameterValue = "";
                 for(int j = i + 1; j < basinEndIndex + 1; j++) {
                     String subParamLine = basinFileLines.get(j).trim();
@@ -280,7 +276,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
 
     private int[] getProcessRange(int startIndex, int endIndex) {
         int[] processRange = new int[2];
-        int processStart = startIndex, processEnd = endIndex;
+        int processEnd = endIndex;
 
         for(int i = startIndex; i < endIndex; i++) {
             String line = basinFileLines.get(i);
@@ -290,7 +286,7 @@ public class AsciiBasinInputParser extends BasinInputParser {
             } // If: Line is empty
         } // Loop: to find empty line
 
-        processRange[0] = processStart;
+        processRange[0] = startIndex;
         processRange[1] = processEnd;
 
         return processRange;
@@ -302,19 +298,19 @@ public class AsciiBasinInputParser extends BasinInputParser {
         List<String> subbasinProcessList = Arrays.asList("Loss", "Canopy", "Transform", "Baseflow");
         typeProcessMap.put("Subbasin", subbasinProcessList);
 
-        List<String> reachProcessList = Arrays.asList("Route");
+        List<String> reachProcessList = Collections.singletonList("Route");
         typeProcessMap.put("Reach", reachProcessList);
 
-        List<String> reservoirProcessList = Arrays.asList();
+        List<String> reservoirProcessList = Collections.emptyList();
         typeProcessMap.put("Reservoir", reservoirProcessList);
 
-        List<String> junctionProcessList = Arrays.asList();
+        List<String> junctionProcessList = Collections.emptyList();
         typeProcessMap.put("Junction", junctionProcessList);
 
-        List<String> sourceProcessList = Arrays.asList();
+        List<String> sourceProcessList = Collections.emptyList();
         typeProcessMap.put("Source", sourceProcessList);
 
-        List<String> sinkProcessList = Arrays.asList();
+        List<String> sinkProcessList = Collections.emptyList();
         typeProcessMap.put("Sink", sinkProcessList);
 
         return typeProcessMap;
@@ -326,19 +322,19 @@ public class AsciiBasinInputParser extends BasinInputParser {
         List<String> subbasinProcessList = Arrays.asList("Area", "Latitude", "Longitude", "Downstream");
         typeProcessMap.put("Subbasin", subbasinProcessList);
 
-        List<String> reachProcessList = Arrays.asList("Downstream");
+        List<String> reachProcessList = Collections.singletonList("Downstream");
         typeProcessMap.put("Reach", reachProcessList);
 
-        List<String> reservoirProcessList = Arrays.asList("Downstream");
+        List<String> reservoirProcessList = Collections.singletonList("Downstream");
         typeProcessMap.put("Reservoir", reservoirProcessList);
 
-        List<String> junctionProcessList = Arrays.asList("Downstream");
+        List<String> junctionProcessList = Collections.singletonList("Downstream");
         typeProcessMap.put("Junction", junctionProcessList);
 
         List<String> sourceProcessList = Arrays.asList("Area", "Downstream", "Flow Method", "Flow Gage");
         typeProcessMap.put("Source", sourceProcessList);
 
-        List<String> sinkProcessList = Arrays.asList();
+        List<String> sinkProcessList = Collections.emptyList();
         typeProcessMap.put("Sink", sinkProcessList);
 
         return typeProcessMap;
@@ -354,11 +350,18 @@ public class AsciiBasinInputParser extends BasinInputParser {
     } // findMatchedString()
 
     private String addUnitsToProcessName(String processName) {
-        String distanceUnit = processName + " (" + displayUnits.getDistanceUnit() + ")";
-        String areaUnit = processName + " (" + displayUnits.getAreaUnit() + ")";
-        processName = (ValidCheck.isDistanceMeasurement(processName)) ? distanceUnit : processName;
-        processName = (ValidCheck.isAreaMeasurement(processName)) ? areaUnit : processName;
-        return processName;
+        String unit;
+
+        if(processName.toLowerCase().contains("length") || processName.toLowerCase().contains("width"))
+            unit = displayUnits.getDistanceUnit();
+        else if(processName.toLowerCase().contains("area"))
+            unit = displayUnits.getAreaUnit();
+        else if(processName.toLowerCase().contains("slope"))
+            unit = displayUnits.getSlopeUnit();
+        else
+            unit = "";
+
+        return (unit.isEmpty()) ? processName : processName + " (" + unit + ")";
     }
 
     private LocalTime firstTimeAfterIndex(List<String> fileLines, int index) {

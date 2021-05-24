@@ -12,14 +12,14 @@ import java.util.List;
 
 import static j2html.TagCreator.*;
 
-public class HtmlModifier {
-    private HtmlModifier() {}
+public class HtmlUtil {
+    private HtmlUtil() {}
 
     public static DomContent printTableHeadRow(List<String> headRow, String thAttribute, String trAttribute) {
         List<DomContent> domList = new ArrayList<>();
 
         for(String column : headRow) {
-            String reformatString = StringBeautifier.beautifyString(column);
+            String reformatString = StringUtil.beautifyString(column);
             DomContent headDom = th(attrs(thAttribute), reformatString);
             domList.add(headDom);
         } // Loop: through headRow list
@@ -31,7 +31,7 @@ public class HtmlModifier {
         List<DomContent> domList = new ArrayList<>();
 
         for(String data : dataRow) {
-            String reformatString = StringBeautifier.beautifyString(data);
+            String reformatString = StringUtil.beautifyString(data);
             DomContent dataDom = td(attrs(tdAttribute), reformatString); // Table Data type
             domList.add(dataDom);
         } // Convert 'data' to Dom
@@ -52,8 +52,8 @@ public class HtmlModifier {
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
         content = content.replace("layout);", "layout, {staticPlot: true});");
         String fullPathToCss = Paths.get(pathToHtml).getParent().toAbsolutePath().toString() + File.separator + "styleStandard.css";
-        StringBeautifier.writeStringToFile(new File(pathToHtml), content);
-        StringBeautifier.writeStringToFile(new File(fullPathToCss), getStandardReportCSS());
+        StringUtil.writeStringToFile(new File(pathToHtml), content);
+        StringUtil.writeStringToFile(new File(fullPathToCss), getStandardReportCSS());
         /* setPlotlyFont(fullPathToHtml, "Vollkorn, serif", "12"); */
     } // writeStandardReportToFile()
 
@@ -61,16 +61,16 @@ public class HtmlModifier {
         /* Writing to HTML file */
         String fullPathToHtml = Paths.get(pathToHtml).toAbsolutePath().toString();
         String fullPathToCss = Paths.get(pathToHtml).getParent().toAbsolutePath().toString() + File.separator + "styleStatistics.css";
-        StringBeautifier.writeStringToFile(new File(fullPathToHtml), content);
-        StringBeautifier.writeStringToFile(new File(fullPathToCss), getStatisticsCSS());
+        StringUtil.writeStringToFile(new File(fullPathToHtml), content);
+        StringUtil.writeStringToFile(new File(fullPathToCss), getStatisticsCSS());
     } // writeStatisticsReportToFile()
 
     private static void setPlotlyFont(String pathToHtml, String fontFamily, String fontSize) {
-        String htmlContent = StringBeautifier.readFileToString(new File(pathToHtml));
+        String htmlContent = StringUtil.readFileToString(new File(pathToHtml));
         htmlContent = htmlContent.replace("var layout = {",
                 "var layout = { font: { family: '" + fontFamily + "', size: " + fontSize + "},");
         File staticPlotHtml = new File(pathToHtml);
-        StringBeautifier.writeStringToFile(staticPlotHtml, htmlContent);
+        StringUtil.writeStringToFile(staticPlotHtml, htmlContent);
     } // setPlotlyFont()
 
     private static String getStandardReportCSS() {

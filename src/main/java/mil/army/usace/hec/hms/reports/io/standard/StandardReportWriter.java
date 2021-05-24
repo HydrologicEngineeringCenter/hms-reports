@@ -4,8 +4,8 @@ import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.io.BasinParser;
 import mil.army.usace.hec.hms.reports.io.ReportWriter;
-import mil.army.usace.hec.hms.reports.util.HtmlModifier;
-import mil.army.usace.hec.hms.reports.util.StringBeautifier;
+import mil.army.usace.hec.hms.reports.util.HtmlUtil;
+import mil.army.usace.hec.hms.reports.util.StringUtil;
 import mil.army.usace.hec.hms.reports.util.Utilities;
 
 import java.beans.PropertyChangeSupport;
@@ -13,12 +13,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static j2html.TagCreator.*;
 
 public class StandardReportWriter extends ReportWriter {
-    private Double basinParserPercent = 40.0;
-    private Double otherPercent = 60.0;
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
+    private final Double basinParserPercent = 40.0;
+    private final Double otherPercent = 60.0;
 
     public StandardReportWriter(Builder builder) {
         super(builder);
@@ -45,6 +48,7 @@ public class StandardReportWriter extends ReportWriter {
 
         /* Check whether the simulation results was computed after the basin file or not */
         if(parser.outdatedSimulation()) {
+            logger.log(Level.SEVERE, "Error: Data Changed, Recompute.");
             support.firePropertyChange("Error", "", "Data Changed, Recompute");
             return new ArrayList<>();
         } // If: User need to recompute
@@ -75,7 +79,7 @@ public class StandardReportWriter extends ReportWriter {
         ).renderFormatted();
 
         /* Writing to HTML output file */
-        HtmlModifier.writeStandardReportToFile(this.pathToDestination.toString(), htmlOutput);
+        HtmlUtil.writeStandardReportToFile(this.pathToDestination.toString(), htmlOutput);
 
         /* Notify HMS that the report has been successfully generated */
         support.firePropertyChange("Message", "", "Success");
@@ -130,10 +134,10 @@ public class StandardReportWriter extends ReportWriter {
         /* Project Name */
         String projectName = Utilities.getFilePath(projectDirectory.toAbsolutePath().toString(), ".hms");
         projectName = projectName.substring(projectName.lastIndexOf(File.separator) + 1, projectName.indexOf(".hms"));
-        DomContent projectTitle = h2(join(b("Project: "), StringBeautifier.beautifyString(projectName.trim())));
+        DomContent projectTitle = h2(join(b("Project: "), StringUtil.beautifyString(projectName.trim())));
 
         /* Simulation Name */
-        String simulation = getSimulationTitle();
+        String simulation = simulationType.getTitle();
         Map<String, String> simulationData = basinParser.getSimulationData();
         DomContent simulationTitle = h2(join(b(simulation), simulationData.get("name").trim()));
 
@@ -168,31 +172,5 @@ public class StandardReportWriter extends ReportWriter {
 
         return div(attrs(".report-header"), reportTitleDom.toArray(new DomContent[]{}));
     } // printReportTitle()
-
-    private String getSimulationTitle() {
-        String simulationName;
-        switch(simulationType) {
-            case RUN:
-                simulationName = "Simulation Run: ";
-                break;
-            case FORECAST:
-                simulationName = "Forecast Alternative: ";
-                break;
-            case OPTIMIZATION:
-                simulationName = "Optimization Trial: ";
-                break;
-            case DEPTH_AREA:
-                simulationName = "Depth Area Analysis: ";
-                break;
-            case MONTE_CARLO:
-                simulationName = "Uncertainty Analysis: ";
-                break;
-            default:
-                simulationName = "<Unknown Simulation Type>: ";
-                break;
-        } // Switch Case
-
-        return simulationName;
-    } // getSimulationTitle()
 
 } // StandardReportWriter class

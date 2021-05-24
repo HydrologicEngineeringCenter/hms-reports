@@ -10,8 +10,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class StringBeautifier {
-    private StringBeautifier() {}
+public class StringUtil {
+    private StringUtil() {}
 
     public static String beautifyString (String name) {
         String result = "";
