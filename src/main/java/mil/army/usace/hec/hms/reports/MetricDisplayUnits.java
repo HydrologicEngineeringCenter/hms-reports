@@ -4,9 +4,14 @@ public class MetricDisplayUnits implements DisplayUnits {
 
     @Override
     public String getDistanceUnit() {
-        return "m"; }
+        return "M"; }
 
     @Override
     public String getAreaUnit() {
-        return "m\u00B2"; }
+        return "KM\u00B2"; }
+
+    @Override
+    public String getSlopeUnit() {
+        return "M/M";
+    }
 }

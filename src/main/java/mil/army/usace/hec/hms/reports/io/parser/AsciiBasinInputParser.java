@@ -350,11 +350,18 @@ public class AsciiBasinInputParser extends BasinInputParser {
     } // findMatchedString()
 
     private String addUnitsToProcessName(String processName) {
-        String distanceUnit = processName + " (" + displayUnits.getDistanceUnit() + ")";
-        String areaUnit = processName + " (" + displayUnits.getAreaUnit() + ")";
-        processName = (ValidCheck.isDistanceMeasurement(processName)) ? distanceUnit : processName;
-        processName = (ValidCheck.isAreaMeasurement(processName)) ? areaUnit : processName;
-        return processName;
+        String unit;
+
+        if(processName.toLowerCase().contains("length") || processName.toLowerCase().contains("width"))
+            unit = displayUnits.getDistanceUnit();
+        else if(processName.toLowerCase().contains("area"))
+            unit = displayUnits.getAreaUnit();
+        else if(processName.toLowerCase().contains("slope"))
+            unit = displayUnits.getSlopeUnit();
+        else
+            unit = "";
+
+        return (unit.isEmpty()) ? processName : processName + " (" + unit + ")";
     }
 
     private LocalTime firstTimeAfterIndex(List<String> fileLines, int index) {

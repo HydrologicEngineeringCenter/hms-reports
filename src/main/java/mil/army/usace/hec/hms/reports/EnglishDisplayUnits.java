@@ -4,9 +4,16 @@ public class EnglishDisplayUnits implements DisplayUnits {
 
     @Override
     public String getDistanceUnit() {
-        return "ft"; }
+        return "FT";
+    }
 
     @Override
     public String getAreaUnit() {
-        return "ft\u00B2"; }
+        return "MI\u00B2";
+    }
+
+    @Override
+    public String getSlopeUnit() {
+        return "FT/FT";
+    }
 }

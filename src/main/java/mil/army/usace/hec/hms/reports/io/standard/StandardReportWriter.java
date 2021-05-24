@@ -13,10 +13,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static j2html.TagCreator.*;
 
 public class StandardReportWriter extends ReportWriter {
+    private final Logger logger = Logger.getLogger(this.getClass().getName());
     private final Double basinParserPercent = 40.0;
     private final Double otherPercent = 60.0;
 
@@ -45,6 +48,7 @@ public class StandardReportWriter extends ReportWriter {
 
         /* Check whether the simulation results was computed after the basin file or not */
         if(parser.outdatedSimulation()) {
+            logger.log(Level.SEVERE, "Error: Data Changed, Recompute.");
             support.firePropertyChange("Error", "", "Data Changed, Recompute");
             return new ArrayList<>();
         } // If: User need to recompute
