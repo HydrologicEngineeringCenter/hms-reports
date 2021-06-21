@@ -261,7 +261,11 @@ public class DepthAreaResultsParser extends BasinResultsParser {
         // If: More than one Basin Elements
         if(basinElementArray != null) { analysisPointElement = findMatchingElement(basinElementArray, name); }
         // Else: Only one Basin Element
-        else { analysisPointElement = findMatchingElement(new JSONArray(basinElementObject), name); }
+        else {
+            JSONArray oneArray = new JSONArray();
+            oneArray.put(basinElementObject);
+            analysisPointElement = findMatchingElement(oneArray, name);
+        }
         if(analysisPointElement == null) { throw new IllegalArgumentException("Analysis Point Element's Results Not Found"); }
 
         /* Get TimeSeriesResults, StatisticsResults, and OtherResults */
