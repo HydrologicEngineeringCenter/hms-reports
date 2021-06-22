@@ -59,6 +59,7 @@ public class StandardReportWriter extends ReportWriter {
         GlobalResultsWriter globalResultsWriter = GlobalResultsWriter.builder()
                 .elementList(elementList)
                 .reportSummaryChoice(this.reportSummaryChoice)
+                .simulationType(this.simulationType)
                 .build();
 
         GlobalParametersWriter globalParametersWriter = GlobalParametersWriter.builder()

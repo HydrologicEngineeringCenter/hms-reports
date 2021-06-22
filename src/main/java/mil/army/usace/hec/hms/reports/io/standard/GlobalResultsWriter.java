@@ -4,6 +4,7 @@ import j2html.tags.DomContent;
 import mil.army.usace.hec.hms.reports.Element;
 import mil.army.usace.hec.hms.reports.ElementResults;
 import mil.army.usace.hec.hms.reports.StatisticResult;
+import mil.army.usace.hec.hms.reports.enums.SimulationType;
 import mil.army.usace.hec.hms.reports.enums.SummaryChoice;
 import mil.army.usace.hec.hms.reports.util.HtmlUtil;
 import mil.army.usace.hec.hms.reports.util.StringUtil;
@@ -13,18 +14,26 @@ import java.util.*;
 import static j2html.TagCreator.*;
 
 public class GlobalResultsWriter {
+    private final SimulationType simulationType;
     private final List<Element> elementList;
     private final List<SummaryChoice> reportSummaryChoice;
 
     /* Constructors */
     private GlobalResultsWriter(Builder builder){
+        this.simulationType = builder.simulationType;
         this.elementList = builder.elementList;
         this.reportSummaryChoice = builder.reportSummaryChoice;
     } // GlobalResultsWriter Constructor
 
     public static class Builder{
+        SimulationType simulationType;
         List<Element> elementList;
         List<SummaryChoice> reportSummaryChoice;
+
+        public Builder simulationType(SimulationType simulationType){
+            this.simulationType = simulationType;
+            return this;
+        } // 'simulationType' constructor
 
         public Builder elementList(List<Element> elementList){
             this.elementList = elementList;
@@ -60,7 +69,19 @@ public class GlobalResultsWriter {
 
         for(Element element : this.elementList) {
             ElementResults elementResults = element.getElementResults();
-            if(elementResults == null) { continue; } // Skip Elements without ElementResults
+
+            /* Skip Elements that are not Analysis Points for Depth Area Simulations */
+            if(simulationType == SimulationType.DEPTH_AREA) {
+                String isPoint = elementResults.getOtherResults().getOrDefault("isAnalysisPoint", "false");
+                if(!Boolean.parseBoolean(isPoint)) {
+                    continue;
+                }
+            }
+
+            /* Skip Elements without ElementResults */
+            if(elementResults == null)
+                continue;
+
             List<String> rowData = new ArrayList<>();
 
             Map<String, String> otherResultsMap = element.getElementResults().getOtherResults();
