@@ -11,6 +11,14 @@ public class DisplayRange {
         this.colorCode = colorCode;
     } // DisplayRange Constructor
 
+    public double getMin() {
+        return this.min;
+    } // getMin()
+
+    public double getMax() {
+        return this.max;
+    } // getMax()
+
     public String getColorCode() {
         return this.colorCode;
     } // getColorCode()
