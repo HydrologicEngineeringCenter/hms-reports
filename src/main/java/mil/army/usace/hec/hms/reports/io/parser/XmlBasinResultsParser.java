@@ -119,8 +119,15 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         if(elementArray != null)
             return elementArray;
-        else if(elementObject != null)
-            return new JSONArray(elementObject);
+        else if(elementObject != null) {
+            JSONArray array = new JSONArray();
+            Iterator<String> keys = elementObject.keys();
+            while(keys.hasNext()) {
+                String key = keys.next();
+                array.put(key);
+            }
+            return array;
+        }
         else
             logger.log(Level.WARNING, "No Elements Found");
 
