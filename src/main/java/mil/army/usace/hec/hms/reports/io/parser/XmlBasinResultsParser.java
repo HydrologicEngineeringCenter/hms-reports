@@ -121,11 +121,7 @@ public class XmlBasinResultsParser extends BasinResultsParser {
             return elementArray;
         else if(elementObject != null) {
             JSONArray array = new JSONArray();
-            Iterator<String> keys = elementObject.keys();
-            while(keys.hasNext()) {
-                String key = keys.next();
-                array.put(key);
-            }
+            array.put(elementObject);
             return array;
         }
         else
