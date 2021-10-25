@@ -7,43 +7,51 @@ import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class StringUtil {
+    private static final Logger logger = Logger.getLogger(StringUtil.class.getName());
+
     private StringUtil() {}
 
     public static String beautifyString (String name) {
-        String result = "";
+        try {
+            String result;
 
-        if(name.equals("")) {
+            if(name.equals("")) {
+                return name;
+            } // If: empty, return
+
+            String camelCasePattern = "[a-z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*"; // Ex: camelCase, camelCaseATest3
+            String pascalCasePattern = "[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*"; // Ex: PascalCase, PascalCaseATest
+            String upperUnderscorePattern = "([A-Z]+[_])+[A-Z]+"; // Ex: UNDER_SCORE, UNDER_SCORE_TEST
+
+            if(isNumeric(name)) {
+                result =  beautifyNumber(name);
+            } // If: Numeric
+            else if(hasMathSigns(name)) {
+                result = beautifyMathStrings(name);
+            } // Else if: Has Math Signs [ +, - , * , = ]
+            else if(name.matches(camelCasePattern) || name.toLowerCase().equals(name)) {
+                result = beautifyCamelCase(name);
+            } // If: camelCase or lowerall
+            else if(name.matches(upperUnderscorePattern) || name.toUpperCase().equals(name)) {
+                result = beautifyUpperUnderscore(name);
+            } // Else if: UPPER_UNDERSCORE or UPPERALL
+            else if(name.matches(pascalCasePattern)) {
+                result = beautifyPascalCase(name);
+            } // Else if: PascalCase
+            else {
+                result = name;
+            } // Else: Doesn't match any special
+
+            return result.trim();
+        } catch(Exception e) {
+            logger.severe(e.getMessage());
             return name;
-        } // If: empty, return
-
-        String camelCasePattern = "[a-z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*"; // Ex: camelCase, camelCaseATest3
-        String pascalCasePattern = "[A-Z]([A-Z0-9]*[a-z][a-z0-9]*[A-Z]|[a-z0-9]*[A-Z][A-Z0-9]*[a-z])[A-Za-z0-9]*"; // Ex: PascalCase, PascalCaseATest
-        String upperUnderscorePattern = "([A-Z]+[_])+[A-Z]+"; // Ex: UNDER_SCORE, UNDER_SCORE_TEST
-
-        if(isNumeric(name)) {
-            result =  beautifyNumber(name);
-        } // If: Numeric
-        else if(hasMathSigns(name)) {
-            result = beautifyMathStrings(name);
-        } // Else if: Has Math Signs [ +, - , * , = ]
-        else if(name.matches(camelCasePattern) || name.toLowerCase().equals(name)) {
-            result = beautifyCamelCase(name);
-        } // If: camelCase or lowerall
-        else if(name.matches(upperUnderscorePattern) || name.toUpperCase().equals(name)) {
-            result = beautifyUpperUnderscore(name);
-        } // Else if: UPPER_UNDERSCORE or UPPERALL
-        else if(name.matches(pascalCasePattern)) {
-            result = beautifyPascalCase(name);
-        } // Else if: PascalCase
-        else {
-            result = name;
-        } // Else: Doesn't match any special
-
-        return result.trim();
+        }
     } // beautifyString
 
     private static String beautifyCamelCase (String name) {
@@ -87,6 +95,7 @@ public class StringUtil {
 
         String[] splitString = name.split("_");
         for(String token : splitString) {
+            if(token.isEmpty()) continue;
             token = token.substring(0, 1).toUpperCase() + token.substring(1) + " ";
             result.append(token);
         } // Capitalizing first characters
@@ -118,7 +127,7 @@ public class StringUtil {
 
     private static boolean isNumeric(String name) {
         boolean isNumeric = true;
-        try { Double num = Double.parseDouble(name); }
+        try { Double.parseDouble(name); }
         catch (NumberFormatException e) { isNumeric = false; }
         return isNumeric;
     } // isDouble()
