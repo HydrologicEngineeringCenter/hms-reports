@@ -32,15 +32,14 @@ public class XmlBasinResultsParser extends BasinResultsParser {
 
         JSONObject resultFile  = getJsonObject(this.pathToBasinResultsFile.toString());
         JSONObject runResults  = resultFile.getJSONObject(simulationType.getName());
-        String startTimeString = runResults.optString("StartTime") + " GMT";
-        String endTimeString   = runResults.optString("EndTime") + " GMT";
-        String executionTime   = runResults.optString("ExecutionTime") + " GMT";
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dMMMyyyy, HH:mm z");
-        DateTimeFormatter executionFormatter = DateTimeFormatter.ofPattern("ddMMMyyyy, HH:mm:ss z");
-        this.startTime = TimeUtil.toHecTime(ZonedDateTime.parse(startTimeString, formatter));
-        this.endTime   = TimeUtil.toHecTime(ZonedDateTime.parse(endTimeString, formatter));
-        this.computedTime = ZonedDateTime.parse(executionTime, executionFormatter);
+        String startTimeString = runResults.optString("StartTime");
+        String endTimeString   = runResults.optString("EndTime");
+        String executionTime   = runResults.optString("ExecutionTime");
+
+        this.startTime = new HecTime(startTimeString);
+        this.endTime   = new HecTime(endTimeString);
+        this.computedTime = TimeUtil.toZonedDateTime(new HecTime(executionTime));
         this.simulationResults = runResults;
     } // XMLBasinResultsParser Constructor
 
