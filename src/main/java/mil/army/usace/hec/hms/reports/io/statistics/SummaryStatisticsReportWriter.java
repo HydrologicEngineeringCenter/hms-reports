@@ -215,9 +215,9 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
         String red = "#F24430";
 
         if(statisticsType == StatisticsType.NASH_SUTCLIFFE_EFFICIENCY) {
-            ratingVeryGood = new DisplayRange(0.75,1, darkGreen);
-            ratingGood = new DisplayRange(0.65, 0.75, lightGreen);
-            ratingSatisfactory = new DisplayRange(0.50, 0.75, yellow);
+            ratingVeryGood = new DisplayRange(0.80, 1, darkGreen);
+            ratingGood = new DisplayRange(0.70, 0.80, lightGreen);
+            ratingSatisfactory = new DisplayRange(0.50, 0.70, yellow);
             ratingUnsatisfactory = new DisplayRange(Double.NEGATIVE_INFINITY, 0.50, red);
         } // If: Nash Sutcliffe Efficiency
         else if(statisticsType == StatisticsType.RMSE_STDEV) {
@@ -227,15 +227,15 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
             ratingUnsatisfactory = new DisplayRange(0.70, Double.POSITIVE_INFINITY, red);
         } // Else if: RMSE Standard Deviation
         else if(statisticsType == StatisticsType.PERCENT_BIAS) {
-            ratingVeryGood = new DisplayRange(-10,10, darkGreen);
-            ratingGood = new DisplayRange(-15, 15, lightGreen);
-            ratingSatisfactory = new DisplayRange(-25, 25, yellow);
+            ratingVeryGood = new DisplayRange(-5, 5, darkGreen);
+            ratingGood = new DisplayRange(-10, 10, lightGreen);
+            ratingSatisfactory = new DisplayRange(-15, 15, yellow);
             ratingUnsatisfactory = new DisplayRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, red);
         } // Else If: Percent Bias
         else if(statisticsType == StatisticsType.COEFFICIENT_OF_DETERMINATION) {
-            ratingVeryGood = new DisplayRange(0.75,1, darkGreen);
-            ratingGood = new DisplayRange(0.65, 0.75, lightGreen);
-            ratingSatisfactory = new DisplayRange(0.50, 0.65, yellow);
+            ratingVeryGood = new DisplayRange(0.85, 1, darkGreen);
+            ratingGood = new DisplayRange(0.75, 0.85, lightGreen);
+            ratingSatisfactory = new DisplayRange(0.60, 0.75, yellow);
             ratingUnsatisfactory = new DisplayRange(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, red);
         } // Else If: Coefficient of Determination
 
