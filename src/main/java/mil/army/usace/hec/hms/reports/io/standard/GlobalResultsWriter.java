@@ -69,6 +69,7 @@ public class GlobalResultsWriter {
 
         for(Element element : this.elementList) {
             ElementResults elementResults = element.getElementResults();
+            if(elementResults == null) continue;
 
             /* Skip Elements that are not Analysis Points for Depth Area Simulations */
             if(simulationType == SimulationType.DEPTH_AREA) {
