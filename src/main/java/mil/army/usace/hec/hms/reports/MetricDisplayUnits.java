@@ -8,7 +8,7 @@ public class MetricDisplayUnits implements DisplayUnits {
 
     @Override
     public String getAreaUnit() {
-        return "KM\u00B2"; }
+        return "KM2"; }
 
     @Override
     public String getSlopeUnit() {

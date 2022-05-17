@@ -9,7 +9,7 @@ public class EnglishDisplayUnits implements DisplayUnits {
 
     @Override
     public String getAreaUnit() {
-        return "MI\u00B2";
+        return "MI2";
     }
 
     @Override
