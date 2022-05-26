@@ -20,16 +20,14 @@ dependencies {
     implementation 'tech.tablesaw:tablesaw-jsplot:0.38.1'
     implementation 'org.jsoup:jsoup:1.12.2'
 
-    implementation 'com.rmanet:rma:6.0.0.51'
-    implementation 'com.rmanet:rmadev:6.0.0.51'
-    implementation 'mil.army.usace.hec:hec:6.0.0.51'
-    implementation 'mil.army.usace.hec:hecData:6.0.0.51'
-    implementation 'mil.army.usace.hec:heclib:6.0.0.51'
-    implementation 'mil.army.usace.hec:hecnf:6.0.0.51'
-    implementation 'mil.army.usace.hec:environment:6.0.0.51'
-    implementation 'mil.army.usace.hec:S00hfp:6.0.0.51'
-    implementation 'mil.army.usace.hec:hec-dssvue-dev:6.0.0.51'
-    implementation 'mil.army.usace.hec:hecnfPluginAPI:6.0.0.51'
+    implementation ("mil.army.usace.hec:hec-monolith:2.+") { transitive(false) }
+    implementation ("mil.army.usace.hec:hec-nucleus-data:1.+") { transitive(false) }
+    implementation ("mil.army.usace.hec:hec-nucleus-metadata:1.+") { transitive(false) }
+
+    // Start runtime-only deps required by HEC shared libraries
+    runtimeOnly("com.google.flogger:flogger:0.7.4")
+    runtimeOnly("com.google.flogger:flogger-system-backend:0.7.4")
+    // End runtime-only deps required by HEC shared libraries
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.4.0'
     testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.4.0"
