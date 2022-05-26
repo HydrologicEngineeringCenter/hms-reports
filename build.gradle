@@ -14,12 +14,11 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.json:json:20190722'
-    implementation 'com.j2html:j2html:1.4.0'
-    implementation 'tech.tablesaw:tablesaw-core:0.38.1'
-    implementation 'tech.tablesaw:tablesaw-jsplot:0.38.1'
-    implementation 'org.jsoup:jsoup:1.12.2'
-
+    implementation 'org.json:json:20220320'
+    implementation 'com.j2html:j2html:1.5.0'
+    implementation 'tech.tablesaw:tablesaw-core:0.43.1'
+    implementation 'tech.tablesaw:tablesaw-jsplot:0.43.1'
+    implementation 'org.jsoup:jsoup:1.14.3'
     implementation ("mil.army.usace.hec:hec-monolith:2.+") { transitive(false) }
     implementation ("mil.army.usace.hec:hec-nucleus-data:1.+") { transitive(false) }
     implementation ("mil.army.usace.hec:hec-nucleus-metadata:1.+") { transitive(false) }
@@ -29,10 +28,10 @@ dependencies {
     runtimeOnly("com.google.flogger:flogger-system-backend:0.7.4")
     // End runtime-only deps required by HEC shared libraries
 
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.4.0'
-    testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.4.0"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.0"
-    testRuntimeOnly "org.junit.vintage:junit-vintage-engine:5.4.0"
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.8.2'
 }
 
 configurations.all {
