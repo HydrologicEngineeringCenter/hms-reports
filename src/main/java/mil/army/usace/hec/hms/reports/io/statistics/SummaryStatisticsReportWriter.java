@@ -25,7 +25,7 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
     private final String rmseStdev = "Observed Flow RMSE Stdev";
     private final String nashSutcliffe = "Observed Flow Nash Sutcliffe";
     private final String percentBias = "Observed Flow Percent Bias";
-    private final String r2Coefficient = "Coefficient of Determination";
+    private final String r2Coefficient = "Observed Flow Coefficient of Determination";
     private final Double basinParserPercent = 85.0;
 
     public SummaryStatisticsReportWriter(Builder builder) {
@@ -131,49 +131,10 @@ public class SummaryStatisticsReportWriter extends ReportWriter {
         summaryMap.put(rmseStdev, statisticsMap.get(rmseStdev));
         summaryMap.put(nashSutcliffe, statisticsMap.get(nashSutcliffe));
         summaryMap.put(percentBias, statisticsMap.get(percentBias));
-        summaryMap.put(r2Coefficient, calculateCoefficientOfDetermination(statisticsElement));
+        summaryMap.put(r2Coefficient, statisticsMap.get(r2Coefficient));
 
         return summaryMap;
     } // summaryStatisticsMap()
-
-    private String calculateCoefficientOfDetermination(Element statisticsElement) {
-        Map<String, double[]> timeSeriesMap = statisticsElement.getElementResults().getTimeSeriesResultsMap();
-        double[] simulatedFlow = timeSeriesMap.get("Outflow");
-        double[] observedFlow  = timeSeriesMap.get("Observed Flow");
-
-        /* Compute maximum absolute residual */
-        SummaryStatistics simStats = new SummaryStatistics();
-        SummaryStatistics obsStats = new SummaryStatistics();
-        for(int i = 0; i < Math.min(simulatedFlow.length, observedFlow.length); i++) {
-            if(observedFlow[i] != Heclib.UNDEFINED_DOUBLE) {
-                obsStats.addValue(observedFlow[i]);
-                simStats.addValue(simulatedFlow[i]);
-            } // If: Not Undefined
-        } // Loop: through each value in simulatedFlow
-
-        /* Return 'Undefined' if not valid */
-        if (obsStats.getN() < 1) {
-            return "Undefined";
-        } // If: obsStats.get() < 1
-
-        double meanObserved = obsStats.getMean();
-        double meanSimulated = simStats.getMean();
-        SummaryStatistics crossResidual = new SummaryStatistics();
-        SummaryStatistics simResidual = new SummaryStatistics();
-        SummaryStatistics obsResidual = new SummaryStatistics();
-        for(int i = 0; i < Math.min(simulatedFlow.length, observedFlow.length); i++) {
-            if(observedFlow[i] != Heclib.UNDEFINED_DOUBLE) {
-                crossResidual.addValue((observedFlow[i] - meanObserved) * (simulatedFlow[i] - meanSimulated));
-                simResidual.addValue((simulatedFlow[i] - meanSimulated) * (simulatedFlow[i] - meanSimulated));
-                obsResidual.addValue((observedFlow[i] - meanObserved) * (observedFlow[i] - meanObserved));
-            } // If: Not Undefined
-        } // Loop: through each value in simulatedFlow
-
-        double r = crossResidual.getSum() / (Math.sqrt(simResidual.getSum()) * Math.sqrt(obsResidual.getSum()));
-        double r2Coefficient = r * r;
-
-        return String.valueOf(r2Coefficient);
-    } // calculateCoefficientOfDetermination()
 
     private Map<String, String> classifyStatisticsColor(Element element) {
         Map<String, String> colorMap = new LinkedHashMap<>();
